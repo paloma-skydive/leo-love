@@ -1,0 +1,175 @@
+[
+  {
+    "id": "leo",
+    "name": "Leo",
+    "relation": "That's me!",
+    "side": "leo",
+    "location": "cayman",
+    "gen": 0,
+    "role": "baby",
+    "title": ""
+  },
+  {
+    "id": "dana",
+    "name": "Dana",
+    "relation": "Mum",
+    "side": "dana",
+    "location": "cayman",
+    "gen": 1,
+    "role": "parent",
+    "title": ""
+  },
+  {
+    "id": "luke",
+    "name": "Luke",
+    "relation": "Dad",
+    "side": "luke",
+    "location": "cayman",
+    "gen": 1,
+    "role": "parent",
+    "title": ""
+  },
+  {
+    "id": "jacki",
+    "name": "Jacki",
+    "relation": "Grandma",
+    "title": "Nana",
+    "side": "luke",
+    "location": "nz",
+    "gen": 2,
+    "role": "grandparent"
+  },
+  {
+    "id": "john",
+    "name": "John",
+    "relation": "Grandad",
+    "title": "Poppa",
+    "side": "luke",
+    "location": "nz",
+    "gen": 2,
+    "role": "grandparent"
+  },
+  {
+    "id": "margot",
+    "name": "Margot",
+    "relation": "Grandma",
+    "title": "",
+    "side": "dana",
+    "location": "nz",
+    "gen": 2,
+    "role": "grandparent"
+  },
+  {
+    "id": "paul",
+    "name": "Paul",
+    "relation": "Grandad",
+    "title": "",
+    "side": "dana",
+    "location": "nz",
+    "gen": 2,
+    "role": "grandparent"
+  },
+  {
+    "id": "amy",
+    "name": "Amy",
+    "relation": "Aunty",
+    "side": "luke",
+    "location": "nz",
+    "gen": 3,
+    "role": "auntuncle",
+    "title": ""
+  },
+  {
+    "id": "sam",
+    "name": "Sam",
+    "relation": "Uncle",
+    "side": "luke",
+    "location": "nz",
+    "gen": 3,
+    "role": "auntuncle",
+    "title": ""
+  },
+  {
+    "id": "max",
+    "name": "Max",
+    "relation": "Uncle",
+    "side": "luke",
+    "location": "nz",
+    "gen": 3,
+    "role": "auntuncle",
+    "title": ""
+  },
+  {
+    "id": "charlotte",
+    "name": "Charlotte",
+    "relation": "Aunty",
+    "side": "luke",
+    "location": "nz",
+    "gen": 3,
+    "role": "auntuncle",
+    "title": ""
+  },
+  {
+    "id": "antony",
+    "name": "Antony",
+    "relation": "Uncle",
+    "qualifier": "Mum's brother",
+    "side": "dana",
+    "location": "australia",
+    "gen": 3,
+    "role": "auntuncle",
+    "title": ""
+  },
+  {
+    "id": "ra",
+    "name": "Ra",
+    "relation": "Cousin",
+    "side": "luke",
+    "location": "nz",
+    "gen": 4,
+    "role": "cousin",
+    "title": ""
+  },
+  {
+    "id": "ryleigh",
+    "name": "Ryleigh",
+    "relation": "Cousin",
+    "side": "luke",
+    "location": "nz",
+    "gen": 4,
+    "role": "cousin",
+    "title": ""
+  },
+  {
+    "id": "antony-luke",
+    "name": "Ant",
+    "relation": "Cousin",
+    "qualifier": "Dad's cousin",
+    "side": "luke",
+    "location": "nz",
+    "gen": 5,
+    "role": "extended",
+    "title": ""
+  },
+  {
+    "id": "roland",
+    "name": "Roland",
+    "relation": "Cousin",
+    "qualifier": "Dad's cousin",
+    "side": "luke",
+    "location": "nz",
+    "gen": 5,
+    "role": "extended",
+    "title": ""
+  },
+  {
+    "id": "marlow",
+    "name": "Marlow",
+    "relation": "Leo's dog",
+    "side": "leo",
+    "location": "cayman",
+    "gen": 6,
+    "role": "pet",
+    "title": ""
+  }
+]

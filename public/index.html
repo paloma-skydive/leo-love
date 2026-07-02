@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#EB2832" />
+<title>Leo&mdash;our littlest Fraser</title>
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="Leo" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Averia+Libre:ital,wght@0,300;0,400;0,700;1,400&family=Fragment+Mono:ital@0;1&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/styles.css?v=35" />
+</head>
+<body>
+
+<!-- LOGIN -->
+<section id="login" class="login hidden">
+  <div class="login-dots" aria-hidden="true">
+    <span class="dot d-red"></span><span class="dot d-yellow"></span>
+    <span class="dot d-blue"></span><span class="dot d-red small"></span>
+    <span class="dot d-yellow small"></span>
+  </div>
+  <div class="login-card">
+    <p class="eyebrow">Welcome to</p>
+    <h1 class="wordmark">Leo</h1>
+    <p class="login-sub" id="login-sub">A little corner of the family for our newest, bravest Fraser. Pop in the family password to come say hello.</p>
+    <form id="login-form">
+      <input id="pw" type="password" placeholder="Family password" autocomplete="current-password" />
+      <button type="submit" class="btn btn-red">Come on in</button>
+    </form>
+    <p id="login-err" class="login-err"></p>
+    <p class="login-private">&#x1F512; Private &amp; password-protected &mdash; this page is just for Leo&rsquo;s family. It&rsquo;s never public and won&rsquo;t show up on Google.</p>
+  </div>
+</section>
+
+<!-- PARENT-CODE GATE (Luke & Dana) -->
+<section id="parent-gate" class="login hidden">
+  <div class="login-dots" aria-hidden="true">
+    <span class="dot d-blue"></span><span class="dot d-red"></span>
+    <span class="dot d-yellow"></span><span class="dot d-blue small"></span>
+    <span class="dot d-red small"></span>
+  </div>
+  <div class="login-card">
+    <p class="eyebrow">Just for Mum &amp; Dad</p>
+    <h1 class="wordmark">Welcome, Luke &amp; Dana</h1>
+    <p class="login-sub">Pop in your parent code to open your private guide &mdash; a quick tour of Leo&rsquo;s page, just for you two.</p>
+    <div class="pg-form">
+      <input id="pg-code" type="password" inputmode="numeric" placeholder="Parent code" maxlength="40" autocomplete="off" />
+      <button id="pg-go" type="button" class="btn btn-blue">Open my guide</button>
+    </div>
+    <p id="pg-err" class="login-err"></p>
+    <p class="login-private"><a href="#" id="pg-skip">I&rsquo;m not a parent &mdash; take me to the family page &rarr;</a></p>
+  </div>
+</section>
+
+<!-- APP -->
+<div id="app" class="hidden">
+  <header class="topbar">
+    <a class="brand" data-view="feed" href="#feed">Leo<span class="brand-dot"></span></a>
+    <nav class="nav">
+      <a data-view="feed" href="#feed" class="active">Feed</a>
+      <a data-view="timeline" href="#timeline">Milestones</a>
+      <a data-view="family" href="#family">Family</a>
+      <a data-view="guide" href="#guide">Guide</a>
+    </nav>
+    <div class="clocks" id="clocks">
+      <div class="clock">
+        <span class="clock-label">Leo &middot; Cayman</span>
+        <span class="clock-time" id="clk-leo">--:--</span>
+      </div>
+      <div class="clock">
+        <span class="clock-label" id="clk-you-label">You</span>
+        <span class="clock-time" id="clk-you">--:--</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- FEED VIEW -->
+  <main id="view-feed" class="view">
+    <section class="hero">
+      <div class="hero-frame"></div>
+      <div class="hero-dots" aria-hidden="true">
+        <span class="dot d-yellow dot-a"></span>
+        <span class="dot d-blue dot-b"></span>
+        <span class="dot d-yellow dot-d"></span>
+      </div>
+      <div class="hero-inner">
+        <p class="eyebrow light">Born 16 June, 1:46pm &middot; Georgetown</p>
+        <h1 class="hero-name">Leo John Paul<br />Fraser</h1>
+        <p class="hero-parents">Son of Luke &amp; Dana Fraser</p>
+        <div class="hero-actions">
+          <div class="age-pill" id="age-pill">Leo is &hellip; young</div>
+          <a class="hero-cta" data-view="timeline" href="#timeline">See Leo&rsquo;s milestones &rarr;</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-cream intro-section">
+      <div class="intro-grid">
+        <div class="intro-left">
+          <img class="intro-photo" src="/img/leo-eyes.jpg?v=3" alt="Baby Leo with his eyes open" />
+          <h2 class="section-kicker intro-kicker">Welcome to the world, Leo <span class="kicker-dot d-red"></span></h2>
+          <p class="intro-copy">This is Leo&rsquo;s little pinboard&mdash;a place for all of us, near and far, to cheer him on. Those first video hellos just get things started: drop a photo, a message or a little update for Leo, Dana &amp; Luke whenever you&rsquo;re thinking of them&mdash;just to say you&rsquo;re in their corner. The more we fill it up, the lovelier it gets.</p>
+        </div>
+        <div class="composer">
+          <div class="prompt-card" id="prompt-card">
+            <span id="prompt-text">&hellip;</span>
+            <button type="button" id="prompt-shuffle" title="Tap for another idea" aria-label="Tap for another idea">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v4.5h-4.5"/></svg>
+            </button>
+          </div>
+          <textarea id="caption" class="field" rows="3" placeholder="Write a little message&hellip;" maxlength="2000"></textarea>
+          <div class="composer-row">
+            <input id="author" class="field" type="text" placeholder="Your name" maxlength="80" />
+            <label class="filepick" id="filepick">
+              <input id="file" type="file" accept="image/*,video/*" hidden />
+              <span id="filepick-label">&#x1F4F7;  Photo or video</span>
+            </label>
+          </div>
+          <div id="preview" class="preview hidden"></div>
+          <button id="post-btn" class="btn btn-blue full" type="button">Share with the family</button>
+          <div id="post-status" class="post-status"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-cream">
+      <div class="wrap wrap-feed">
+        <h2 class="section-kicker">From the family <span class="kicker-dot d-yellow"></span></h2>
+        <div class="feed-controls">
+          <div class="feed-filters" id="feed-filters"></div>
+          <div class="feed-sort">
+            <button type="button" class="sort-btn active" data-sort="newest">Newest</button>
+            <button type="button" class="sort-btn" data-sort="oldest">Oldest</button>
+          </div>
+        </div>
+        <div id="feed-list" class="feed-list"></div>
+        <p id="feed-empty" class="feed-empty hidden">No messages yet&mdash;be the first to say hello to Leo. &#x1F90D;</p>
+      </div>
+    </section>
+
+    <section class="band band-blue">
+      <div class="band-text">
+        <p class="eyebrow light">Around the clock</p>
+        <h2 class="band-title">Loved across<br />time zones</h2>
+        <p class="band-copy">From New Zealand to Cayman and all the places in between, someone in Leo&rsquo;s family is awake and cheering him on.</p>
+      </div>
+      <div class="band-art">
+        <img src="/img/leo-parents.jpg?v=2" alt="Dana and Luke each holding baby Leo skin-to-skin" />
+      </div>
+    </section>
+  </main>
+
+  <!-- TIMELINE VIEW -->
+  <main id="view-timeline" class="view hidden">
+    <section class="hero hero-timeline">
+      <div class="hero-frame"></div>
+      <div class="hero-dots" aria-hidden="true">
+        <span class="dot d-yellow dot-a"></span>
+        <span class="dot d-blue dot-b"></span>
+        <span class="dot d-yellow dot-d"></span>
+      </div>
+      <div class="hero-inner">
+        <p class="eyebrow light">Leo&rsquo;s story, one day at a time</p>
+        <h1 class="hero-name">Milestones</h1>
+        <p class="hero-parents">Stronger by the minute</p>
+      </div>
+    </section>
+
+    <section class="section section-cream">
+      <div class="add-ms-wrap">
+        <details class="add-ms" id="timeline-add">
+          <summary>
+            <span class="add-ms-plus" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+            <span>Add to Leo&rsquo;s timeline <em>&mdash;just for Mum &amp; Dad</em></span>
+          </summary>
+          <div class="add-ms-body">
+            <div class="tl-tabs">
+              <button type="button" class="tl-tab active" data-tab="quick">Quick update</button>
+              <button type="button" class="tl-tab" data-tab="milestone">Milestone</button>
+            </div>
+
+            <div class="tl-panel" id="tab-quick">
+              <p class="composer-help">A few taps for the family, on the days words feel like too much. Tap anything that fits today&mdash;no pressure, no writing needed.</p>
+
+              <p class="chip-label">Today, Leo was&hellip;</p>
+              <div class="chips" id="chips-moment">
+                <button type="button" class="chip" data-emoji="&#x1F634;" data-word="sleepy">&#x1F634; Sleepy</button>
+                <button type="button" class="chip" data-emoji="&#x1F60C;" data-word="settled">&#x1F60C; Settled</button>
+                <button type="button" class="chip" data-emoji="&#x1F90D;" data-word="snuggly">&#x1F90D; Snuggly</button>
+                <button type="button" class="chip" data-emoji="&#x1F4AA;" data-word="holding strong">&#x1F4AA; Holding strong</button>
+                <button type="button" class="chip" data-emoji="&#x1F37C;" data-word="a good eater">&#x1F37C; A good feed</button>
+                <button type="button" class="chip" data-emoji="&#x2696;&#xFE0F;" data-word="a little bigger">&#x2696;&#xFE0F; A little bigger</button>
+                <button type="button" class="chip" data-emoji="&#x1F321;&#xFE0F;" data-word="keeping cosy and warm">&#x1F321;&#xFE0F; Cosy &amp; warm</button>
+                <button type="button" class="chip" data-emoji="&#x1FAC1;" data-word="breathing easier">&#x1FAC1; Breathing easier</button>
+                <button type="button" class="chip" data-emoji="&#x1F932;" data-word="out for a cuddle">&#x1F932; Cuddle time</button>
+                <button type="button" class="chip" data-emoji="&#x1F440;" data-word="bright-eyed">&#x1F440; Bright-eyed</button>
+                <button type="button" class="chip" data-emoji="&#x1F4A4;" data-word="resting well">&#x1F4A4; Resting well</button>
+                <button type="button" class="chip" data-emoji="&#x1F90F;" data-word="holding on tight">&#x1F90F; Holding on tight</button>
+              </div>
+
+              <div class="ms-row">
+                <label class="ms-field">
+                  <span>Date</span>
+                  <input id="ci-date" type="date" class="field" />
+                </label>
+                <label class="ms-field">
+                  <span>Weight <em>(optional)</em></span>
+                  <input id="ci-weight" type="text" class="field" placeholder="e.g. 1.9kg" maxlength="20" />
+                </label>
+              </div>
+              <label class="ms-field">
+                <span>Anything else? <em>(optional)</em></span>
+                <input id="ci-note" type="text" class="field" placeholder="A tiny note&hellip;" maxlength="280" />
+              </label>
+              <label class="ms-field">
+                <span>From</span>
+                <div class="who-pick" id="ci-who">
+                  <button type="button" class="who-btn" data-who="Dana">&#x1F49B; Dana</button>
+                  <button type="button" class="who-btn" data-who="Luke">&#x1F499; Luke</button>
+                </div>
+              </label>
+              <button id="ci-save" class="btn btn-blue full" type="button">Post update</button>
+              <div id="ci-status" class="post-status"></div>
+            </div>
+
+            <div class="tl-panel hidden" id="tab-milestone">
+              <p class="composer-help">A bigger moment worth remembering&mdash;add the story and a photo or video.</p>
+              <div class="ms-row">
+                <label class="ms-field">
+                  <span>Date</span>
+                  <input id="ms-date" type="date" class="field" />
+                </label>
+                <label class="ms-field">
+                  <span>Time <em>(optional)</em></span>
+                  <input id="ms-time" type="time" class="field" />
+                </label>
+              </div>
+              <div class="ms-row">
+                <label class="ms-field grow">
+                  <span>Title</span>
+                  <input id="ms-title" type="text" class="field" placeholder="e.g. First time off the CPAP" maxlength="140" />
+                </label>
+                <label class="ms-field emoji-field">
+                  <span>Emoji</span>
+                  <input id="ms-emoji" type="text" class="field" placeholder="⭐" maxlength="4" />
+                </label>
+              </div>
+              <label class="ms-field">
+                <span>The story <em>(optional&mdash;add the lovely details)</em></span>
+                <textarea id="ms-body" class="field" rows="3" placeholder="e.g. Took 4ml today&mdash;basically a feast! Greedy guts." maxlength="4000"></textarea>
+              </label>
+              <label class="filepick" id="ms-filepick">
+                <input id="ms-file" type="file" accept="image/*,video/*" hidden />
+                <span id="ms-filepick-label">&#x1F4F7;  Add a photo or video (optional)</span>
+              </label>
+              <div id="ms-preview" class="preview hidden"></div>
+              <label class="ms-field">
+                <span>From</span>
+                <div class="who-pick" id="ms-who">
+                  <button type="button" class="who-btn" data-who="Dana">&#x1F49B; Dana</button>
+                  <button type="button" class="who-btn" data-who="Luke">&#x1F499; Luke</button>
+                </div>
+              </label>
+              <button id="ms-save" class="btn btn-blue full" type="button">Add milestone</button>
+              <div id="ms-status" class="post-status"></div>
+            </div>
+          </div>
+        </details>
+      </div>
+
+    <section class="timeline" id="timeline-list"></section>
+    </section>
+
+    <section class="band band-red">
+      <div class="band-text">
+        <p class="eyebrow light">Held close</p>
+        <h2 class="band-title">Held, fed<br />and growing</h2>
+        <p class="band-copy">Skin-to-skin in the rocking chair, one good feed at a time. This is Leo&rsquo;s story&mdash;and it&rsquo;s only just beginning.</p>
+      </div>
+      <div class="band-art">
+        <img src="/img/leo-mum.jpg?v=2" alt="Dana cradling baby Leo in the NICU" />
+      </div>
+    </section>
+  </main>
+
+  <!-- FAMILY VIEW -->
+  <main id="view-family" class="view hidden">
+    <section class="hero hero-family">
+      <div class="hero-frame"></div>
+      <div class="hero-dots" aria-hidden="true">
+        <span class="dot d-red dot-a"></span>
+        <span class="dot d-blue dot-b"></span>
+        <span class="dot d-red dot-d"></span>
+      </div>
+      <div class="hero-inner">
+        <p class="eyebrow light">Everyone who loves him</p>
+        <h1 class="hero-name">Leo&rsquo;s Family</h1>
+        <p class="hero-parents">Across Cayman, NZ &amp; beyond</p>
+      </div>
+    </section>
+
+    <section class="section section-cream">
+      <div class="wrap">
+        <h2 class="section-kicker">The whole gang <span class="kicker-dot d-blue"></span></h2>
+        <p class="composer-help">Tap anyone to see what they&rsquo;ve shared.<br />Grandparents&mdash;tap your own card to choose your special name (Nana, Poppa, whatever Leo will call you).</p>
+        <div id="family-tree"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- GUIDE VIEW (for the family) -->
+  <main id="view-guide" class="view hidden">
+    <section class="hero hero-guide">
+      <div class="hero-frame"></div>
+      <div class="hero-dots" aria-hidden="true">
+        <span class="dot d-yellow dot-a"></span>
+        <span class="dot d-red dot-b"></span>
+        <span class="dot d-yellow dot-d"></span>
+      </div>
+      <div class="hero-inner">
+        <p class="eyebrow light">Welcome &mdash; so glad you&rsquo;re here</p>
+        <h1 class="hero-name">How it works</h1>
+        <p class="hero-parents">Leo&rsquo;s private family page</p>
+      </div>
+    </section>
+
+    <section class="section section-cream">
+      <div class="wrap">
+        <p class="intro-copy gd-intro">This is a private little page for Leo&rsquo;s family &mdash; a place to follow how he&rsquo;s doing and send him your love. Here&rsquo;s everything you can do. It only takes a minute. &#x1F90D;</p>
+
+        <div class="gd-step">
+          <span class="gd-num">1</span>
+          <div>
+            <h3>Send Leo some love</h3>
+            <p>On the <b>Feed</b>, post a photo, a short video or a little message. Stuck for words? Tap the &#x21BB; for a gentle idea. This is the heart of the page &mdash; the more we add, the lovelier it gets.</p>
+          </div>
+        </div>
+
+        <div class="gd-step">
+          <span class="gd-num">2</span>
+          <div>
+            <h3>Follow his story</h3>
+            <p>The <b>Milestones</b> tab is Leo&rsquo;s journey, day by day &mdash; every little win as he grows stronger. Pop in any time to see how he&rsquo;s getting on.</p>
+          </div>
+        </div>
+
+        <div class="gd-step">
+          <span class="gd-num">3</span>
+          <div>
+            <h3>Find your place in the family</h3>
+            <p>The <b>Family</b> tab shows everyone who loves Leo, from Cayman to NZ and beyond. Tap a name to see what they&rsquo;ve shared. Grandparents &mdash; tap your own card to pick what Leo will call you.</p>
+          </div>
+        </div>
+
+        <div class="gd-tip">
+          <b>&#x1F512; It&rsquo;s completely private.</b> This page isn&rsquo;t public and won&rsquo;t show up on Google &mdash; only family with the password can see it. Please keep the password within the family. &#x1F90D;
+        </div>
+
+        <div class="gd-cta-row">
+          <a class="btn btn-red" data-view="feed" href="#feed">Say hello to Leo &rarr;</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="mobnav">
+    <a data-view="feed" href="#feed" class="active"><span class="mn-ico">&#x1F90D;</span><span class="mn-lbl">Feed</span></a>
+    <a data-view="timeline" href="#timeline"><span class="mn-ico">&#x2728;</span><span class="mn-lbl">Milestones</span></a>
+    <a data-view="family" href="#family"><span class="mn-ico">&#x1F333;</span><span class="mn-lbl">Family</span></a>
+    <a data-view="guide" href="#guide"><span class="mn-ico">&#x1F4D6;</span><span class="mn-lbl">Guide</span></a>
+  </nav>
+
+  <footer class="footer">
+    <span class="footer-dot d-red"></span>
+    <span class="footer-dot d-yellow"></span>
+    <span class="footer-dot d-blue"></span>
+    <p>Made with love for Leo, from your family across the world &middot; NZ &harr; Cayman</p>
+  </footer>
+</div>
+
+<script src="/app.js?v=35"></script>
+</body>
+</html>

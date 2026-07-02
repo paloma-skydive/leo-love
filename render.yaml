@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: leo-love
+    runtime: docker
+    plan: starter
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/session
+    envVars:
+      - key: DATA_DIR
+        value: /var/data
+    disk:
+      name: leo-media
+      mountPath: /var/data
+      sizeGB: 2
