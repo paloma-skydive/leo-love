@@ -521,6 +521,7 @@ function startApp() {
   setupTimelineTabs();
   setupCheckin();
   setupSort();
+  setupEmailSignup();
   loadFamily();
   loadFeed();
   tickClocks(); tickAge();
@@ -748,5 +749,101 @@ async function parentGateGo() {
 $("pg-go")?.addEventListener("click", parentGateGo);
 $("pg-code")?.addEventListener("keydown", (e) => { if (e.key === "Enter") parentGateGo(); });
 $("pg-skip")?.addEventListener("click", (e) => { e.preventDefault(); $("parent-gate").classList.add("hidden"); PENDING_PARENT = false; startApp(); });
+
+// ---------- Email signup (get news about Leo by email) ----------
+function emailCardHTML(compact) {
+  const name = escapeHtml(localStorage.getItem("leo_author") || localStorage.getItem("leo_email_name") || "");
+  const email = escapeHtml(localStorage.getItem("leo_email") || "");
+  const lead = compact
+    ? `<h3 class="ec-title">Want an email when there&rsquo;s news? \u{1F4EC}</h3>
+       <p class="ec-sub">We&rsquo;ll let you know when there&rsquo;s a new photo, video or milestone &mdash; no app, no fuss.</p>`
+    : "";
+  return `
+    <div class="email-card">
+      ${lead}
+      <div class="ec-fields">
+        <input class="field ec-name" type="text" placeholder="Your name" maxlength="80" value="${name}" />
+        <input class="field ec-email" type="email" placeholder="you@email.com" maxlength="160" value="${email}" />
+      </div>
+      <p class="ec-freq-label">How often?</p>
+      <div class="ec-freq">
+        <button type="button" class="ec-opt active" data-freq="instant"><b>Every new post</b><span>the moment it&rsquo;s shared</span></button>
+        <button type="button" class="ec-opt" data-freq="daily"><b>Once a day</b><span>a little round-up</span></button>
+      </div>
+      <button type="button" class="btn btn-red full ec-go">Keep me posted \u{1F49B}</button>
+      <div class="ec-status post-status"></div>
+      <button type="button" class="ec-off">Turn these emails off</button>
+    </div>`;
+}
+
+function wireEmailCard(card) {
+  let freq = "instant";
+  card.querySelectorAll(".ec-opt").forEach((b) =>
+    b.addEventListener("click", () => {
+      freq = b.dataset.freq;
+      card.querySelectorAll(".ec-opt").forEach((x) => x.classList.toggle("active", x === b));
+    })
+  );
+  const nameEl = card.querySelector(".ec-name");
+  const emailEl = card.querySelector(".ec-email");
+  const status = card.querySelector(".ec-status");
+
+  async function submit(offMode) {
+    const email = (emailEl.value || "").trim();
+    const name = (nameEl.value || "").trim();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      status.className = "ec-status post-status err";
+      status.textContent = "Pop in an email address first \u{1F60A}";
+      return;
+    }
+    status.className = "ec-status post-status";
+    status.textContent = offMode ? "Turning them off\u2026" : "Signing you up\u2026";
+    try {
+      const r = await fetch("/api/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, name, freq: offMode ? "off" : freq }),
+      });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        status.className = "ec-status post-status err";
+        status.textContent = d.error || "That didn\u2019t work\u2014try again?";
+        return;
+      }
+      localStorage.setItem("leo_email", email);
+      if (name) localStorage.setItem("leo_email_name", name);
+      status.className = "ec-status post-status ok";
+      if (offMode) {
+        status.textContent = "Done \u2014 you won\u2019t get any more emails.";
+      } else if (d.delivering === false) {
+        status.textContent = "You\u2019re on the list \u{1F49B} Emails switch on very soon.";
+      } else {
+        status.textContent = freq === "daily"
+          ? "All set \u2014 a daily note about Leo is on its way \u{1F49B}"
+          : "All set \u2014 we\u2019ll email you when there\u2019s news \u{1F49B}";
+      }
+    } catch {
+      status.className = "ec-status post-status err";
+      status.textContent = "Connection hiccup\u2014try again.";
+    }
+  }
+  card.querySelector(".ec-go").addEventListener("click", () => submit(false));
+  card.querySelector(".ec-off").addEventListener("click", () => submit(true));
+}
+
+function setupEmailSignup() {
+  const guide = document.getElementById("email-signup-guide");
+  const feed = document.getElementById("email-signup-feed");
+  if (guide && !guide.dataset.wired) {
+    guide.innerHTML = emailCardHTML(false);
+    wireEmailCard(guide);
+    guide.dataset.wired = "1";
+  }
+  if (feed && !feed.dataset.wired) {
+    feed.innerHTML = emailCardHTML(true);
+    wireEmailCard(feed);
+    feed.dataset.wired = "1";
+  }
+}
 
 boot();

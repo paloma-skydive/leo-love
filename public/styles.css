@@ -641,3 +641,55 @@ a { color: inherit; text-decoration: none; }
   .hero .dot-c { right: -22px; width: 84px; height: 84px; }
   .hero .dot-a { width: 120px; height: 120px; bottom: -40px; }
 }
+
+/* ---------- Email signup card ---------- */
+.email-mount { margin-top: 16px; }
+.email-card {
+  background: var(--white);
+  border: 1.5px solid #f0ede0;
+  border-radius: 18px;
+  padding: 22px 22px 20px;
+  box-shadow: var(--shadow);
+  max-width: 620px;
+  margin: 0 auto;
+}
+.gd-step .email-card { box-shadow: none; border-color: #eee7d4; margin-top: 4px; }
+.ec-title {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 1.3rem;
+  margin: 0 0 6px;
+  display: flex; align-items: center; gap: 8px;
+}
+.ec-sub { margin: 0 0 16px; line-height: 1.5; color: #555; font-size: .98rem; }
+.ec-fields { display: flex; gap: 10px; }
+.ec-fields .field { margin-bottom: 0; flex: 1; min-width: 0; }
+@media (max-width: 520px) { .ec-fields { flex-direction: column; } }
+.ec-freq-label {
+  font-family: var(--mono); text-transform: uppercase; letter-spacing: .08em;
+  font-size: .72rem; color: #999; margin: 16px 0 8px;
+}
+.ec-freq { display: flex; gap: 10px; }
+.ec-opt {
+  flex: 1; cursor: pointer; text-align: left;
+  background: var(--cream); border: 1.5px solid #ece8d8; border-radius: 12px;
+  padding: 11px 14px; font-family: var(--body); color: var(--ink);
+  transition: border-color .15s, background .15s, box-shadow .15s;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.ec-opt b { font-size: .98rem; }
+.ec-opt span { font-size: .8rem; color: #8a8677; }
+.ec-opt.active {
+  border-color: var(--red); background: #fff;
+  box-shadow: 0 0 0 3px rgba(235,40,50,.12);
+}
+.ec-opt.active span { color: var(--red); }
+.email-card .ec-go { margin-top: 16px; }
+.ec-status { min-height: 1.1em; margin-top: 12px; }
+.ec-off {
+  display: block; margin: 12px auto 0; background: none; border: none;
+  color: #b6b1a1; font-family: var(--mono); font-size: .72rem;
+  text-transform: uppercase; letter-spacing: .06em; cursor: pointer;
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.ec-off:hover { color: var(--red); }
