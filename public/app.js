@@ -1352,9 +1352,20 @@ function wireEmailCard(card) {
   const status = card.querySelector(".ec-status");
 
   function showDone(msg) {
-    doneSub.innerHTML = msg;
+    doneSub.innerHTML = msg || "";
+    doneSub.classList.toggle("hidden", !msg);
     formEl.classList.add("hidden");
     doneEl.classList.remove("hidden");
+  }
+  // After a successful sign-up, quietly fade the confirmation back to the form
+  // after a few seconds so it doesn't sit there forever.
+  let doneTimer = null;
+  function autoHideDone() {
+    if (doneTimer) clearTimeout(doneTimer);
+    doneTimer = setTimeout(() => {
+      // Only revert if they haven't turned emails off in the meantime.
+      if (localStorage.getItem("leo_email_on") === "1") showForm();
+    }, 4500);
   }
   function showAlready(first) {
     // Distinct "we already have you" greeting (e.g. Amy pre-added them).
@@ -1376,7 +1387,7 @@ function wireEmailCard(card) {
 
   // If this browser has already signed up, greet them with the confirmation.
   if (localStorage.getItem("leo_email_on") === "1" && localStorage.getItem("leo_email")) {
-    showDone("We&rsquo;ll email you whenever there&rsquo;s something new about Leo. \u{1F49B}");
+    showDone("");
   }
 
   // Proactive check: when someone types an email we already have on the list
@@ -1440,11 +1451,10 @@ function wireEmailCard(card) {
       if (d.already) {
         showAlready(first);
       } else {
-        showDone(
-          (first ? `Thanks, ${escapeHtml(first)} \u2014 ` : "") +
-          `we&rsquo;ll email you whenever there&rsquo;s something new about Leo. \u{1F49B}`
-        );
+        // Just "You're all set! \u{1F49B}" — no extra line.
+        showDone("");
       }
+      autoHideDone();
     } catch {
       status.className = "ec-status post-status err";
       status.textContent = "Connection hiccup\u2014try again.";
