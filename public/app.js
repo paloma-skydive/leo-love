@@ -814,8 +814,8 @@ async function buildWhoMenu() {
   menu.innerHTML =
     `<div class="who-group-label">Family</div>${famItems}` +
     `<div class="who-sep"></div>` +
-    `<button type="button" class="who-opt who-opt-alt" role="option" data-kind="friend">Wider Fam + Friends</button>` +
-    `<button type="button" class="who-opt who-opt-alt" role="option" data-kind="newfamily">Relative\u2014not on the tree yet</button>`;
+    `<button type="button" class="who-opt who-opt-alt" role="option" data-kind="friend">Wider fam & friends</button>` +
+    `<button type="button" class="who-opt who-opt-alt" role="option" data-kind="newfamily">Relative\u2014not on family tree</button>`;
   menu.querySelectorAll(".who-opt").forEach((o) =>
     o.addEventListener("click", () => chooseWho(o.dataset.kind, o.dataset.id, o.textContent.trim()))
   );
@@ -1542,7 +1542,7 @@ async function openEditModal(kind, id, scope) {
       $("em-emoji").value = (m.feedEmoji != null ? m.feedEmoji : m.emoji) || "";
       $("em-title-input").value = (m.feedTitle != null ? m.feedTitle : m.title) || "";
       $("em-body").value = (m.feedBody != null ? m.feedBody : m.body) || "";
-      note.textContent = "This changes how the milestone looks on the feed only — the timeline stays as written.";
+      note.textContent = "This changes how the milestone looks on the feed only\u2014the timeline stays as is.";
       note.classList.remove("hidden");
       dateWrap.classList.add("hidden");   // date is a timeline concern
       delBtn.classList.add("hidden");     // deleting is a timeline action
