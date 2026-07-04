@@ -393,6 +393,10 @@ a { color: inherit; text-decoration: none; }
   background: var(--cream); outline: none; margin-bottom: 12px; resize: vertical;
 }
 .field:focus { border-color: var(--blue); }
+/* Date fields: keep the body font + a consistent look with the other inputs */
+input[type="date"].field { font-family: var(--body); color: var(--ink); cursor: pointer; min-height: 50px; }
+input[type="date"].field::-webkit-calendar-picker-indicator { cursor: pointer; opacity: .5; transition: opacity .12s; }
+input[type="date"].field::-webkit-calendar-picker-indicator:hover { opacity: 1; }
 /* compact composer: name + file picker share a row */
 .composer-row { display: flex; gap: 10px; align-items: stretch; flex-wrap: wrap; }
 .composer-row #author { flex: 1 1 55%; min-width: 140px; margin-bottom: 12px; }
@@ -679,6 +683,13 @@ a { color: inherit; text-decoration: none; }
 .checkin-wrap { max-width: 680px; margin: 0 auto 18px; }
 .chip-label { font-family: var(--mono); text-transform: uppercase; letter-spacing: .03em; font-size: .7rem; color: var(--soft); margin: 16px 0 8px; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 6px; }
+/* Mini Update states as tiles — same tile language as the milestone emoji picker */
+.chips.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(88px, 1fr)); gap: 8px; }
+.chips.tiles .chip { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+  border-radius: 14px; padding: 12px 8px; }
+.chips.tiles .chip .chip-emoji { font-size: 1.4rem; line-height: 1; }
+.chips.tiles .chip .chip-word { font-size: .8rem; font-weight: 600; }
+.chips.tiles .chip.chip-add { border-style: dashed; }
 .chip {
   font-family: var(--body); font-size: .92rem; font-weight: 500;
   background: var(--cream); color: var(--ink);
@@ -727,12 +738,13 @@ a { color: inherit; text-decoration: none; }
 }
 .add-ms > summary::-webkit-details-marker { display: none; }
 .add-ms-plus {
-  width: 32px; height: 32px; flex-shrink: 0; border-radius: 50%;
+  width: 32px; height: 32px; flex-shrink: 0; border-radius: 50%; margin-left: auto;
   background: var(--blue); color: var(--white);
   display: inline-flex; align-items: center; justify-content: center;
   line-height: 0; transition: transform .2s ease;
 }
 .add-ms[open] .add-ms-plus { transform: rotate(45deg); }
+.add-ms > summary .info-tip { margin-left: 0; flex-shrink: 0; }
 .add-ms summary em { color: var(--soft); font-style: normal; font-weight: 500; font-size: .9rem; }
 .add-ms-body { padding: 0 24px 24px; }
 .ms-row { display: flex; gap: 12px; }
@@ -749,9 +761,6 @@ a { color: inherit; text-decoration: none; }
 .emoji-field { flex: 0 0 80px; }
 .emoji-field .field { text-align: center; font-size: 1.3rem; }
 
-/* Add-ms summary: one bold title with the lion tucked right up beside it */
-.add-ms-head { display: inline-flex; align-items: center; gap: 6px; }
-.add-ms-head .info-tip { margin-left: 0; }
 .add-ms-title { font-weight: 700; }
 
 /* Mini Update: breathing room between the state chips and the date field */
@@ -770,11 +779,12 @@ a { color: inherit; text-decoration: none; }
   background: var(--white); color: var(--blue); cursor: pointer; }
 .chip-own-add:hover { background: var(--blue); color: #fff; }
 
-/* Milestone emoji quick-pick palette */
-.emoji-quick { display: flex; flex-wrap: wrap; gap: 6px; margin: -4px 0 14px; }
-.emoji-quick .eq { font-size: 1.15rem; line-height: 1; width: 40px; height: 40px; border-radius: 10px;
-  border: 2px solid var(--line); background: var(--white); cursor: pointer; transition: border-color .12s, background .12s; }
+/* Milestone emoji quick-pick palette — tiles fill the column width */
+.emoji-quick { display: grid; grid-template-columns: repeat(auto-fit, minmax(44px, 1fr)); gap: 8px; margin: 0 0 4px; }
+.emoji-quick .eq { font-size: 1.25rem; line-height: 1; height: 46px; border-radius: 12px;
+  border: 2px solid var(--line); background: var(--white); cursor: pointer; transition: border-color .12s, background .12s, transform .1s; }
 .emoji-quick .eq:hover { border-color: var(--blue); }
+.emoji-quick .eq:active { transform: scale(.94); }
 .emoji-quick .eq.on { border-color: var(--blue); background: var(--blue); }
 
 /* Milestone badge inline on copy-only feed cards (no media tile to sit on) */

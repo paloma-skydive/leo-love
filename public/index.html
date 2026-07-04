@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Averia+Libre:ital,wght@0,300;0,400;0,700;1,400&family=Fragment+Mono:ital@0;1&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="/styles.css?v=61" />
+<link rel="stylesheet" href="/styles.css?v=62" />
 </head>
 <body>
 
@@ -74,7 +74,7 @@
         <span class="dot d-blue dot-b"></span>
         <span class="dot d-yellow dot-d"></span>
       </div>
-      <img class="hero-photo" src="/img/leo-hero-bw.jpg?v=61" alt="Baby Leo asleep in his maroon beanie" />
+      <img class="hero-photo" src="/img/leo-hero-bw.jpg?v=62" alt="Baby Leo asleep in his maroon beanie" />
       <div class="hero-inner">
         <p class="eyebrow light">Born 16 June, 1:46pm &middot; Georgetown</p>
         <h1 class="hero-name">Leo John Paul<br />Fraser</h1>
@@ -192,8 +192,9 @@
       <div class="add-ms-wrap">
         <details class="add-ms" id="timeline-add">
           <summary>
+            <span class="info-tip"><button type="button" class="info-btn" aria-label="How updates work">🦁</button><span class="info-pop">Two ways to update:<br><b>1. Mini Update</b>&mdash;a few words or a pic to share how Leo&rsquo;s doing<br><b>2. Milestone</b>&mdash;for our main man&rsquo;s bigger moments</span></span>
+            <span class="add-ms-title">Luke + Dana: update the fam on how Leo&rsquo;s doing</span>
             <span class="add-ms-plus" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
-            <span class="add-ms-head"><span class="add-ms-title">Luke + Dana: update the fam on how Leo&rsquo;s doing</span><span class="info-tip"><button type="button" class="info-btn" aria-label="How updates work">🦁</button><span class="info-pop">Two ways to update:<br><b>1. Mini Update</b>&mdash;a few words or a pic to share how Leo&rsquo;s doing<br><b>2. Milestone</b>&mdash;for our main man&rsquo;s bigger moments</span></span></span>
           </summary>
           <div class="add-ms-body">
             <div class="tl-tabs">
@@ -203,14 +204,14 @@
 
             <div class="tl-panel" id="tab-quick">
               <p class="chip-label">How&rsquo;s Leo today?</p>
-              <div class="chips" id="chips-moment">
-                <button type="button" class="chip" data-emoji="&#x1F634;" data-word="sleepy">&#x1F634; Sleepy</button>
-                <button type="button" class="chip" data-emoji="&#x1F60C;" data-word="settled">&#x1F60C; Settled</button>
-                <button type="button" class="chip" data-emoji="&#x1F90D;" data-word="snuggly">&#x1F90D; Snuggly</button>
-                <button type="button" class="chip" data-emoji="&#x1F37C;" data-word="feeding well">&#x1F37C; Good feeds</button>
-                <button type="button" class="chip" data-emoji="&#x1F440;" data-word="bright-eyed">&#x1F440; Bright eyed</button>
-                <button type="button" class="chip" data-emoji="&#x1F63E;" data-word="a bit scratchy">&#x1F63E; Scratchy</button>
-                <button type="button" class="chip chip-add" id="chip-add-own">&#x2795; Your own</button>
+              <div class="chips tiles" id="chips-moment">
+                <button type="button" class="chip" data-emoji="&#x1F634;" data-word="sleepy"><span class="chip-emoji">&#x1F634;</span><span class="chip-word">Sleepy</span></button>
+                <button type="button" class="chip" data-emoji="&#x1F60C;" data-word="settled"><span class="chip-emoji">&#x1F60C;</span><span class="chip-word">Settled</span></button>
+                <button type="button" class="chip" data-emoji="&#x1F90D;" data-word="snuggly"><span class="chip-emoji">&#x1F90D;</span><span class="chip-word">Snuggly</span></button>
+                <button type="button" class="chip" data-emoji="&#x1F37C;" data-word="feeding well"><span class="chip-emoji">&#x1F37C;</span><span class="chip-word">Good feeds</span></button>
+                <button type="button" class="chip" data-emoji="&#x1F440;" data-word="bright-eyed"><span class="chip-emoji">&#x1F440;</span><span class="chip-word">Bright eyed</span></button>
+                <button type="button" class="chip" data-emoji="&#x1F63E;" data-word="a bit scratchy"><span class="chip-emoji">&#x1F63E;</span><span class="chip-word">Scratchy</span></button>
+                <button type="button" class="chip chip-add" id="chip-add-own"><span class="chip-emoji">&#x2795;</span><span class="chip-word">Your own</span></button>
               </div>
               <div class="chip-own hidden" id="chip-own-row">
                 <input id="ci-own-emoji" class="field chip-own-emoji" maxlength="4" placeholder="&#x1F642;" aria-label="Emoji" />
@@ -247,25 +248,29 @@
                 <span>Date</span>
                 <input id="ms-date" type="date" class="field" />
               </div>
-              <div class="ms-row">
-                <label class="ms-field grow">
-                  <span>Title</span>
-                  <input id="ms-title" type="text" class="field" placeholder="e.g. Reached birth weight" maxlength="140" />
-                </label>
-                <div class="ms-field emoji-field">
-                  <span>Emoji</span>
-                  <input id="ms-emoji" type="text" class="field" placeholder="⭐" maxlength="4" />
+              <label class="ms-field">
+                <span>Title</span>
+                <input id="ms-title" type="text" class="field" placeholder="e.g. Reached birth weight" maxlength="140" />
+              </label>
+              <input id="ms-emoji" type="hidden" />
+              <div class="ms-field">
+                <span>Pick an emoji</span>
+                <div class="emoji-quick" id="ms-emoji-quick" aria-label="Pick an emoji">
+                  <button type="button" class="eq" data-emoji="&#x2B50;">&#x2B50;</button>
+                  <button type="button" class="eq" data-emoji="&#x1F981;">&#x1F981;</button>
+                  <button type="button" class="eq" data-emoji="&#x1F37C;">&#x1F37C;</button>
+                  <button type="button" class="eq" data-emoji="&#x1F354;">&#x1F354;</button>
+                  <button type="button" class="eq" data-emoji="&#x1F4AA;">&#x1F4AA;</button>
+                  <button type="button" class="eq" data-emoji="&#x1FAC1;">&#x1FAC1;</button>
+                  <button type="button" class="eq" data-emoji="&#x1F60E;">&#x1F60E;</button>
+                  <button type="button" class="eq" data-emoji="&#x1F440;">&#x1F440;</button>
+                  <button type="button" class="eq" data-emoji="&#x2696;&#xFE0F;">&#x2696;&#xFE0F;</button>
+                  <button type="button" class="eq" data-emoji="&#x1F3C6;">&#x1F3C6;</button>
+                  <button type="button" class="eq" data-emoji="&#x1F389;">&#x1F389;</button>
+                  <button type="button" class="eq" data-emoji="&#x1F308;">&#x1F308;</button>
+                  <button type="button" class="eq" data-emoji="&#x1F634;">&#x1F634;</button>
+                  <button type="button" class="eq" data-emoji="&#x2764;&#xFE0F;">&#x2764;&#xFE0F;</button>
                 </div>
-              </div>
-              <div class="emoji-quick" id="ms-emoji-quick" aria-label="Pick an emoji">
-                <button type="button" class="eq" data-emoji="&#x2B50;">&#x2B50;</button>
-                <button type="button" class="eq" data-emoji="&#x1F981;">&#x1F981;</button>
-                <button type="button" class="eq" data-emoji="&#x1F37C;">&#x1F37C;</button>
-                <button type="button" class="eq" data-emoji="&#x2696;&#xFE0F;">&#x2696;&#xFE0F;</button>
-                <button type="button" class="eq" data-emoji="&#x1F4AA;">&#x1F4AA;</button>
-                <button type="button" class="eq" data-emoji="&#x1FAC1;">&#x1FAC1;</button>
-                <button type="button" class="eq" data-emoji="&#x1F389;">&#x1F389;</button>
-                <button type="button" class="eq" data-emoji="&#x2764;&#xFE0F;">&#x2764;&#xFE0F;</button>
               </div>
               <label class="ms-field">
                 <span>The Story <em>(optional)</em></span>
@@ -361,6 +366,6 @@
   </div>
 </div>
 
-<script src="/app.js?v=61"></script>
+<script src="/app.js?v=62"></script>
 </body>
 </html>

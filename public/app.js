@@ -719,6 +719,10 @@ function setupMilestoneForm() {
   if (btn.dataset.wired) return;
   btn.dataset.wired = "1";
 
+  // Whole date field opens the native picker (not just the tiny icon)
+  const msDate = $("ms-date");
+  if (msDate) msDate.addEventListener("click", () => { try { msDate.showPicker && msDate.showPicker(); } catch (e) {} });
+
   // Tap-to-pick emoji (so it works on desktop too, where there's no emoji key)
   const eq = $("ms-emoji-quick");
   if (eq) eq.addEventListener("click", (e) => {
@@ -973,7 +977,7 @@ function setupCheckin() {
     chip.className = "chip on";
     chip.dataset.word = word.toLowerCase();
     chip.dataset.emoji = emoji || "\u2728";
-    chip.textContent = (emoji ? emoji + " " : "") + word;
+    chip.innerHTML = `<span class="chip-emoji">${escapeHtml(emoji || "\u2728")}</span><span class="chip-word">${escapeHtml(word)}</span>`;
     $("chip-add-own").before(chip);
     $("ci-own-word").value = ""; $("ci-own-emoji").value = "";
     $("chip-own-row").classList.add("hidden");
