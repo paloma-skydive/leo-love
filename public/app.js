@@ -948,7 +948,7 @@ async function boot() {
   const forParents = new URLSearchParams(location.search).get("for") === "parents";
   if (forParents) {
     const sub = $("login-sub");
-    if (sub) sub.textContent = "Welcome, Mum & Dad. Pop in the family password first, then your parent code, and we\u2019ll open your private guide.";
+    if (sub) sub.textContent = "Welcome, Mum & Dad. Pop in the secret code first, then your parent code, and we\u2019ll open your private guide.";
   }
 
   if (!data.authed) {
