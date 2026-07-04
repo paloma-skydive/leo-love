@@ -293,22 +293,21 @@ a { color: inherit; text-decoration: none; }
   background: var(--white); border-radius: 18px; box-shadow: var(--shadow);
   padding: 28px 28px 30px;
 }
-/* Leo photo replaces the corner circle: bigger, no white border, matches the hero dot look */
+/* Leo photo floats above-left in the cream, clear of the module (no overlap) */
 .intro-photo {
-  width: 132px; height: 132px;
+  width: 128px; height: 128px;
   object-fit: cover; object-position: 50% 38%;
   border-radius: 50%; box-shadow: var(--shadow); display: block;
-  position: absolute; top: -40px; left: -30px;
-  z-index: 2;
+  margin: 0 0 18px 4px;
 }
 .intro-left .eyebrow { margin-bottom: 10px; }
 /* Welcome header matches the composer "Drop an update" title size */
-.intro-card .intro-kicker { margin: 66px 0 14px; }
-.intro-copy { color: var(--soft); margin: 0; font-size: 1.02rem; line-height: 1.6; max-width: 42ch; }
+.intro-card .intro-kicker { margin: 0 0 14px; }
+.intro-copy { color: var(--soft); margin: 0; font-size: .96rem; line-height: 1.6; max-width: 42ch; }
 /* Intro lead sits in its own soft-yellow module */
-.intro-lead { margin: 0 0 4px; font-size: 1.02rem; line-height: 1.55;
+.intro-lead { margin: 0 0 4px; font-size: .96rem; line-height: 1.55;
   background: var(--yellow); color: var(--ink); border-radius: 12px; padding: 14px 16px; }
-.intro-list { color: var(--soft); margin: 14px 0 0; padding-left: 1.15em; font-size: 1.02rem; line-height: 1.55; max-width: 42ch; }
+.intro-list { color: var(--soft); margin: 14px 0 0; padding-left: 1.15em; font-size: .96rem; line-height: 1.55; max-width: 42ch; }
 .intro-list li { margin-bottom: 8px; }
 .intro-list li::marker { color: var(--red); }
 .intro-link { color: var(--blue); font-weight: 600; text-decoration: none; }
@@ -362,12 +361,12 @@ a { color: inherit; text-decoration: none; }
 .fam-intro { text-align: center; margin: 0 auto 22px; max-width: 40ch; }
 .composer-title { font-family: var(--display); font-weight: 700; font-size: 1.5rem; margin: 4px 0 10px; display: flex; align-items: center; gap: 9px; }
 .composer-title .kicker-dot { width: 11px; height: 11px; }
-.prompt-lead { font-family: var(--body); color: var(--soft); font-size: .92rem; margin: 0 0 14px; line-height: 1.5; }
+.prompt-lead { font-family: var(--body); color: var(--soft); font-size: .96rem; margin: 0 0 14px; line-height: 1.55; }
 .prompt-card {
-  background: var(--yellow); border-radius: 12px; padding: 13px 15px;
+  background: var(--yellow); border-radius: 12px; padding: 14px 16px;
   display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
-  font-family: var(--body); font-weight: 400; font-size: .98rem;
-  line-height: 1.5;
+  font-family: var(--body); font-weight: 400; font-size: .96rem;
+  line-height: 1.55;
 }
 .prompt-card span { flex: 1; }
 .prompt-hint { font-family: var(--mono); text-transform: uppercase; letter-spacing: .02em; font-size: .68rem; color: var(--soft); margin: 0 0 16px; text-align: center; }
@@ -414,7 +413,7 @@ a { color: inherit; text-decoration: none; }
 .filepick {
   display: flex; align-items: center; justify-content: center; text-align: center; cursor: pointer;
   border: 2px dashed var(--line); border-radius: 12px;
-  padding: 14px 18px; margin-bottom: 12px; color: var(--soft); font-weight: 600; font-size: .95rem;
+  padding: 14px 18px; margin-bottom: 12px; color: var(--soft); font-weight: 600; font-size: 1rem;
   transition: border-color .12s, color .12s; white-space: nowrap;
 }
 .filepick:hover { border-color: var(--blue); color: var(--blue); }
@@ -493,7 +492,7 @@ a { color: inherit; text-decoration: none; }
 .comment-text { margin: 1px 0 0; font-size: .96rem; white-space: pre-wrap; }
 /* Collapsible comments: a small toggle chip that accordions open the thread + form */
 .comments-toggle {
-  display: inline-flex; align-items: center; gap: 6px;
+  display: inline-flex; align-items: center; gap: 7px;
   margin-top: 10px; padding: 6px 12px; border-radius: 999px;
   background: var(--cream); border: 1.5px solid var(--line); cursor: pointer;
   font-family: var(--mono); text-transform: uppercase; letter-spacing: .03em;
@@ -501,13 +500,24 @@ a { color: inherit; text-decoration: none; }
   transition: border-color .15s, color .15s, background .15s;
 }
 .comments-toggle .ct-ico { display: inline-flex; }
+.comments-toggle .ct-chev { width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 5px solid currentColor; transition: transform .18s; margin-left: 1px; }
+.comments-toggle.open .ct-chev { transform: rotate(180deg); }
 .comments-toggle:hover, .comments-toggle.open { border-color: var(--blue); color: var(--blue); }
 .comments.hidden { display: none; }
 .comments { margin-top: 10px; }
-.comment-list { margin-bottom: 4px; }
-.comment-form { display: flex; gap: 8px; margin-top: 12px; align-items: stretch; }
-/* When comments sit above the input, divide them off so the box is clearly the compose area */
-.comment-form.has-above { margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--line); }
+/* Posted comments grouped in their own soft panel so they read as the thread, not the compose box */
+.comment-list { background: var(--cream); border: 1px solid var(--line); border-radius: 12px; padding: 13px 14px 4px; margin-bottom: 10px; }
+.comment-list .comment:last-child { margin-bottom: 9px; }
+/* Secondary "Add a comment" button — keeps viewing separate from composing */
+.comment-add-btn {
+  display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+  background: none; border: none; padding: 2px 2px; color: var(--blue);
+  font-family: var(--mono); text-transform: uppercase; letter-spacing: .03em; font-size: .68rem; font-weight: 600;
+}
+.comment-add-btn:hover { filter: brightness(.85); }
+.comment-add-btn.hidden { display: none; }
+.comment-form { display: flex; gap: 8px; margin-top: 10px; align-items: stretch; }
+.comment-form.hidden { display: none; }
 .comment-form input {
   flex: 1; min-width: 0; font-family: var(--mono); font-size: .78rem;
   padding: 10px 16px; border: 2px solid var(--line); border-radius: 999px;

@@ -407,10 +407,12 @@ function renderComments(mount, comments) {
     <button type="button" class="comments-toggle" aria-expanded="false">
       <span class="ct-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></span>
       <span class="ct-label">${comments.length ? comments.length + (comments.length === 1 ? " comment" : " comments") : "Add a comment"}</span>
+      <span class="ct-chev" aria-hidden="true"></span>
     </button>
     <div class="comments hidden">
       ${comments.length ? `<div class="comment-list">${items}</div>` : ""}
-      <div class="comment-form${comments.length ? " has-above" : ""}">
+      ${comments.length ? `<button type="button" class="comment-add-btn">+ Add a comment</button>` : ""}
+      <div class="comment-form${comments.length ? " hidden" : ""}">
         <input class="cf-name" type="text" placeholder="Name" value="${escapeHtml(name)}" maxlength="80" />
         <input class="cf-text" type="text" placeholder="Add a comment…" maxlength="1500" />
         <button class="comment-send" type="button">Post</button>
@@ -419,11 +421,19 @@ function renderComments(mount, comments) {
 
   const toggle = mount.querySelector(".comments-toggle");
   const panel = mount.querySelector(".comments");
+  const addBtn = mount.querySelector(".comment-add-btn");
+  const form = mount.querySelector(".comment-form");
   toggle.addEventListener("click", () => {
     const nowOpen = panel.classList.toggle("hidden") === false;
     toggle.setAttribute("aria-expanded", String(nowOpen));
     toggle.classList.toggle("open", nowOpen);
-    if (nowOpen) setTimeout(() => mount.querySelector(".cf-text")?.focus(), 30);
+    // With no comments yet, opening goes straight to composing.
+    if (nowOpen && !comments.length) setTimeout(() => mount.querySelector(".cf-text")?.focus(), 30);
+  });
+  // "Add a comment" reveals the compose form (so viewing isn't the same as composing).
+  if (addBtn) addBtn.addEventListener("click", () => {
+    form.classList.remove("hidden"); addBtn.classList.add("hidden");
+    setTimeout(() => mount.querySelector(".cf-name")?.focus(), 30);
   });
 
   const nameEl = mount.querySelector(".cf-name");
