@@ -1395,7 +1395,7 @@ function reflectParentMode() {
   const btn = $("parent-mode-btn");
   if (!btn) return;
   btn.classList.toggle("on", IS_PARENT);
-  btn.textContent = IS_PARENT ? "Parent mode on" : "Luke & Dana";
+  btn.textContent = IS_PARENT ? "Parent mode on" : "\u{1F511} Unlock Parent Mode";
 }
 function setupParentMode() {
   const btn = $("parent-mode-btn");
