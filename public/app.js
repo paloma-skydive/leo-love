@@ -288,11 +288,25 @@ function feedVideosPlaying() {
   );
 }
 
+// Is someone mid-edit inside the feed right now? An open comment edit box, a
+// delete-confirm, or a focused comment compose/edit field means a feed rebuild
+// would yank their work out from under them — so we hold off (same idea as a
+// playing video) and flush once they're done.
+function feedEditorOpen() {
+  const list = document.getElementById("feed-list");
+  if (!list) return false;
+  if (list.querySelector(".comment-edit-box, .comment-confirm")) return true;
+  const a = document.activeElement;
+  if (a && list.contains(a) && (a.classList.contains("cf-text") || a.classList.contains("cf-name") || a.classList.contains("ce-input"))) return true;
+  return false;
+}
+
 // When we've deferred a refresh, re-run it once the video the family was
 // watching has stopped.
 function flushPendingFeed() {
   if (!pendingFeedRefresh) return;
   if (feedVideosPlaying().length) return; // something else is still playing
+  if (feedEditorOpen()) return;           // someone's still mid-edit
   pendingFeedRefresh = false;
   renderFeedFilters();
   renderFeed();
@@ -312,6 +326,13 @@ async function loadFeed() {
   }
 
   ALL_POSTS = posts;
+
+  // Don't rebuild the feed DOM out from under an open comment editor / compose
+  // field — that wipes what they're typing. Defer and flush when it closes.
+  if (feedEditorOpen() && $("feed-list").children.length) {
+    pendingFeedRefresh = true;
+    return;
+  }
 
   // There's a real change, but if someone's mid-video, don't yank it out from
   // under them. Stash the update and apply it the moment the video stops.
@@ -647,7 +668,7 @@ function renderComments(mount, comments) {
       });
       // Snap the comment box back to its collapsed state after posting
       // (the fresh render is closed by default and shows the new count).
-      if (r.ok) { textEl.value = ""; await mountComments(mount); }
+      if (r.ok) { textEl.value = ""; await mountComments(mount); flushPendingFeed(); }
     } finally { btn.disabled = false; }
   };
   mount.querySelector(".comment-send").addEventListener("click", send);
@@ -664,14 +685,15 @@ function renderComments(mount, comments) {
         bar.className = "comment-confirm";
         bar.innerHTML = `<span>Delete this comment?</span><button type="button" class="cc-yes">Delete</button><button type="button" class="cc-no">Keep</button>`;
         row.querySelector(".comment-main").appendChild(bar);
-        bar.querySelector(".cc-no").addEventListener("click", () => bar.remove());
+        bar.querySelector(".cc-no").addEventListener("click", () => { bar.remove(); flushPendingFeed(); });
         bar.querySelector(".cc-yes").addEventListener("click", async () => {
           bar.querySelector(".cc-yes").disabled = true;
           const r = await fetch("/api/comments/delete", {
             method: "POST", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ targetType: type, targetId: id, id: cid }),
           });
-          if (r.ok) await mountComments(mount);
+          if (r.ok) { await mountComments(mount); flushPendingFeed(); }
+          else bar.querySelector(".cc-yes").disabled = false;
         });
       }
     }));
@@ -689,7 +711,7 @@ function renderComments(mount, comments) {
       textP.after(box);
       const inp = box.querySelector(".ce-input");
       inp.focus();
-      const close = () => { box.remove(); textP.style.display = ""; };
+      const close = () => { box.remove(); textP.style.display = ""; flushPendingFeed(); };
       box.querySelector(".ce-cancel").addEventListener("click", close);
       const save = async () => {
         const val = inp.value.trim();
@@ -699,7 +721,7 @@ function renderComments(mount, comments) {
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ targetType: type, targetId: id, id: cid, text: val }),
         });
-        if (r.ok) await mountComments(mount); else { box.querySelector(".ce-save").disabled = false; }
+        if (r.ok) { await mountComments(mount); flushPendingFeed(); } else { box.querySelector(".ce-save").disabled = false; }
       };
       box.querySelector(".ce-save").addEventListener("click", save);
       inp.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); save(); } if (e.key === "Escape") close(); });
