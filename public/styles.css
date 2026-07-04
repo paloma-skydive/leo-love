@@ -317,13 +317,14 @@ a { color: inherit; text-decoration: none; }
 /* Intro lead sits in its own soft-yellow module */
 .intro-lead { margin: 0 0 4px; font-size: .88rem; line-height: 1.5;
   background: var(--yellow); color: var(--ink); border-radius: 12px; padding: 12px 15px; }
-/* Scannable icon rows (replaces the dense bullet list). Grow to fill the card and
-   distribute evenly so the welcome height matches the taller composer with no dead space. */
-.intro-points { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-direction: column; flex: 1; justify-content: space-between; gap: 12px; }
+/* Scannable icon rows (replaces the dense bullet list). Sit in their own soft-blue
+   module and grow to fill the card so the welcome height matches the taller composer. */
+.intro-points { list-style: none; margin: 14px 0 0; padding: 16px 16px; display: flex; flex-direction: column; flex: 1; justify-content: space-between; gap: 13px;
+  background: rgba(53,108,192,.08); border-radius: 14px; }
 .intro-points .ip { display: flex; align-items: flex-start; gap: 12px; font-size: .88rem; line-height: 1.45; color: var(--ink); }
 .intro-points .ip-ico { flex-shrink: 0; width: 30px; height: 30px; border-radius: 50%;
-  background: var(--cream); display: inline-flex; align-items: center; justify-content: center;
-  font-size: .98rem; box-shadow: inset 0 0 0 1.5px #efe9d6; }
+  background: var(--white); display: inline-flex; align-items: center; justify-content: center;
+  font-size: .98rem; box-shadow: 0 1px 3px rgba(21,20,20,.1); }
 .intro-list { color: var(--soft); margin: 14px 0 0; padding-left: 1.15em; font-size: .96rem; line-height: 1.55; max-width: 42ch; }
 .intro-list li { margin-bottom: 8px; }
 .intro-list li::marker { color: var(--red); }
