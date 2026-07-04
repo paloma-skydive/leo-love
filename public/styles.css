@@ -88,7 +88,7 @@ a { color: inherit; text-decoration: none; }
 .login-dots .d-red { top: 9%; left: 11%; width: 84px; height: 84px; }
 .login-dots .d-yellow { bottom: 12%; right: 9%; width: 150px; height: 150px; }
 .login-dots .d-blue { top: 24%; right: 14%; width: 56px; height: 56px; }
-.login-dots .d-red.small { bottom: 26%; left: 16%; width: 44px; height: 44px; }
+.login-dots .d-red.small { top: 34%; left: 19%; bottom: auto; width: 44px; height: 44px; }
 .login-dots .d-yellow.small { top: 64%; left: 6%; width: 30px; height: 30px; }
 .login-card {
   position: relative; z-index: 3;
