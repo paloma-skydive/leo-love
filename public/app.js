@@ -945,14 +945,11 @@ async function boot() {
   APPROVAL_MODE = !!data.approvalMode;
 
   // Guide link: Luke & Dana arriving at /guide.html (redirected to /?next=guide when
-  // not logged in). They just need the secret code — no separate parent code.
-  // (?for=parents kept as a back-compat alias for any old links.)
+  // not logged in). The access page is the SAME general one everyone sees — they just
+  // enter the secret code, then get routed on to the guide. (?for=parents kept as a
+  // back-compat alias for any old links.)
   const q = new URLSearchParams(location.search);
   const wantsGuide = q.get("next") === "guide" || q.get("for") === "parents";
-  if (wantsGuide) {
-    const sub = $("login-sub");
-    if (sub) sub.textContent = "Welcome, Mum & Dad. Pop in the secret code to open your private guide.";
-  }
 
   if (!data.authed) {
     PENDING_GUIDE = wantsGuide;
