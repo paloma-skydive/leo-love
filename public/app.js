@@ -551,8 +551,8 @@ async function buildWhoMenu() {
   menu.innerHTML =
     `<div class="who-group-label">Family</div>${famItems}` +
     `<div class="who-sep"></div>` +
-    `<button type="button" class="who-opt who-opt-alt" role="option" data-kind="friend">A friend of Luke &amp; Dana</button>` +
-    `<button type="button" class="who-opt who-opt-alt" role="option" data-kind="newfamily">Family \u2014 not on the tree yet</button>`;
+    `<button type="button" class="who-opt who-opt-alt" role="option" data-kind="friend">Wider Fam + Friends</button>` +
+    `<button type="button" class="who-opt who-opt-alt" role="option" data-kind="newfamily">Relative\u2014not on the tree yet</button>`;
   menu.querySelectorAll(".who-opt").forEach((o) =>
     o.addEventListener("click", () => chooseWho(o.dataset.kind, o.dataset.id, o.textContent.trim()))
   );
