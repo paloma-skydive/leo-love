@@ -368,16 +368,37 @@ function probeVideoCodec(file: string): Promise<string> {
 async function normaliseMedia(
   rawPath: string,
   id: string,
-  isVideo: boolean
+  isVideo: boolean,
+  skipTranscode = false
 ): Promise<{ fileName: string; mediaType: "image" | "video"; mime: string }> {
   if (isVideo) {
+    const outName = id + ".mp4";
+    const outPath = path.join(UPLOAD_DIR, outName);
+    // Pre-transcoded path: the uploader already produced a web-ready H.264/yuv420p
+    // file (e.g. Paloma transcodes big family videos off-box, since re-encoding a
+    // 40MB clip on the small Render instance exhausts its memory and restarts the
+    // app). Just stream-copy with faststart — cheap, low-memory, no re-encode.
+    if (skipTranscode) {
+      try {
+        await run("ffmpeg", ["-y", "-i", rawPath, "-c", "copy", "-movflags", "+faststart", outPath], 60 * 1000);
+        if (rawPath !== outPath) fs.unlink(rawPath, () => {});
+        return { fileName: outName, mediaType: "video", mime: "video/mp4" };
+      } catch (e: any) {
+        console.error("faststart remux failed, keeping original:", e?.message);
+        // Fall back to just using the raw file as-is (already web-ready by contract).
+        try {
+          if (rawPath !== outPath) fs.renameSync(rawPath, outPath);
+          return { fileName: outName, mediaType: "video", mime: "video/mp4" };
+        } catch {
+          return { fileName: path.basename(rawPath), mediaType: "video", mime: "video/mp4" };
+        }
+      }
+    }
     // Always re-encode to a universally-playable baseline: 8-bit yuv420p (NOT
     // 10-bit/HDR, which many phones & browsers can't decode and which causes
     // playback to stall a few seconds in), constant frame rate, regular
     // keyframes, faststart. Never trust a source .mp4 as-is — iPhones now
     // record 10-bit Dolby Vision HEVC/H.264 with variable frame rate.
-    const outName = id + ".mp4";
-    const outPath = path.join(UPLOAD_DIR, outName);
     try {
       await run(
         "ffmpeg",
@@ -659,6 +680,7 @@ app.post("/api/milestone-media", requireAuth, (req, res) => {
   const mime = String(req.headers["content-type"] || "application/octet-stream");
   const isVideo = mime.startsWith("video/");
   const isImage = mime.startsWith("image/");
+  const skipTranscode = String(req.headers["x-pretranscoded"] || "") === "1";
   if (!isVideo && !isImage) return res.status(400).json({ error: "Only images and videos." });
   let ext = path.extname(origName).toLowerCase().replace(/[^a-z0-9.]/g, "");
   if (!ext) ext = isVideo ? ".mp4" : ".jpg";
@@ -675,7 +697,7 @@ app.post("/api/milestone-media", requireAuth, (req, res) => {
   out.on("finish", async () => {
     if (aborted) return;
     try {
-      const media = await normaliseMedia(dest, id, isVideo);
+      const media = await normaliseMedia(dest, id, isVideo, skipTranscode);
       res.json({ ok: true, mediaFile: media.fileName, mediaType: media.mediaType });
     } catch {
       fs.unlink(dest, () => {});
@@ -724,6 +746,7 @@ app.post("/api/upload", requireAuth, (req, res) => {
 
   const isVideo = mime.startsWith("video/");
   const isImage = mime.startsWith("image/");
+  const skipTranscode = String(req.headers["x-pretranscoded"] || "") === "1";
   if (!isVideo && !isImage) {
     return res.status(400).json({ error: "Only images and videos can be shared." });
   }
@@ -753,7 +776,7 @@ app.post("/api/upload", requireAuth, (req, res) => {
     if (aborted) return;
     let media;
     try {
-      media = await normaliseMedia(dest, id, isVideo);
+      media = await normaliseMedia(dest, id, isVideo, skipTranscode);
     } catch {
       fs.unlink(dest, () => {});
       return res.status(422).json({ error: "Couldn't process that file\u2014try a JPG or MP4?" });

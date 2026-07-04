@@ -355,7 +355,11 @@ function renderComments(mount, comments) {
   }).join("");
 
   mount.innerHTML = `
-    <div class="comments">
+    <button type="button" class="comments-toggle" aria-expanded="false">
+      <span class="ct-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></span>
+      <span class="ct-label">${comments.length ? comments.length + (comments.length === 1 ? " comment" : " comments") : "Add a comment"}</span>
+    </button>
+    <div class="comments hidden">
       ${items}
       <div class="comment-form">
         <input class="cf-name" type="text" placeholder="Name" value="${escapeHtml(name)}" maxlength="80" />
@@ -363,6 +367,15 @@ function renderComments(mount, comments) {
         <button class="comment-send" type="button">Post</button>
       </div>
     </div>`;
+
+  const toggle = mount.querySelector(".comments-toggle");
+  const panel = mount.querySelector(".comments");
+  toggle.addEventListener("click", () => {
+    const nowOpen = panel.classList.toggle("hidden") === false;
+    toggle.setAttribute("aria-expanded", String(nowOpen));
+    toggle.classList.toggle("open", nowOpen);
+    if (nowOpen) setTimeout(() => mount.querySelector(".cf-text")?.focus(), 30);
+  });
 
   const nameEl = mount.querySelector(".cf-name");
   const textEl = mount.querySelector(".cf-text");
@@ -379,7 +392,7 @@ function renderComments(mount, comments) {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ targetType: type, targetId: id, author, text }),
       });
-      if (r.ok) { textEl.value = ""; mountComments(mount); }
+      if (r.ok) { textEl.value = ""; await mountComments(mount); mount.querySelector(".comments-toggle")?.click(); }
     } finally { btn.disabled = false; }
   };
   mount.querySelector(".comment-send").addEventListener("click", send);

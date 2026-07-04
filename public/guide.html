@@ -7,63 +7,98 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Averia+Libre:ital,wght@0,300;0,400;0,700;1,400&family=Fragment+Mono:ital@0;1&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="/styles.css?v=42" />
+<link rel="stylesheet" href="/styles.css?v=43" />
 <style>
-  /* ---- Guide: calm, uniform, editorial. One body type throughout. ---- */
-  .g-hero { background: var(--ink); color: var(--cream); padding: 66px clamp(20px,5vw,40px) 52px; text-align: center; position: relative; overflow: hidden; }
-  .g-hero .hero-frame { position: absolute; inset: 14px; border: 1.5px solid rgba(255,254,245,.6); border-radius: 16px; }
-  .g-hero .eye { font-family: var(--mono); text-transform: uppercase; letter-spacing: .14em; font-size: .72rem; opacity: .82; margin: 0 0 12px; position: relative; }
-  .g-hero h1 { font-family: var(--display); font-weight: 700; font-size: clamp(2.1rem,7vw,3.1rem); margin: 0; position: relative; line-height: 1.04; }
+  /* ---- Guide: calm, uniform, editorial. Module cards, one body type. ---- */
+  .g-hero {
+    position: relative; min-height: 80vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: var(--ink); color: var(--cream);
+    padding: 40px clamp(20px,5vw,40px); text-align: center; overflow: hidden;
+  }
+  .g-hero .hero-frame { position: absolute; inset: 16px; border: 1.5px solid rgba(255,254,245,.55); border-radius: 18px; pointer-events: none; }
+  /* Dots pinned to the corners so they never crowd the text */
+  .g-hero .gd-dot { position: absolute; border-radius: 50%; }
+  .g-hero .gd-1 { width: 130px; height: 130px; background: var(--red); top: -46px; left: -40px; }
+  .g-hero .gd-2 { width: 90px; height: 90px; background: var(--yellow); bottom: -30px; right: 40px; }
+  .g-hero .gd-3 { width: 60px; height: 60px; background: var(--blue); bottom: 54px; left: 30px; }
+  .g-hero .eye { font-family: var(--mono); text-transform: uppercase; letter-spacing: .16em; font-size: .74rem; opacity: .85; margin: 0 0 16px; position: relative; }
+  .g-hero h1 { font-family: var(--display); font-weight: 700; font-size: clamp(2.4rem,8vw,3.6rem); margin: 0; position: relative; line-height: 1.05; }
+  .g-hero .sub { font-family: var(--body); font-size: 1.02rem; opacity: .8; margin: 16px 0 0; position: relative; max-width: 30ch; }
 
-  .guide { max-width: 620px; margin: 0 auto; padding: 0 clamp(22px,5vw,36px) 72px; }
+  /* Wider, calmer column */
+  .guide { max-width: 760px; margin: -56px auto 0; padding: 0 clamp(18px,4vw,28px) 80px; position: relative; z-index: 2; }
 
-  /* Amy's note — set apart with a thin rule, same body type */
-  .g-note { margin: 40px 0 8px; padding-left: 20px; border-left: 3px solid var(--yellow); }
-  .g-note p { margin: 0 0 14px; }
-  .g-note .sign { font-family: var(--mono); text-transform: uppercase; letter-spacing: .05em; font-size: .78rem; color: var(--soft); }
+  /* Uniform body copy everywhere */
+  .guide p, .guide li { font-family: var(--body); font-size: 1.04rem; line-height: 1.68; color: var(--ink); }
 
-  /* Uniform body copy everywhere in the guide */
-  .guide p, .guide li { font-family: var(--body); font-size: 1.02rem; line-height: 1.65; color: var(--ink); }
+  /* Each section is its own module card */
+  .g-card {
+    background: var(--white); border-radius: 20px; box-shadow: var(--shadow);
+    padding: 30px clamp(24px,4vw,38px); margin: 0 0 20px;
+  }
+  .g-note-card { border-top: 5px solid var(--yellow); }
+  .g-note-card p { margin: 0 0 14px; }
+  .g-note-card p:last-child { margin-bottom: 0; }
+  .g-note-card .sign { font-family: var(--mono); text-transform: uppercase; letter-spacing: .06em; font-size: .8rem; color: var(--soft); }
 
-  /* Section headings — one consistent style with a small colour dot */
-  .g-sec { margin: 40px 0 0; }
-  .g-sec + .g-sec { border-top: 1px solid var(--line); padding-top: 34px; }
-  .g-sec h2 { font-family: var(--display); font-weight: 700; font-size: 1.4rem; line-height: 1.2; margin: 0 0 12px; display: flex; align-items: baseline; gap: 10px; }
-  .g-sec h2 .dot { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; transform: translateY(-1px); }
-  .d-red { background: var(--red); } .d-blue { background: var(--blue); } .d-yellow { background: var(--yellow); }
-  .g-sec p { margin: 0 0 14px; }
+  /* Section heading: a small eyebrow kicker + title, roomy */
+  .g-kicker { font-family: var(--mono); text-transform: uppercase; letter-spacing: .1em; font-size: .72rem; margin: 0 0 8px; }
+  .g-card.k-blue .g-kicker { color: var(--blue); }
+  .g-card.k-red .g-kicker { color: var(--red); }
+  .g-card.k-amber .g-kicker { color: #c9a227; }
+  .g-card h2 { font-family: var(--display); font-weight: 700; font-size: 1.5rem; line-height: 1.2; margin: 0 0 14px; }
+  .g-card p:last-child { margin-bottom: 0; }
 
-  /* Clean numbered steps — quiet, uniform */
-  .g-steps { list-style: none; counter-reset: s; padding: 0; margin: 4px 0 0; }
-  .g-steps li { counter-increment: s; position: relative; padding-left: 40px; margin-bottom: 18px; }
-  .g-steps li::before { content: counter(s); position: absolute; left: 0; top: -1px; width: 26px; height: 26px; border-radius: 50%; background: var(--cream); border: 1.5px solid var(--ink); font-family: var(--mono); font-size: .82rem; display: inline-flex; align-items: center; justify-content: center; }
+  /* Numbered steps: proper coloured tokens, generous spacing */
+  .g-steps { list-style: none; counter-reset: s; padding: 0; margin: 6px 0 0; }
+  .g-steps li {
+    counter-increment: s; position: relative; padding: 2px 0 0 52px; margin-bottom: 22px;
+    min-height: 34px; display: flex; align-items: center;
+  }
+  .g-steps li:last-child { margin-bottom: 0; }
+  .g-steps li::before {
+    content: counter(s); position: absolute; left: 0; top: 0;
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--red); color: #fff;
+    font-family: var(--display); font-weight: 700; font-size: 1.05rem;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .g-steps li:nth-child(2)::before { background: var(--blue); }
+  .g-steps li:nth-child(3)::before { background: #c9a227; }
 
-  .g-cta-row { margin-top: 44px; text-align: center; }
-  .g-cta { display: inline-block; background: var(--red); color: #fff; font-family: var(--mono); text-transform: uppercase; letter-spacing: .04em; font-size: .8rem; padding: 15px 30px; border-radius: 12px; text-decoration: none; transition: filter .15s, transform .15s; }
+  .g-cta-row { margin-top: 34px; text-align: center; }
+  .g-cta { display: inline-block; background: var(--red); color: #fff; font-family: var(--mono); text-transform: uppercase; letter-spacing: .04em; font-size: .82rem; padding: 16px 32px; border-radius: 12px; text-decoration: none; transition: filter .15s, transform .15s; }
   .g-cta:hover { filter: brightness(1.05); transform: translateY(-1px); }
 </style>
 </head>
 <body>
   <div class="g-hero">
+    <span class="gd-dot gd-1"></span>
+    <span class="gd-dot gd-2"></span>
+    <span class="gd-dot gd-3"></span>
     <div class="hero-frame"></div>
     <p class="eye">For Luke &amp; Dana</p>
     <h1>Leo&rsquo;s little guide</h1>
+    <p class="sub">A quick tour of Leo&rsquo;s page &mdash; just for you two.</p>
   </div>
 
   <div class="guide">
-    <div class="g-note">
+    <div class="g-card g-note-card">
       <p>This is a space for Leo &mdash; but really, it&rsquo;s for you two. As parents, all your love pours into him. This is a small way to pour a little back, and to remind you that even from the other side of the world, you&rsquo;re surrounded by people who love you.</p>
       <p class="sign">&mdash; Amy &#x1F49B;</p>
     </div>
 
-    <div class="g-sec">
-      <h2><span class="dot d-blue"></span> First things first &mdash; this page is private</h2>
+    <div class="g-card k-blue">
+      <p class="g-kicker">First things first</p>
+      <h2>This page is private</h2>
       <p>You two are the first people to land here. None of the family featured have seen it yet (I&rsquo;ve only just demanded they send me something). It isn&rsquo;t public, it won&rsquo;t show up on Google, and it lives behind a locked domain &mdash; and it stays that way until you say otherwise.</p>
     </div>
 
-    <div class="g-sec">
-      <h2><span class="dot d-red"></span> Sharing the page</h2>
-      <p>When you&rsquo;re ready, you decide who comes in &mdash; just the family who&rsquo;ve contributed, or wider family and friends, whoever you like. Whoever gets the link still lands on a password-protected page.</p>
+    <div class="g-card k-red">
+      <p class="g-kicker">Sharing the page</p>
+      <h2>You decide who comes in</h2>
+      <p>When you&rsquo;re ready, it&rsquo;s your call who joins &mdash; just the family who&rsquo;ve contributed, or wider family and friends, whoever you like. Whoever gets the link still lands on a password-protected page.</p>
       <ol class="g-steps">
         <li>Have a look through. For now it&rsquo;s only the people closest to you &mdash; I didn&rsquo;t want to get the whole clan involved just yet.</li>
         <li>When you&rsquo;re happy for the family who&rsquo;ve shared something to come in, just tell me.</li>
@@ -71,9 +106,10 @@
       </ol>
     </div>
 
-    <div class="g-sec">
-      <h2><span class="dot d-yellow"></span> How this page works</h2>
-      <p>Each section has a little &#9432; with a quick instruction &mdash; not because I think you need it, but because you&rsquo;re probably woken every two hours (three, if you&rsquo;re lucky).</p>
+    <div class="g-card k-amber">
+      <p class="g-kicker">How this page works</p>
+      <h2>Look for the little &#9432;</h2>
+      <p>Each section has a small &#9432; with a quick instruction &mdash; not because I think you need it, but because you&rsquo;re probably woken every two hours (three, if you&rsquo;re lucky).</p>
     </div>
 
     <div class="g-cta-row">
