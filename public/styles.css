@@ -217,7 +217,7 @@ a { color: inherit; text-decoration: none; }
 /* big dot straddles the bottom edge: overlaps the inset frame line AND bleeds into the cream module below */
 .hero .dot-a { width: 150px; height: 150px; bottom: -64px; left: 8%; z-index: 6; }
 .hero .dot-b { width: 84px; height: 84px; bottom: 14%; right: 11%; }
-.hero .dot-c { width: 120px; height: 120px; top: 18%; right: -38px; }
+.hero .dot-c { width: 120px; height: 120px; top: 18%; right: -38px; z-index: 6; }
 .hero .dot-d { width: 46px; height: 46px; top: 16%; left: 14%; }
 .hero-name {
   font-family: var(--display);
@@ -287,12 +287,14 @@ a { color: inherit; text-decoration: none; }
 .intro-section { padding-top: 56px; padding-bottom: 56px; }
 .wrap { max-width: 680px; margin: 0 auto; }
 
-/* two-column welcome: text left, composer right (stacks on mobile) */
+/* two-column welcome: text left, composer right (stacks on mobile).
+   Equal height (stretch) so the two cards' bottoms line up; the welcome's rows
+   spread to fill the extra height so there's no dead gap at the bottom. */
 .intro-grid {
   max-width: 980px; margin: 0 auto;
-  display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: stretch;
 }
-.intro-left { align-self: start; display: flex; }
+.intro-left { align-self: stretch; display: flex; }
 .intro-card {
   position: relative; flex: 1;
   display: flex; flex-direction: column;
@@ -315,8 +317,9 @@ a { color: inherit; text-decoration: none; }
 /* Intro lead sits in its own soft-yellow module */
 .intro-lead { margin: 0 0 4px; font-size: .88rem; line-height: 1.5;
   background: var(--yellow); color: var(--ink); border-radius: 12px; padding: 12px 15px; }
-/* Scannable icon rows (replaces the dense bullet list) */
-.intro-points { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+/* Scannable icon rows (replaces the dense bullet list). Grow to fill the card and
+   distribute evenly so the welcome height matches the taller composer with no dead space. */
+.intro-points { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-direction: column; flex: 1; justify-content: space-between; gap: 12px; }
 .intro-points .ip { display: flex; align-items: flex-start; gap: 12px; font-size: .88rem; line-height: 1.45; color: var(--ink); }
 .intro-points .ip-ico { flex-shrink: 0; width: 30px; height: 30px; border-radius: 50%;
   background: var(--cream); display: inline-flex; align-items: center; justify-content: center;
@@ -477,10 +480,13 @@ a { color: inherit; text-decoration: none; }
 
 /* ---------- FEED ---------- */
 .wrap-feed { max-width: 1140px; }
-.feed-list { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-top: 18px; align-items: start; }
+/* grid-auto-rows:1fr + stretch makes EVERY card the same height (tiles are already
+   a fixed height; the body flexes and the "Add a comment" bar anchors to the bottom),
+   so the grid reads as an even matrix instead of ragged columns. */
+.feed-list { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-top: 18px; align-items: stretch; grid-auto-rows: 1fr; }
 @media (max-width: 860px) { .feed-list { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 520px) { .feed-list { grid-template-columns: 1fr; } }
-.card { background: var(--white); border-radius: 18px; overflow: hidden; box-shadow: var(--shadow); display: flex; flex-direction: column; }
+.card { background: var(--white); border-radius: 18px; overflow: hidden; box-shadow: var(--shadow); display: flex; flex-direction: column; height: 100%; }
 .card-media { position: relative; background: var(--ink); display: flex; align-items: center; justify-content: center; height: clamp(230px, 24vw, 300px); overflow: hidden; cursor: pointer; }
 .card-media img, .card-media video { width: 100%; height: 100%; display: block; object-fit: cover; }
 /* Play badge on video tiles */
@@ -533,7 +539,7 @@ a { color: inherit; text-decoration: none; }
 /* With equal-height tiles (stretch), the comment toggle is anchored to the bottom,
    so no caption-height reserve is needed. */
 /* Reserve a consistent caption height so resting media cards in a row line up */
-.card:not(.card-text) .card-caption { min-height: 4.4em; }
+/* (caption min-height reserve no longer needed: uniform card height handles alignment) */
 .card-caption.expanded { -webkit-line-clamp: unset; min-height: 0; }
 /* Clear "read more" affordance when a caption is truncated (clean line-clamp, no half-faded words) */
 .card-caption.clamped { -webkit-line-clamp: 3; }
@@ -901,7 +907,6 @@ a { color: inherit; text-decoration: none; }
 }
 .footer-dot { width: 13px; height: 13px; border-radius: 50%; display: inline-block; margin: 0 3px; }
 .footer p { margin: 14px 0 0; font-family: var(--mono); font-size: .8rem; text-transform: uppercase; letter-spacing: .02em; }
-.footer .footer-sentiment { font-family: var(--display); text-transform: none; letter-spacing: 0; font-size: 1.15rem; line-height: 1.5; color: rgba(255,254,245,.92); max-width: 34ch; margin: 18px auto 0; }
 /* Discreet parent-mode unlock for Luke & Dana */
 .parent-mode-btn {
   margin: 18px auto 0; display: inline-block; background: none; border: none; cursor: pointer;
@@ -1127,6 +1132,20 @@ a { color: inherit; text-decoration: none; }
 .email-on-red .ec-lead { display: none; }
 .email-on-red .ec-row .ec-go { background: var(--yellow); color: var(--ink); }
 .email-on-red .ec-row .ec-go:hover { background: var(--cream); }
+/* Blue footer (homepage) — same treatment as red: hide the chip, yellow button. */
+.email-on-blue { margin-top: 22px; max-width: 520px; }
+.email-on-blue .ec-lead { display: none; }
+.email-on-blue .ec-row .ec-go { background: var(--yellow); color: var(--ink); }
+.email-on-blue .ec-row .ec-go:hover { background: var(--cream); }
+/* Yellow footer (family) — ink text; white fields + a blue button for contrast on yellow. */
+.email-on-yellow { margin-top: 22px; max-width: 520px; }
+.email-on-yellow .ec-lead { display: none; }
+.email-on-yellow .ec-row .field { background: var(--white); border-color: rgba(21,20,20,.14); color: var(--ink); }
+.email-on-yellow .ec-row .ec-go { background: var(--blue); color: var(--cream); }
+.email-on-yellow .ec-row .ec-go:hover { background: var(--ink); }
+.email-on-yellow .ec-done-title, .email-on-yellow .ec-done-sub { color: var(--ink); }
+.email-on-yellow .ec-off { color: rgba(21,20,20,.55); }
+.email-on-yellow .ec-off:hover { color: var(--ink); }
 
 /* Milestone badge on feed cards derived from a milestone */
 .ms-badge {
