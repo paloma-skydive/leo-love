@@ -756,42 +756,57 @@ function emailCardHTML(compact) {
   const email = escapeHtml(localStorage.getItem("leo_email") || "");
   const lead = compact
     ? `<h3 class="ec-title">Want an email when there&rsquo;s news? \u{1F4EC}</h3>
-       <p class="ec-sub">We&rsquo;ll let you know when there&rsquo;s a new photo, video or milestone &mdash; no app, no fuss.</p>`
+       <p class="ec-sub">We&rsquo;ll email you whenever there&rsquo;s a new photo, video or milestone of Leo &mdash; no app, no fuss.</p>`
     : "";
   return `
     <div class="email-card">
-      ${lead}
-      <div class="ec-fields">
-        <input class="field ec-name" type="text" placeholder="Your name" maxlength="80" value="${name}" />
-        <input class="field ec-email" type="email" placeholder="you@email.com" maxlength="160" value="${email}" />
+      <div class="ec-form">
+        ${lead}
+        <div class="ec-fields">
+          <input class="field ec-name" type="text" placeholder="Your name" maxlength="80" value="${name}" />
+          <input class="field ec-email" type="email" placeholder="you@email.com" maxlength="160" value="${email}" />
+        </div>
+        <button type="button" class="btn btn-red full ec-go">Keep me posted \u{1F49B}</button>
+        <div class="ec-status post-status"></div>
       </div>
-      <p class="ec-freq-label">How often?</p>
-      <div class="ec-freq">
-        <button type="button" class="ec-opt active" data-freq="instant"><b>Every new post</b><span>the moment it&rsquo;s shared</span></button>
-        <button type="button" class="ec-opt" data-freq="daily"><b>Once a day</b><span>a little round-up</span></button>
+      <div class="ec-done hidden">
+        <div class="ec-done-tick" aria-hidden="true">\u{1F49B}</div>
+        <h3 class="ec-done-title">You&rsquo;re all set!</h3>
+        <p class="ec-done-sub"></p>
+        <button type="button" class="ec-off">Turn these emails off</button>
       </div>
-      <button type="button" class="btn btn-red full ec-go">Keep me posted \u{1F49B}</button>
-      <div class="ec-status post-status"></div>
-      <button type="button" class="ec-off">Turn these emails off</button>
     </div>`;
 }
 
 function wireEmailCard(card) {
-  let freq = "instant";
-  card.querySelectorAll(".ec-opt").forEach((b) =>
-    b.addEventListener("click", () => {
-      freq = b.dataset.freq;
-      card.querySelectorAll(".ec-opt").forEach((x) => x.classList.toggle("active", x === b));
-    })
-  );
+  const formEl = card.querySelector(".ec-form");
+  const doneEl = card.querySelector(".ec-done");
+  const doneSub = card.querySelector(".ec-done-sub");
   const nameEl = card.querySelector(".ec-name");
   const emailEl = card.querySelector(".ec-email");
   const status = card.querySelector(".ec-status");
 
+  function showDone(msg) {
+    doneSub.innerHTML = msg;
+    formEl.classList.add("hidden");
+    doneEl.classList.remove("hidden");
+  }
+  function showForm() {
+    doneEl.classList.add("hidden");
+    formEl.classList.remove("hidden");
+    status.textContent = "";
+    status.className = "ec-status post-status";
+  }
+
+  // If this browser has already signed up, greet them with the confirmation.
+  if (localStorage.getItem("leo_email_on") === "1" && localStorage.getItem("leo_email")) {
+    showDone("We&rsquo;ll email you whenever there&rsquo;s something new about Leo. \u{1F49B}");
+  }
+
   async function submit(offMode) {
     const email = (emailEl.value || "").trim();
     const name = (nameEl.value || "").trim();
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (!offMode && (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))) {
       status.className = "ec-status post-status err";
       status.textContent = "Pop in an email address first \u{1F60A}";
       return;
@@ -799,10 +814,11 @@ function wireEmailCard(card) {
     status.className = "ec-status post-status";
     status.textContent = offMode ? "Turning them off\u2026" : "Signing you up\u2026";
     try {
+      const useEmail = offMode ? (localStorage.getItem("leo_email") || email) : email;
       const r = await fetch("/api/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, name, freq: offMode ? "off" : freq }),
+        body: JSON.stringify({ email: useEmail, name, freq: offMode ? "off" : "instant" }),
       });
       const d = await r.json().catch(() => ({}));
       if (!r.ok) {
@@ -810,18 +826,21 @@ function wireEmailCard(card) {
         status.textContent = d.error || "That didn\u2019t work\u2014try again?";
         return;
       }
-      localStorage.setItem("leo_email", email);
-      if (name) localStorage.setItem("leo_email_name", name);
-      status.className = "ec-status post-status ok";
       if (offMode) {
+        localStorage.setItem("leo_email_on", "0");
+        showForm();
+        status.className = "ec-status post-status ok";
         status.textContent = "Done \u2014 you won\u2019t get any more emails.";
-      } else if (d.delivering === false) {
-        status.textContent = "You\u2019re on the list \u{1F49B} Emails switch on very soon.";
-      } else {
-        status.textContent = freq === "daily"
-          ? "All set \u2014 a daily note about Leo is on its way \u{1F49B}"
-          : "All set \u2014 we\u2019ll email you when there\u2019s news \u{1F49B}";
+        return;
       }
+      localStorage.setItem("leo_email", email);
+      localStorage.setItem("leo_email_on", "1");
+      if (name) localStorage.setItem("leo_email_name", name);
+      const first = name ? name.split(/\s+/)[0] : "";
+      showDone(
+        (first ? `Thanks, ${escapeHtml(first)} \u2014 ` : "") +
+        `we&rsquo;ll email you whenever there&rsquo;s something new about Leo. \u{1F49B}`
+      );
     } catch {
       status.className = "ec-status post-status err";
       status.textContent = "Connection hiccup\u2014try again.";

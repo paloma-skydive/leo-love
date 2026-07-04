@@ -693,3 +693,20 @@ a { color: inherit; text-decoration: none; }
   text-decoration: underline; text-underline-offset: 3px;
 }
 .ec-off:hover { color: var(--red); }
+
+/* Confirmation state after signup */
+.ec-done { text-align: center; padding: 8px 4px 4px; }
+.ec-done-tick {
+  font-size: 2.2rem; line-height: 1;
+  animation: ecPop .4s cubic-bezier(.2,1.4,.5,1) both;
+}
+@keyframes ecPop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+.ec-done-title {
+  font-family: var(--display); font-weight: 700; font-size: 1.4rem;
+  margin: 10px 0 6px;
+}
+.ec-done-sub {
+  margin: 0 auto; max-width: 380px; line-height: 1.55;
+  color: #555; font-size: 1rem;
+}
+.ec-done .ec-off { margin-top: 18px; }

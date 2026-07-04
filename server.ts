@@ -221,10 +221,9 @@ function saveFamily(list: any[]) {
 type Subscriber = {
   email: string;
   name?: string;
-  freq: "instant" | "daily" | "off";
+  freq: "instant" | "off"; // "instant" = email on every update; "off" = unsubscribed
   token: string; // for one-click unsubscribe links
   createdAt: string;
-  lastDigestDay?: string; // yyyy-mm-dd (Cayman) of last digest sent
 };
 
 function loadSubscribers(): Subscriber[] {
@@ -298,7 +297,7 @@ function btn(href: string, label: string) {
 // ---- Notify subscribers of a new feed post ----
 async function notifyNewPost(post: any) {
   try {
-    const subs = loadSubscribers().filter((s) => s.freq === "instant");
+    const subs = loadSubscribers().filter((s) => s.freq !== "off");
     if (!subs.length) return;
     const who = escapeText(post.author || "Someone in the family");
     const cap = post.caption ? `<p style="font-size:15px;line-height:1.6;color:#333;margin:0 0 18px;">&ldquo;${escapeText(post.caption)}&rdquo;</p>` : "";
@@ -318,7 +317,7 @@ async function notifyNewPost(post: any) {
 // ---- Notify subscribers of a new milestone ----
 async function notifyNewMilestone(m: any) {
   try {
-    const subs = loadSubscribers().filter((s) => s.freq === "instant");
+    const subs = loadSubscribers().filter((s) => s.freq !== "off");
     if (!subs.length) return;
     const title = escapeText(m.title || "A new milestone");
     const emoji = m.emoji ? escapeText(m.emoji) + " " : "";
@@ -508,43 +507,42 @@ app.get("/api/subscribe/me", requireAuth, (req, res) => {
   const email = normEmail(String(req.query.email || ""));
   if (!email) return res.json({ subscriber: null });
   const s = loadSubscribers().find((x) => x.email === email) || null;
-  res.json({ subscriber: s ? { email: s.email, name: s.name || "", freq: s.freq } : null });
+  res.json({ subscriber: s ? { email: s.email, name: s.name || "", on: s.freq !== "off" } : null });
 });
 
-// Subscribe / change frequency. Family are already behind the site password, so
-// entering their own address here is the opt-in. A friendly welcome email doubles
-// as confirmation the address works.
+// Subscribe / unsubscribe. Family are already behind the site password, so
+// entering their own address here is the opt-in. Subscribers get an email on
+// every update. A friendly welcome email doubles as confirmation the address works.
 app.post("/api/subscribe", requireAuth, async (req, res) => {
   const b = req.body || {};
   const email = normEmail(b.email);
   const name = String(b.name || "").trim().slice(0, 80);
-  let freq = String(b.freq || "instant").trim();
-  if (!["instant", "daily", "off"].includes(freq)) freq = "instant";
+  const off = String(b.freq || "").trim() === "off";
+  const freq: "instant" | "off" = off ? "off" : "instant";
   if (!validEmail(email)) return res.status(400).json({ error: "That email doesn\u2019t look quite right." });
 
   const list = loadSubscribers();
   let s = list.find((x) => x.email === email);
-  const isNew = !s;
+  const wasOn = s && s.freq !== "off";
   if (!s) {
-    s = { email, name, freq: freq as any, token: crypto.randomBytes(16).toString("hex"), createdAt: new Date().toISOString() };
+    s = { email, name, freq, token: crypto.randomBytes(16).toString("hex"), createdAt: new Date().toISOString() };
     list.push(s);
   } else {
-    s.freq = freq as any;
+    s.freq = freq;
     if (name) s.name = name;
     if (!s.token) s.token = crypto.randomBytes(16).toString("hex");
   }
   saveSubscribers(list);
 
-  // Send a warm welcome/confirmation on first sign-up (best effort).
-  if (isNew && freq !== "off") {
+  // Send a warm welcome/confirmation the first time they turn emails on.
+  if (!off && !wasOn) {
     const hi = name ? `Hi ${escapeText(name)},` : "Hello!";
-    const when = freq === "daily" ? "a once-a-day summary" : "an email each time there&rsquo;s something new";
     const inner = `<p style="font-size:18px;font-weight:800;margin:0 0 10px;">You&rsquo;re all set \u{1F49B}</p>
-      <p style="font-size:15px;line-height:1.6;color:#333;margin:0 0 16px;">${hi} you&rsquo;ll now get ${when} about Leo &mdash; new photos, videos and little milestones as he grows stronger.</p>
+      <p style="font-size:15px;line-height:1.6;color:#333;margin:0 0 16px;">${hi} you&rsquo;ll now get an email whenever there&rsquo;s something new about Leo &mdash; new photos, videos and little milestones as he grows stronger.</p>
       <div style="margin:6px 0 4px;">${btn(SITE_URL, "Open Leo&rsquo;s page \u2192")}</div>`;
-    sendEmail(email, "You&rsquo;re signed up for Leo updates \u{1F49B}", emailShell(inner, unsubUrlFor(s)));
+    sendEmail(email, "You\u2019re signed up for Leo updates \u{1F49B}", emailShell(inner, unsubUrlFor(s)));
   }
-  res.json({ ok: true, freq: s.freq, delivering: emailReady() });
+  res.json({ ok: true, on: !off });
 });
 
 // One-click unsubscribe from an email link (public, no auth needed).
@@ -798,66 +796,5 @@ app.get("*", (_req, res) => {
   res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   res.sendFile(path.join(import.meta.dirname, "public", "index.html"));
 });
-
-// ---- Daily digest ----
-// Once a day, after 7pm Cayman time, email "daily" subscribers a summary of
-// everything posted that day. Deduped per subscriber by the Cayman day key so
-// each person gets at most one digest per day even though we check hourly.
-function caymanParts(d = new Date()) {
-  const fmt = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "America/Cayman", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", hour12: false,
-  });
-  const p: Record<string, string> = {};
-  for (const part of fmt.formatToParts(d)) p[part.type] = part.value;
-  return { day: `${p.year}-${p.month}-${p.day}`, hour: parseInt(p.hour, 10) };
-}
-
-async function runDailyDigest() {
-  try {
-    const { day, hour } = caymanParts();
-    if (hour < 19) return; // wait until evening Cayman time
-    const subs = loadSubscribers().filter((s) => s.freq === "daily" && s.lastDigestDay !== day);
-    if (!subs.length) return;
-
-    // Gather today's (Cayman day) posts + milestones.
-    const isToday = (iso: string) => {
-      try { return caymanParts(new Date(iso)).day === day; } catch { return false; }
-    };
-    const posts = (await readPosts()).filter((p) => isToday(p.createdAt));
-    const ms = loadMilestones().filter((m) => isToday(m.createdAt || m.sortISO || ""));
-    if (!posts.length && !ms.length) {
-      // Nothing happened today — mark as seen so we don't re-check all evening.
-      const all = loadSubscribers();
-      for (const s of all) if (s.freq === "daily") s.lastDigestDay = day;
-      saveSubscribers(all);
-      return;
-    }
-
-    let items = "";
-    for (const m of ms) {
-      items += `<div style="padding:12px 0;border-bottom:1px solid #f0f0f0;"><span style="font-size:12px;color:#356CC0;font-weight:700;text-transform:uppercase;letter-spacing:.05em;">Milestone</span><br /><b style="font-size:15px;">${m.emoji ? escapeText(m.emoji) + " " : ""}${escapeText(m.title || "")}</b>${m.body ? `<br /><span style="font-size:14px;color:#555;">${escapeText(m.body)}</span>` : ""}</div>`;
-    }
-    for (const p of posts) {
-      const w = escapeText(p.author || "Someone");
-      const mw = p.mediaType === "video" ? "shared a video" : "shared a photo";
-      items += `<div style="padding:12px 0;border-bottom:1px solid #f0f0f0;"><b style="font-size:15px;">${w}</b> <span style="font-size:14px;color:#555;">${mw}${p.caption ? `: &ldquo;${escapeText(p.caption)}&rdquo;` : ""}</span></div>`;
-    }
-    const count = posts.length + ms.length;
-    const all = loadSubscribers();
-    for (const s of subs) {
-      const inner = `<p style="font-size:18px;font-weight:800;margin:0 0 6px;">Today with Leo \u{1F49B}</p>
-        <p style="font-size:14px;color:#777;margin:0 0 14px;">${count} new ${count === 1 ? "thing" : "things"} on his page today.</p>
-        ${items}
-        <div style="margin:18px 0 4px;">${btn(SITE_URL, "See it all \u2192")}</div>`;
-      const ok = await sendEmail(s.email, `Today with Leo \u{1F49B} (${count} new)`, emailShell(inner, unsubUrlFor(s)));
-      const rec = all.find((x) => x.email === s.email);
-      if (rec && ok) rec.lastDigestDay = day;
-    }
-    saveSubscribers(all);
-  } catch (e: any) {
-    console.error("runDailyDigest error:", e?.message);
-  }
-}
-setInterval(runDailyDigest, 30 * 60 * 1000); // check every 30 min
 
 app.listen(PORT, () => console.log(`Leo app on :${PORT}`));
