@@ -487,7 +487,7 @@ a { color: inherit; text-decoration: none; }
 @media (max-width: 860px) { .feed-list { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 520px) { .feed-list { grid-template-columns: 1fr; } }
 .card { background: var(--white); border-radius: 18px; overflow: hidden; box-shadow: var(--shadow); display: flex; flex-direction: column; height: 100%; }
-.card-media { position: relative; background: var(--ink); display: flex; align-items: center; justify-content: center; height: clamp(230px, 24vw, 300px); overflow: hidden; cursor: pointer; }
+.card-media { position: relative; background: var(--ink); display: flex; align-items: center; justify-content: center; height: clamp(180px, 18vw, 230px); overflow: hidden; cursor: pointer; }
 .card-media img, .card-media video { width: 100%; height: 100%; display: block; object-fit: cover; }
 /* Play badge on video tiles */
 .play-badge {
@@ -502,6 +502,11 @@ a { color: inherit; text-decoration: none; }
 /* Text-only cards get a brand-coloured tile (same fixed height as a photo/video
    tile) so every card lines up and the grid stays even. */
 .card-tile { flex-direction: column; text-align: center; padding: 22px 20px; }
+/* Text-only tiles fill the card's height (the grid stretches every card equal),
+   so the coloured panel drags down and the white body shrinks to just the
+   name row + comment bar — no big white gap under the text. */
+.card:has(.card-tile) .card-media.card-tile { flex: 1 1 auto; height: auto; min-height: clamp(180px, 18vw, 230px); }
+.card:has(.card-tile) .card-body { flex: 0 0 auto; }
 .card-tile .tile-inner { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px; max-height: 100%; overflow: hidden; }
 .card-tile .tile-emoji { font-size: 2.1rem; line-height: 1; }
 .card-tile .tile-title { font-family: var(--display); font-weight: 700; font-size: 1.16rem; line-height: 1.25; margin: 0;
