@@ -489,17 +489,21 @@ a { color: inherit; text-decoration: none; }
 
 /* ---------- FEED ---------- */
 .wrap-feed { max-width: 1140px; }
-/* grid-auto-rows:1fr + stretch makes EVERY card the same height (tiles are already
-   a fixed height; the body flexes and the "Add a comment" bar anchors to the bottom),
-   so the grid reads as an even matrix instead of ragged columns. */
-.feed-list { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-top: 18px; align-items: stretch; grid-auto-rows: 1fr; }
+/* ---------------------------------------------------------------------------
+   FEED GRID INVARIANT (see skills/leo-feed-grid before changing any of this):
+   - Every card in a row is the SAME height (grid-auto-rows:1fr + stretch + .card height:100%).
+   - The MEDIA / TILE block is a FIXED height on EVERY card (photo, video, colour tile) via
+     --tile-h. NEVER flex-grow it — growing the media is what stretched videos and colour
+     tiles unevenly (the recurring whack-a-mole).
+   - The BODY (.card-body) is the flexible part: flex:1 absorbs leftover row height; the
+     comment bar (.comments-mount margin-top:auto) is pinned to the bottom. Any slack shows
+     as a little white space under the caption — never a taller image or longer colour block.
+   --------------------------------------------------------------------------- */
+.feed-list { --tile-h: clamp(180px, 18vw, 230px); display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-top: 18px; align-items: stretch; grid-auto-rows: 1fr; }
 @media (max-width: 860px) { .feed-list { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 520px) { .feed-list { grid-template-columns: 1fr; } }
 .card { background: var(--white); border-radius: 18px; overflow: hidden; box-shadow: var(--shadow); display: flex; flex-direction: column; height: 100%; }
-.card-media { position: relative; background: var(--ink); display: flex; align-items: center; justify-content: center; flex: 1 1 auto; height: auto; min-height: clamp(180px, 18vw, 230px); overflow: hidden; cursor: pointer; }
-/* The media (photo/video) grows to fill the card, so its viewing area — and the
-   play button — sits at the same level as the text-only milestone tiles in the row.
-   The body (name + caption) hugs its content at the bottom. */
+.card-media { position: relative; background: var(--ink); display: flex; align-items: center; justify-content: center; flex: 0 0 auto; height: var(--tile-h); overflow: hidden; cursor: pointer; }
 .card-media img, .card-media video { width: 100%; height: 100%; display: block; object-fit: cover; }
 /* Play badge on video tiles */
 .play-badge {
@@ -511,14 +515,10 @@ a { color: inherit; text-decoration: none; }
   transition: background .15s, transform .15s;
 }
 .card-media:hover .play-badge { background: var(--red); transform: translate(-50%,-50%) scale(1.06); }
-/* Text-only cards get a brand-coloured tile (same fixed height as a photo/video
-   tile) so every card lines up and the grid stays even. */
+/* Text-only cards get a brand-coloured tile at the SAME fixed height (--tile-h) as a
+   photo/video tile, so its content centres at the same level as a video's play button
+   and the grid stays even. Do NOT flex-grow it. */
 .card-tile { flex-direction: column; text-align: center; padding: 22px 20px; }
-/* Text-only tiles fill the card's height (the grid stretches every card equal),
-   so the coloured panel drags down and the white body shrinks to just the
-   name row + comment bar — no big white gap under the text. */
-.card:has(.card-tile) .card-media.card-tile { flex: 1 1 auto; height: auto; min-height: clamp(180px, 18vw, 230px); }
-.card:has(.card-tile) .card-body { flex: 0 0 auto; }
 .card-tile .tile-inner { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px; max-height: 100%; overflow: hidden; }
 .card-tile .tile-emoji { font-size: 2.1rem; line-height: 1; }
 .card-tile .tile-title { font-family: var(--display); font-weight: 700; font-size: 1.16rem; line-height: 1.25; margin: 0;
@@ -531,7 +531,7 @@ a { color: inherit; text-decoration: none; }
 .card-tile-blue { background: var(--blue); color: var(--cream); }
 .card-tile-yellow { background: var(--yellow); color: var(--ink); }
 .card-tile .ms-badge { background: rgba(255,254,245,.9); color: var(--ink); }
-.card-body { padding: 16px 18px 18px; display: flex; flex-direction: column; flex: 0 0 auto; }
+.card-body { padding: 16px 18px 18px; display: flex; flex-direction: column; flex: 1; }
 /* Milestone feed card: title as a small header above the story */
 .card-ms-title { font-family: var(--display); font-weight: 700; font-size: 1.08rem; line-height: 1.3; margin: 0 0 2px; color: var(--ink); }
 /* Milestone feed cards: keep the story tight under its title (Amy: remove the gap) */

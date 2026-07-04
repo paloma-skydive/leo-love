@@ -7,71 +7,53 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Averia+Libre:ital,wght@0,300;0,400;0,700;1,400&family=Fragment+Mono:ital@0;1&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="/styles.css?v=70" />
+<link rel="stylesheet" href="/styles.css?v=81" />
 <style>
-  /* ---- Guide: calm, uniform, editorial. Module cards, one body type. ---- */
-  /* Hero reuses the shared .hero / .hero-frame / .hero-dots / .hero-name /
-     .eyebrow classes from styles.css so the typeface + dots match the main
-     site exactly; we only recolour it ink here. */
+  /* ---- Guide: calm, uniform, editorial. Aligned to the main page's type scale. ---- */
   .hero-guide-page { background: var(--ink); color: var(--cream); }
   .hero-guide-page .hero-frame { border-color: rgba(255,254,245,.85); }
   /* Keep the accent dots inside the hero so they don't bleed onto the note card below. */
   .hero-guide-page .dot-a { bottom: 12%; left: 6%; width: 120px; height: 120px; }
   .hero-guide-page .dot-c { z-index: 2; }
-  .hero-guide-page .sub { font-family: var(--body); font-size: 1.05rem; opacity: .82; margin: 14px auto 0; max-width: 34ch; position: relative; z-index: 5; }
+  /* Sub sits on one line (no max-width wrap). */
+  .hero-guide-page .sub { font-family: var(--body); font-size: .95rem; opacity: .82; margin: 12px auto 0; position: relative; z-index: 5; }
 
   /* Wider, calmer column */
-  .guide { max-width: 760px; margin: -56px auto 0; padding: 0 clamp(18px,4vw,28px) 80px; position: relative; z-index: 2; }
+  .guide { max-width: 720px; margin: -56px auto 0; padding: 0 clamp(18px,4vw,28px) 80px; position: relative; z-index: 2; }
 
-  /* Uniform body copy everywhere */
-  .guide p, .guide li { font-family: var(--body); font-size: 1.04rem; line-height: 1.68; color: var(--ink); }
+  /* Uniform body copy — same size as the main page body (.92rem) */
+  .guide p, .guide li { font-family: var(--body); font-size: .92rem; line-height: 1.55; color: var(--ink); }
 
   /* Each section is its own module card */
   .g-card {
     background: var(--white); border-radius: 20px; box-shadow: var(--shadow);
-    padding: 30px clamp(24px,4vw,38px); margin: 0 0 20px;
+    padding: 26px clamp(22px,4vw,32px); margin: 0 0 18px;
   }
   .g-note-card { border-top: 5px solid var(--yellow); }
-  .g-note-card p { margin: 0 0 14px; }
+  .g-note-card p { margin: 0 0 12px; }
   .g-note-card p:last-child { margin-bottom: 0; }
-  .g-note-card .sign { font-family: var(--mono); text-transform: uppercase; letter-spacing: .06em; font-size: .8rem; color: var(--soft); }
+  .guide .g-note-card .sign { font-family: var(--mono); text-transform: uppercase; letter-spacing: .06em; font-size: .74rem; color: var(--soft); }
 
-  /* Section heading: a small eyebrow kicker + title, roomy */
-  .g-kicker { font-family: var(--mono); text-transform: uppercase; letter-spacing: .1em; font-size: .72rem; margin: 0 0 8px; }
+  /* Section heading: mono eyebrow kicker + Averia title (matches main page eyebrows + headers).
+     Prefixed with .guide so it wins over the .guide p base rule (specificity). */
+  .guide .g-kicker { font-family: var(--mono); text-transform: uppercase; letter-spacing: .1em; font-size: .68rem; line-height: 1.4; margin: 0 0 8px; }
   .g-card.k-blue .g-kicker { color: var(--blue); }
   .g-card.k-red .g-kicker { color: var(--red); }
   .g-card.k-amber .g-kicker { color: #c9a227; }
-  .g-card h2 { font-family: var(--display); font-weight: 700; font-size: 1.5rem; line-height: 1.2; margin: 0 0 14px; }
-  .g-card h2 .g-emoji { font-family: var(--body); margin-right: .35em; }
+  .g-card h2 { font-family: var(--display); font-weight: 700; font-size: 1.3rem; line-height: 1.2; margin: 0 0 12px; }
+  .g-card h2 .g-emoji { font-family: var(--body); margin-right: .3em; }
   .g-card p:last-child { margin-bottom: 0; }
 
-  /* Bullet list inside a section (matches body type, roomy) */
-  .g-list { list-style: none; padding: 0; margin: 14px 0 0; }
-  .g-list li { position: relative; padding: 0 0 0 26px; margin-bottom: 16px; }
+  /* Bullet list inside a section */
+  .g-list { list-style: none; padding: 0; margin: 12px 0 0; }
+  .g-list li { position: relative; padding: 0 0 0 24px; margin-bottom: 12px; }
   .g-list li:last-child { margin-bottom: 0; }
-  .g-list li::before { content: ""; position: absolute; left: 4px; top: .62em; width: 8px; height: 8px; border-radius: 50%; background: var(--red); }
+  .g-list li::before { content: ""; position: absolute; left: 3px; top: .6em; width: 7px; height: 7px; border-radius: 50%; background: var(--red); }
   .g-card.k-blue .g-list li::before { background: var(--blue); }
   .g-card.k-amber .g-list li::before { background: #c9a227; }
 
-  /* Numbered steps: proper coloured tokens, generous spacing */
-  .g-steps { list-style: none; counter-reset: s; padding: 0; margin: 6px 0 0; }
-  .g-steps li {
-    counter-increment: s; position: relative; padding: 2px 0 0 52px; margin-bottom: 22px;
-    min-height: 34px; display: flex; align-items: center;
-  }
-  .g-steps li:last-child { margin-bottom: 0; }
-  .g-steps li::before {
-    content: counter(s); position: absolute; left: 0; top: 0;
-    width: 34px; height: 34px; border-radius: 50%;
-    background: var(--red); color: #fff;
-    font-family: var(--display); font-weight: 700; font-size: 1.05rem;
-    display: inline-flex; align-items: center; justify-content: center;
-  }
-  .g-steps li:nth-child(2)::before { background: var(--blue); }
-  .g-steps li:nth-child(3)::before { background: #c9a227; }
-
-  .g-cta-row { margin-top: 34px; text-align: center; }
-  .g-cta { display: inline-block; background: var(--red); color: #fff; font-family: var(--mono); text-transform: uppercase; letter-spacing: .04em; font-size: .82rem; padding: 16px 32px; border-radius: 12px; text-decoration: none; transition: filter .15s, transform .15s; }
+  .g-cta-row { margin-top: 30px; text-align: center; }
+  .g-cta { display: inline-block; background: var(--red); color: #fff; font-family: var(--mono); text-transform: uppercase; letter-spacing: .04em; font-size: .78rem; padding: 15px 30px; border-radius: 12px; text-decoration: none; transition: filter .15s, transform .15s; }
   .g-cta:hover { filter: brightness(1.05); transform: translateY(-1px); }
 </style>
 </head>
@@ -92,23 +74,31 @@
 
   <div class="guide">
     <div class="g-card g-note-card">
-      <p>This is a space for Leo&mdash;but really, it&rsquo;s for you two. As parents, all your love will pour into your child. This is a small way to pour a little back.</p>
+      <p>This is a space dedicated to Leo&mdash;but really, it&rsquo;s for you two. I know that both of you will be pouring all of your love into that little boy. I hope this gives you a little back.</p>
       <p class="sign">&mdash;Amy &#x1F49B;</p>
     </div>
 
     <div class="g-card k-blue">
       <p class="g-kicker">First things first</p>
       <h2><span class="g-emoji">&#x1F512;</span>This page is private</h2>
-      <p>You two are the first people to land here. None of the family featured have seen it yet (I just demanded they send me something). It isn&rsquo;t public, it won&rsquo;t show up on Google, and it lives behind a locked domain.</p>
+      <ul class="g-list">
+        <li>You two are the first people to land here.</li>
+        <li>None of the family featured have seen it yet (I just demanded they send me something).</li>
+        <li>It isn&rsquo;t public, it won&rsquo;t show up on Google, and it lives behind a locked domain.</li>
+      </ul>
     </div>
 
     <div class="g-card k-red">
       <p class="g-kicker">Sharing the page</p>
       <h2><span class="g-emoji">&#x1F981;</span>You decide who comes in</h2>
-      <p>When you&rsquo;re ready, it&rsquo;s your call who joins&mdash;just the family who&rsquo;ve contributed, wider family and friends, whoever you like. Whoever gets the link still lands on (another) password-protected page. It&rsquo;s Fort Knox up in here.</p>
       <ul class="g-list">
-        <li>Have a look through. The people you see are the only people who I asked to contribute (I didn&rsquo;t want to get every single family member involved without you seeing it, so was only in touch with the people you two are closest to).</li>
-        <li>When you&rsquo;re happy for the family who&rsquo;ve shared something to come in, let me know! I&rsquo;ll flick a few switches and send them a family password. They&rsquo;ll land straight on the family password page, then over to the main feed. This guide stays hidden, just for you two.</li>
+        <li>When you&rsquo;re ready, it&rsquo;s your call who you share it with.</li>
+        <li>This might just be the family who&rsquo;ve contributed, or wider family and friends as well&mdash;this is up to you.</li>
+        <li>Whoever receives the link will land on a family password-protected page. It&rsquo;s Fort Knox up in here.</li>
+        <li>The people you see here are the only people who I&rsquo;ve asked to contribute. (I didn&rsquo;t want to get every single family member involved before you&rsquo;d seen it, so was only in touch with the people you two are closest to).</li>
+        <li>If you&rsquo;re happy for the family who&rsquo;ve shared something to come in, let me know! I&rsquo;ll flick a few switches, send them the link + the family code.</li>
+        <li>The link will land them on a locked page, then take over to the main feed.</li>
+        <li>This guide stays hidden, just for you two.</li>
       </ul>
     </div>
 
@@ -116,9 +106,10 @@
       <p class="g-kicker">Final housekeeping</p>
       <h2><span class="g-emoji">&#x1F511;</span>Parent Mode</h2>
       <ul class="g-list">
-        <li>You have full control over anything that&rsquo;s posted on this page&mdash;whether it&rsquo;s your own post you want to change, or someone else&rsquo;s post you want to edit (including the milestones I&rsquo;ve already added).</li>
-        <li>Scroll to the bottom of the homepage and you&rsquo;ll see &#x1F511; Parent Mode. Click to unlock it, drop in your password, and edit as you please.</li>
-        <li>If there are any site bugs that need fixing, or you want a new feature added, I&rsquo;m at your service. I&rsquo;ll also let the family know to email me if they have any issues.</li>
+        <li>You have full editing control over what&rsquo;s posted on this page&mdash;whether it&rsquo;s your own post or someone else&rsquo;s (including the milestones I&rsquo;ve already added).</li>
+        <li>How to do this: scroll to the bottom of the homepage and you&rsquo;ll see &#x1F511; Parent Mode.</li>
+        <li>Click to unlock it, drop in your password, and edit as you please.</li>
+        <li>If there are any site bugs that need fixing, or you want a new feature added, I&rsquo;m at your service.</li>
       </ul>
     </div>
 
