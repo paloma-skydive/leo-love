@@ -6,8 +6,13 @@ let IS_PARENT = false;
 let APPROVAL_MODE = false;
 let ALL_POSTS = [];
 let FAMILY = [];
+let MILESTONES = [];
 let feedFilter = null;
 let feedSort = "newest";
+
+// Pencil icon for the parent-only edit control on posts/milestones.
+const PENCIL_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
+const MONTHS_FULL = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 let shuffleOrder = [];
 let renderedFeedSig = null;   // signature of the posts currently drawn in the DOM
 let pendingFeedRefresh = false; // a refresh is waiting for a playing video to stop
@@ -316,6 +321,10 @@ function renderFeed() {
     const mediaBlock = hasMedia
       ? `<div class="card-media" role="button" tabindex="0" data-lightbox="${src}" data-type="${p.mediaType}" data-caption="${escapeHtml(p.caption || "")}" data-author="${escapeHtml(p.author || "Someone")}"${msLbAttrs}>${media}${badge}${countBadge}</div>`
       : "";
+    // Parents (Luke & Dana) get a small pencil to fix their own posts/milestones.
+    const editBtn = IS_PARENT
+      ? `<button type="button" class="edit-btn" data-edit-kind="${p.fromMilestone ? "milestone" : "post"}" data-edit-id="${escapeHtml(p.fromMilestone ? p.milestoneId : p.id)}" aria-label="Edit" title="Edit">${PENCIL_SVG}</button>`
+      : "";
     card.innerHTML = `
       ${mediaBlock}
       <div class="card-body">
@@ -325,6 +334,7 @@ function renderFeed() {
             <div class="card-who">${escapeHtml(p.author || "Someone")}</div>
             <div class="card-when">${timeAgo(p.createdAt)}${where}</div>
           </div>
+          ${editBtn}
         </div>
         ${cap}
         <div class="comments-mount" data-type="${cType}" data-id="${escapeHtml(cId)}"></div>
@@ -479,6 +489,7 @@ async function loadMilestones() {
   const r = await fetch("/api/milestones");
   if (!r.ok) return;
   const { milestones } = await r.json();
+  MILESTONES = milestones || [];
   const el = $("timeline-list");
   el.innerHTML = "";
   for (const m of milestones) {
@@ -503,8 +514,12 @@ async function loadMilestones() {
       }).join("");
       media = `<div class="ms-gallery" data-count="${items.length}">${tiles}</div>`;
     }
+    const editBtn = IS_PARENT
+      ? `<button type="button" class="edit-btn" data-edit-kind="milestone" data-edit-id="${escapeHtml(m.id)}" aria-label="Edit" title="Edit">${PENCIL_SVG}</button>`
+      : "";
     d.innerHTML = `
       <div class="ms-card">
+        ${editBtn}
         <div class="ms-date">${escapeHtml(m.dateText || "")}</div>
         <div class="ms-title">${m.emoji ? `<span class="ms-emoji">${escapeHtml(m.emoji)}</span> ` : ""}${escapeHtml(m.title || "")}</div>
         ${m.body ? `<p class="ms-body">${escapeHtml(m.body)}</p>` : ""}
@@ -892,6 +907,7 @@ function startApp() {
   setupFilterArrows();
   setupInfoTips();
   setupLightbox();
+  setupEditModal();
   loadFamily();
   loadFeed();
   renderWorldClocks(); tickAge();
@@ -1338,6 +1354,175 @@ function closeLightbox() {
   lb.setAttribute("aria-hidden", "true");
   document.body.style.overflow = "";
 }
+// ---------- Edit a post / milestone (parents only: Luke & Dana) ----------
+let editState = null; // { kind: "post" | "milestone", id }
+
+function showEditError(msg) {
+  const e = $("em-error");
+  e.textContent = msg; e.classList.remove("hidden");
+}
+function setEditDate(iso) {
+  const input = $("em-date");
+  input.value = iso || "";
+  const valEl = $("edit-modal").querySelector(".datepick .dp-val");
+  if (valEl) {
+    valEl.textContent = iso ? dpFmt(iso) : "Pick a date";
+    valEl.classList.toggle("dp-placeholder", !iso);
+  }
+}
+
+async function openEditModal(kind, id) {
+  const modal = $("edit-modal");
+  const postFields = modal.querySelector(".em-post");
+  const msFields = modal.querySelector(".em-ms");
+  $("em-error").classList.add("hidden");
+  $("em-confirm").classList.add("hidden");
+  modal.querySelector(".em-actions").classList.remove("em-modal-hide");
+  editState = { kind, id };
+
+  if (kind === "post") {
+    const p = ALL_POSTS.find((x) => x.id === id);
+    if (!p) return;
+    $("em-title").textContent = "Edit post";
+    $("em-caption").value = p.caption || "";
+    $("em-author").value = p.author || "";
+    postFields.classList.remove("hidden");
+    msFields.classList.add("hidden");
+    $("em-confirm-text").textContent = "Delete this post? It\u2019ll be removed from the feed.";
+  } else {
+    // Feed cards don't carry dateText/sortISO, so fetch the authoritative record.
+    let m = MILESTONES.find((x) => x.id === id);
+    if (!m) {
+      try {
+        const r = await fetch("/api/milestones");
+        if (r.ok) { MILESTONES = (await r.json()).milestones || []; m = MILESTONES.find((x) => x.id === id); }
+      } catch {}
+    }
+    if (!m) return;
+    $("em-title").textContent = "Edit milestone";
+    $("em-emoji").value = m.emoji || "";
+    $("em-title-input").value = m.title || "";
+    $("em-body").value = m.body || "";
+    setEditDate((m.sortISO || "").slice(0, 10));
+    const eq = $("em-emoji-quick");
+    eq.querySelectorAll(".eq").forEach((b) => b.classList.toggle("on", b.dataset.emoji === (m.emoji || "")));
+    postFields.classList.add("hidden");
+    msFields.classList.remove("hidden");
+    $("em-confirm-text").textContent = "Delete this milestone? It\u2019ll be removed from the timeline and feed.";
+  }
+  modal.classList.remove("hidden");
+  modal.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+}
+
+function closeEditModal() {
+  const modal = $("edit-modal");
+  modal.classList.add("hidden");
+  modal.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
+  editState = null;
+}
+
+async function refreshAfterEdit() {
+  renderedFeedSig = null; // force a rebuild
+  await loadFeed();
+  if (!$("view-timeline").classList.contains("hidden")) await loadMilestones();
+}
+
+async function saveEdit() {
+  if (!editState) return;
+  const { kind, id } = editState;
+  $("em-error").classList.add("hidden");
+  const saveBtn = $("em-save");
+  saveBtn.disabled = true;
+  try {
+    let url, body;
+    if (kind === "post") {
+      url = `/api/posts/${encodeURIComponent(id)}/edit`;
+      body = { caption: $("em-caption").value, author: $("em-author").value.trim() };
+    } else {
+      const title = $("em-title-input").value.trim();
+      if (!title) { showEditError("Give the milestone a short title."); saveBtn.disabled = false; return; }
+      body = { title, body: $("em-body").value, emoji: $("em-emoji").value.trim() };
+      const dateISO = $("em-date").value;
+      if (dateISO && /^\d{4}-\d{2}-\d{2}$/.test(dateISO)) {
+        body.sortISO = new Date(`${dateISO}T12:00:00Z`).toISOString();
+        const [y, mo, d] = dateISO.split("-").map(Number);
+        body.dateText = `${d} ${MONTHS_FULL[mo - 1]} ${y}`;
+      }
+      url = `/api/milestones/${encodeURIComponent(id)}/edit`;
+    }
+    const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    if (!r.ok) { const j = await r.json().catch(() => ({})); throw new Error(j.error || "Couldn\u2019t save that."); }
+    closeEditModal();
+    await refreshAfterEdit();
+  } catch (e) {
+    showEditError(e.message || "Couldn\u2019t save that.");
+  } finally {
+    saveBtn.disabled = false;
+  }
+}
+
+async function deleteItem() {
+  if (!editState) return;
+  const { kind, id } = editState;
+  const url = kind === "post"
+    ? `/api/posts/${encodeURIComponent(id)}/delete`
+    : `/api/milestones/${encodeURIComponent(id)}/delete`;
+  const yesBtn = $("em-confirm-yes");
+  yesBtn.disabled = true;
+  try {
+    const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
+    if (!r.ok) { const j = await r.json().catch(() => ({})); throw new Error(j.error || "Couldn\u2019t delete that."); }
+    closeEditModal();
+    await refreshAfterEdit();
+  } catch (e) {
+    showEditError(e.message || "Couldn\u2019t delete that.");
+    yesBtn.disabled = false;
+  }
+}
+
+function setupEditModal() {
+  const modal = $("edit-modal");
+  if (!modal || modal.dataset.wired) return;
+  modal.dataset.wired = "1";
+  setupDatePicker("em-date", false);
+
+  // Emoji quick-pick fills the text field.
+  const eq = $("em-emoji-quick");
+  eq.addEventListener("click", (e) => {
+    const b = e.target.closest(".eq");
+    if (!b) return;
+    eq.querySelectorAll(".eq").forEach((x) => x.classList.toggle("on", x === b));
+    $("em-emoji").value = b.dataset.emoji;
+  });
+
+  modal.querySelector(".em-close").addEventListener("click", closeEditModal);
+  $("em-cancel").addEventListener("click", closeEditModal);
+  modal.addEventListener("click", (e) => { if (e.target === modal) closeEditModal(); });
+  $("em-save").addEventListener("click", saveEdit);
+
+  // Delete → reveal confirm sub-panel, then act.
+  $("em-delete").addEventListener("click", () => {
+    modal.querySelector(".em-actions").classList.add("em-modal-hide");
+    $("em-confirm").classList.remove("hidden");
+  });
+  $("em-confirm-no").addEventListener("click", () => {
+    $("em-confirm").classList.add("hidden");
+    modal.querySelector(".em-actions").classList.remove("em-modal-hide");
+  });
+  $("em-confirm-yes").addEventListener("click", deleteItem);
+
+  // Open on any edit pencil (delegated, so it works for freshly-rendered cards).
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest(".edit-btn[data-edit-kind]");
+    if (!btn) return;
+    e.preventDefault(); e.stopPropagation();
+    openEditModal(btn.dataset.editKind, btn.dataset.editId);
+  });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !modal.classList.contains("hidden")) closeEditModal(); });
+}
+
 function setupLightbox() {
   if (document.body.dataset.lbWired) return;
   document.body.dataset.lbWired = "1";

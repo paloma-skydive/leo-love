@@ -861,6 +861,18 @@ app.post("/api/posts/:id/edit", requireParent, async (req, res) => {
   res.json({ ok: true, post });
 });
 
+// ---- Delete a family feed post (parent-only) ----
+// Removes the post record; its media file is left on disk so it could be
+// recovered if needed (mirrors the milestone-delete behaviour).
+app.post("/api/posts/:id/delete", requireParent, async (req, res) => {
+  const id = path.basename(String(req.params.id || ""));
+  const file = path.join(POSTS_DIR, id + ".json");
+  if (!fs.existsSync(file)) return res.status(404).json({ error: "Couldn't find that post." });
+  try { await fsp.unlink(file); }
+  catch { return res.status(500).json({ error: "Couldn't remove that post." }); }
+  res.json({ ok: true });
+});
+
 // ---- Edit a milestone's title / story / emoji (parent-only) ----
 app.post("/api/milestones/:id/edit", requireParent, (req, res) => {
   const id = String(req.params.id || "");
