@@ -1530,12 +1530,16 @@ function setupLightbox() {
 }
 
 function setupEmailSignup() {
-  const feed = document.getElementById("email-signup-feed");
-  if (feed && !feed.dataset.wired) {
-    feed.innerHTML = emailCardHTML(true);
-    wireEmailCard(feed);
-    feed.dataset.wired = "1";
-  }
+  // The email signup lives in the red footer band at the bottom of both the
+  // feed (homepage) and the timeline views — mount whichever are present.
+  ["email-signup-feed", "email-signup-timeline"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el && !el.dataset.wired) {
+      el.innerHTML = emailCardHTML(true);
+      wireEmailCard(el);
+      el.dataset.wired = "1";
+    }
+  });
 }
 
 // ---------- Section info popups (ⓘ brief instructions per section) ----------

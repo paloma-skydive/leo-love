@@ -1094,6 +1094,12 @@ a { color: inherit; text-decoration: none; }
 .email-on-band .ec-done-title, .email-on-band .ec-done-sub { color: var(--cream); }
 .email-on-band .ec-off { color: rgba(255,254,245,.6); }
 .email-on-band .ec-off:hover { color: var(--cream); }
+/* Red footer band variant: the band title + copy already explain it, so drop the
+   module's own chip; recolour the button (btn-red would vanish on red) to yellow. */
+.email-on-red { margin-top: 22px; max-width: 520px; }
+.email-on-red .ec-lead { display: none; }
+.email-on-red .ec-row .ec-go { background: var(--yellow); color: var(--ink); }
+.email-on-red .ec-row .ec-go:hover { background: var(--cream); }
 
 /* Milestone badge on feed cards derived from a milestone */
 .ms-badge {
