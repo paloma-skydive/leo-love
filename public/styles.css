@@ -263,6 +263,11 @@ a { color: inherit; text-decoration: none; }
 .band-art { position: relative; overflow: hidden; min-height: 56vh; background: var(--ink); }
 .band-flip .band-text { order: 2; }
 .band-flip .band-art { order: 1; }
+/* Solo band (no photo): full-width, shorter, content in a comfortable centred column */
+.band-solo { grid-template-columns: 1fr; min-height: 0; }
+.band-solo .band-text { padding: 52px var(--pad-x); align-items: center; text-align: center; }
+.band-solo .band-copy { max-width: 46ch; }
+.band-solo .email-mount { width: 100%; max-width: 620px; margin-top: 26px; }
 .band-art img { width: 100%; height: 100%; object-fit: cover; display: block; position: absolute; inset: 0; }
 
 @media (max-width: 720px) {
@@ -467,7 +472,7 @@ a { color: inherit; text-decoration: none; }
 
 /* ---------- FEED ---------- */
 .wrap-feed { max-width: 1140px; }
-.feed-list { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-top: 18px; align-items: start; }
+.feed-list { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-top: 18px; align-items: stretch; }
 @media (max-width: 860px) { .feed-list { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 520px) { .feed-list { grid-template-columns: 1fr; } }
 .card { background: var(--white); border-radius: 18px; overflow: hidden; box-shadow: var(--shadow); display: flex; flex-direction: column; }
@@ -485,13 +490,17 @@ a { color: inherit; text-decoration: none; }
 .card-media:hover .play-badge { background: var(--red); transform: translate(-50%,-50%) scale(1.06); }
 .card-body { padding: 16px 18px 18px; display: flex; flex-direction: column; flex: 1; }
 /* Milestone feed card: title as a small header above the story */
-.card-ms-title { font-family: var(--display); font-weight: 700; font-size: 1.08rem; line-height: 1.3; margin: 0 0 6px; color: var(--ink); }
+.card-ms-title { font-family: var(--display); font-weight: 700; font-size: 1.08rem; line-height: 1.3; margin: 0 0 2px; color: var(--ink); }
+/* Milestone feed cards: keep the story tight under its title (Amy: remove the gap) */
+.card-ms-title + .card-caption { margin-top: 1px; }
 /* Text-only "copy update" card — no media tile, the note leads */
 .card-text { background: var(--white); }
 .card-text .card-body { padding: 18px 20px 18px; }
-.card-text .card-head { order: 2; margin: 14px 0 0; }
+/* Uniform tiles: cards in a row match height (align-items:stretch), so anchor the
+   attribution + comments to the bottom of every card and the note/caption to the top. */
+.card-text .card-head { order: 2; margin: auto 0 0; }
 .card-caption-text { order: 1; margin: 0; font-family: var(--display); font-size: 1.12rem; line-height: 1.4; color: var(--ink); -webkit-line-clamp: 6; }
-.card-text .comments-mount { order: 3; }
+.card-text .comments-mount { order: 3; margin-top: 12px; }
 .card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
 .avatar {
   width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
@@ -501,19 +510,18 @@ a { color: inherit; text-decoration: none; }
 .card-who { font-weight: 700; }
 .card-when { font-family: var(--mono); font-size: .72rem; color: var(--soft); text-transform: uppercase; letter-spacing: .02em; }
 .card-caption { margin: 4px 0 0; white-space: pre-wrap; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; cursor: pointer; font-size: .92rem; line-height: 1.5; }
-/* Reserve a consistent caption height so resting cards in a row line up (media cards) */
-.card:not(.card-text) .card-caption { min-height: 4.4em; }
+/* With equal-height tiles (stretch), the comment toggle is anchored to the bottom,
+   so no caption-height reserve is needed. */
 .card-caption.expanded { -webkit-line-clamp: unset; min-height: 0; }
-/* Clear "read more" affordance when a caption is truncated — cut a line earlier so text doesn't run under it */
-.card-caption.clamped { position: relative; padding-bottom: 22px; -webkit-line-clamp: 2; }
-.card-caption.clamped::after {
-  content: "… more"; position: absolute; right: 0; bottom: 0;
+/* Clear "read more" affordance when a caption is truncated (clean line-clamp, no half-faded words) */
+.card-caption.clamped { -webkit-line-clamp: 3; }
+.cap-more {
+  display: inline-block; margin: 6px 0 0; padding: 0; background: none; border: none; cursor: pointer;
   font-family: var(--mono); text-transform: uppercase; letter-spacing: .03em;
   font-size: .64rem; font-weight: 600; color: var(--blue);
-  padding: 2px 2px 2px 64px;
-  background: linear-gradient(90deg, transparent, var(--white) 58%);
 }
-.card-caption.expanded::after { content: none; }
+.cap-more:hover { filter: brightness(.85); }
+.card-caption.expanded + .cap-more { display: none; }
 .card .comments-mount { margin-top: auto; padding-top: 10px; }
 .feed-empty { text-align: center; color: var(--soft); padding: 30px; font-size: 1.05rem; }
 
@@ -585,17 +593,17 @@ a { color: inherit; text-decoration: none; }
 .feed-filters-wrap { position: relative; display: flex; align-items: center; }
 .feed-filters { display: flex; gap: 26px; overflow-x: auto; padding: 10px 2px 12px; -webkit-overflow-scrolling: touch; scrollbar-width: none; scroll-behavior: smooth; flex: 1; min-width: 0; }
 .feed-filters::-webkit-scrollbar { display: none; }
-/* Floating scroll arrows — no circle, just the chevron */
+/* Scroll arrows — on-brand round buttons (white circle, ink chevron, red on hover) */
 .ff-arrow {
-  flex: 0 0 auto; width: 22px; height: 40px; border-radius: 0;
-  border: none; background: none; color: var(--ink);
-  font-size: 1.7rem; line-height: 1; cursor: pointer; z-index: 3; opacity: .55;
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: none; transition: opacity .15s, transform .15s;
+  flex: 0 0 auto; width: 34px; height: 34px; border-radius: 50%;
+  border: 1.5px solid var(--line); background: var(--white); color: var(--ink);
+  font-size: 1.25rem; line-height: 1; cursor: pointer; z-index: 3; opacity: 1;
+  display: flex; align-items: center; justify-content: center; padding: 0 0 2px;
+  box-shadow: 0 2px 10px rgba(21,20,20,.12); transition: color .15s, border-color .15s, transform .15s;
 }
-.ff-arrow:hover { opacity: 1; transform: scale(1.15); background: none; }
-.ff-prev { margin-right: 4px; }
-.ff-next { margin-left: 4px; }
+.ff-arrow:hover { color: var(--red); border-color: var(--red); transform: scale(1.08); background: var(--white); }
+.ff-prev { margin-right: 12px; }
+.ff-next { margin-left: 12px; }
 .ff-arrow[hidden] { display: none; }
 .fam-chip {
   display: flex; flex-direction: column; align-items: center; gap: 6px;

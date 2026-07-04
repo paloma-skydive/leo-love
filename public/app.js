@@ -21,7 +21,6 @@ const PROMPTS = [
   "Share a baby photo of Luke or Dana\u2014let's see who Leo takes after.",
   "Post a family tradition or game you can't wait for Leo to join in on.",
   "See something that made you think of Leo? Film a quick video and share it.",
-  "Share a mum meme to make Dana laugh after a rough night.",
   "Drop your best (or worst) parenting advice.",
   "What adventure are you planning for when Leo's big and strong?",
   "Read Leo a bedtime story on video\u2014his mum & dad can play it to him.",
@@ -117,7 +116,7 @@ function setView(v) {
   window.scrollTo({ top: 0, behavior: "smooth" });
   if (v === "timeline") loadMilestones();
   if (v === "family") loadFamily();
-  if (v === "feed") requestAnimationFrame(() => setTimeout(updateFilterArrows, 40));
+  if (v === "feed") requestAnimationFrame(() => setTimeout(() => { updateFilterArrows(); flagClampedCaptions(); }, 40));
 }
 document.addEventListener("click", (e) => {
   const a = e.target.closest("[data-view]");
@@ -205,7 +204,7 @@ function updateFilterArrows() {
 function setupFilterArrows() {
   const row = $("feed-filters"), prev = $("ff-prev"), next = $("ff-next");
   if (!row) return;
-  const step = () => Math.max(140, row.clientWidth * 0.7);
+  const step = () => Math.max(240, row.clientWidth * 1.1);
   if (prev) prev.addEventListener("click", () => row.scrollBy({ left: -step(), behavior: "smooth" }));
   if (next) next.addEventListener("click", () => row.scrollBy({ left: step(), behavior: "smooth" }));
   row.addEventListener("scroll", updateFilterArrows, { passive: true });
@@ -342,14 +341,12 @@ function renderFeed() {
     list.appendChild(card);
     mountComments(card.querySelector(".comments-mount"));
   }
-  // Flag captions that are actually truncated so we can show a clear
-  // "…more" affordance (esp. on video tiles where the text is easy to miss).
-  requestAnimationFrame(() => {
-    list.querySelectorAll(".card-caption").forEach((c) => {
-      if (c.classList.contains("expanded")) return;
-      c.classList.toggle("clamped", c.scrollHeight - c.clientHeight > 4);
-    });
-  });
+  // Flag captions that are actually truncated and give them a clean "Read more"
+  // link below (no messy half-faded words trailing across cards). Runs now and
+  // again shortly after, so it's reliable even if layout/fonts settle late.
+  flagClampedCaptions();
+  requestAnimationFrame(flagClampedCaptions);
+  setTimeout(flagClampedCaptions, 250);
   // Remember what's now drawn, so the next auto-refresh can tell if anything
   // actually changed before rebuilding (and interrupting any playing video).
   renderedFeedSig = feedSig(ALL_POSTS);
@@ -357,6 +354,29 @@ function renderFeed() {
 
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+// Give any truncated feed caption a clean "Read more" link below it. Idempotent
+// and safe to call repeatedly (it adds/removes as truncation state changes).
+function flagClampedCaptions() {
+  const list = $("feed-list");
+  if (!list) return;
+  list.querySelectorAll(".card-caption").forEach((c) => {
+    if (c.classList.contains("expanded")) return;
+    const clamped = c.scrollHeight - c.clientHeight > 4;
+    c.classList.toggle("clamped", clamped);
+    const next = c.nextElementSibling;
+    const hasMore = next && next.classList.contains("cap-more");
+    if (clamped && !hasMore) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "cap-more";
+      btn.textContent = "Read more";
+      c.insertAdjacentElement("afterend", btn);
+    } else if (!clamped && hasMore) {
+      next.remove();
+    }
+  });
 }
 
 // Normalise a milestone/post's media into an array of {file,type}. Supports both
@@ -1184,7 +1204,9 @@ $("pg-skip")?.addEventListener("click", (e) => { e.preventDefault(); $("parent-g
 
 // ---------- Email signup (get news about Leo by email) ----------
 function emailCardHTML(compact) {
-  const name = escapeHtml(localStorage.getItem("leo_author") || localStorage.getItem("leo_email_name") || "");
+  // Start the name blank on this shared family feed — pre-filling the last author
+  // (e.g. "Amy") made it look like a filled state rather than a fresh resting one.
+  const name = "";
   const email = escapeHtml(localStorage.getItem("leo_email") || "");
   return `
     <div class="email-card email-card-slim">
@@ -1546,8 +1568,14 @@ function setupLightbox() {
       });
       return;
     }
+    const more = e.target.closest(".cap-more");
+    if (more) {
+      const cap = more.previousElementSibling;
+      if (cap && cap.classList.contains("card-caption")) { cap.classList.add("expanded"); cap.classList.remove("clamped"); more.remove(); }
+      return;
+    }
     const cap = e.target.closest(".card-caption");
-    if (cap) { cap.classList.toggle("expanded"); if (cap.classList.contains("expanded")) cap.classList.remove("clamped"); }
+    if (cap) { cap.classList.toggle("expanded"); if (cap.classList.contains("expanded")) { cap.classList.remove("clamped"); const n = cap.nextElementSibling; if (n && n.classList.contains("cap-more")) n.remove(); } }
   });
 }
 
