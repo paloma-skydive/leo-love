@@ -640,6 +640,7 @@ app.get("/api/feed", requireAuth, async (_req, res) => {
       caption: [m.title, m.body].filter(Boolean).join(" \u2014 "),
       mediaFile: m.mediaFile,
       mediaType: m.mediaType,
+      media: Array.isArray(m.media) && m.media.length ? m.media : (m.mediaFile ? [{ file: m.mediaFile, type: m.mediaType || "image" }] : []),
       createdAt: m.sortISO || m.createdAt || new Date().toISOString(),
       fromMilestone: true,
       milestoneId: m.id,
@@ -687,6 +688,19 @@ app.post("/api/milestones", requireAuth, (req, res) => {
   if (mediaFile && (mediaType === "image" || mediaType === "video")) {
     milestone.mediaFile = path.basename(mediaFile);
     milestone.mediaType = mediaType;
+  }
+  // Optional multi-photo: media array [{file,type}]. Mirror first into mediaFile
+  // for backward compat (feed tile, older clients).
+  if (Array.isArray(b.media)) {
+    const arr = b.media
+      .filter((x: any) => x && x.file)
+      .map((x: any) => ({ file: path.basename(String(x.file)), type: x.type === "video" ? "video" : "image" }))
+      .slice(0, 8);
+    if (arr.length) {
+      milestone.media = arr;
+      milestone.mediaFile = arr[0].file;
+      milestone.mediaType = arr[0].type;
+    }
   }
   const list = loadMilestones();
   list.push(milestone);
@@ -856,6 +870,22 @@ app.post("/api/milestones/:id/edit", requireParent, (req, res) => {
   if (typeof b.title === "string" && b.title.trim()) m.title = b.title.trim().slice(0, 140);
   if (typeof b.body === "string") m.body = b.body.slice(0, 4000);
   if (typeof b.emoji === "string") m.emoji = b.emoji.trim().slice(0, 8);
+  if (typeof b.author === "string" && b.author.trim()) m.author = b.author.trim().slice(0, 80);
+  // Attach / replace media. Single mediaFile, OR a full media array [{file,type}].
+  if (typeof b.mediaFile === "string" && b.mediaFile.trim()) {
+    m.mediaFile = path.basename(b.mediaFile.trim());
+    m.mediaType = b.mediaType === "video" ? "video" : "image";
+    m.media = [{ file: m.mediaFile, type: m.mediaType }];
+  }
+  if (Array.isArray(b.media)) {
+    const arr = b.media
+      .filter((x: any) => x && x.file)
+      .map((x: any) => ({ file: path.basename(String(x.file)), type: x.type === "video" ? "video" : "image" }))
+      .slice(0, 8);
+    m.media = arr;
+    if (arr.length) { m.mediaFile = arr[0].file; m.mediaType = arr[0].type; }
+    else { delete m.mediaFile; delete m.mediaType; }
+  }
   saveMilestones(list);
   res.json({ ok: true, milestone: m });
 });

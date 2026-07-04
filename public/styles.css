@@ -799,6 +799,18 @@ a { color: inherit; text-decoration: none; }
 /* Media capped in height; positive bottom margin so the comment toggle sits clear below it (no overlap) */
 .ms-media { margin: 13px -18px 15px; border-radius: 0; overflow: hidden; background: var(--ink); cursor: pointer; max-height: 300px; }
 .ms-media img, .ms-media video { width: 100%; height: 300px; object-fit: cover; display: block; }
+/* Multi-photo milestone gallery: full-bleed edge tiles, side by side (stacks 1-col on very narrow) */
+.ms-gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin: 13px -18px 15px; background: var(--ink); }
+.ms-gallery[data-count="1"] { grid-template-columns: 1fr; }
+.ms-gtile { position: relative; overflow: hidden; background: var(--ink); cursor: pointer; height: 240px; }
+.ms-gtile img, .ms-gtile video { width: 100%; height: 100%; object-fit: cover; display: block; }
+@media (max-width: 460px) { .ms-gtile { height: 200px; } }
+/* '+N more photos' badge on feed milestone tiles */
+.media-count { position: absolute; bottom: 10px; right: 10px; z-index: 2;
+  display: inline-flex; align-items: center; gap: 4px;
+  font-family: var(--mono); font-size: .62rem; letter-spacing: .03em;
+  padding: 4px 8px; border-radius: 999px;
+  background: rgba(21,20,20,.72); color: var(--cream); backdrop-filter: blur(3px); }
 .ms-emoji { font-size: 1.25rem; }
 
 /* ============================================================

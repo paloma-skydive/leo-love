@@ -310,8 +310,10 @@ function renderFeed() {
     // Milestone-derived cards share the milestone's own comment thread.
     const cType = p.fromMilestone ? "milestone" : "post";
     const cId = p.fromMilestone ? p.milestoneId : p.id;
+    const extra = mediaList(p).length - 1;
+    const countBadge = extra > 0 ? `<span class="media-count" aria-hidden="true"><svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M4 6h12v10H4z" opacity=".5"/><path d="M8 4h12v12H8z"/></svg> +${extra}</span>` : "";
     const mediaBlock = hasMedia
-      ? `<div class="card-media" role="button" tabindex="0" data-lightbox="${src}" data-type="${p.mediaType}" data-caption="${escapeHtml(p.caption || "")}" data-author="${escapeHtml(p.author || "Someone")}">${media}${badge}</div>`
+      ? `<div class="card-media" role="button" tabindex="0" data-lightbox="${src}" data-type="${p.mediaType}" data-caption="${escapeHtml(p.caption || "")}" data-author="${escapeHtml(p.author || "Someone")}">${media}${badge}${countBadge}</div>`
       : "";
     card.innerHTML = `
       ${mediaBlock}
@@ -344,6 +346,16 @@ function renderFeed() {
 
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+// Normalise a milestone/post's media into an array of {file,type}. Supports both
+// the new `media` array and the legacy single mediaFile/mediaType.
+function mediaList(m) {
+  if (Array.isArray(m.media) && m.media.length) {
+    return m.media.filter((x) => x && x.file).map((x) => ({ file: x.file, type: x.type === "video" ? "video" : "image" }));
+  }
+  if (m.mediaFile) return [{ file: m.mediaFile, type: m.mediaType === "video" ? "video" : "image" }];
+  return [];
 }
 
 function currentName() {
@@ -472,13 +484,23 @@ async function loadMilestones() {
     const d = document.createElement("div");
     d.className = "ms";
     const by = m.author ? `<div class="ms-date" style="margin-top:6px">added by ${escapeHtml(m.author)}</div>` : "";
-    const msrc = `/media/${escapeHtml(m.mediaFile || "")}`;
     const mcap = escapeHtml(m.title || "");
-    const media = m.mediaFile
-      ? (m.mediaType === "video"
-          ? `<div class="ms-media" role="button" tabindex="0" data-lightbox="${msrc}" data-type="video" data-caption="${mcap}"><video src="${msrc}#t=0.1" playsinline preload="metadata" muted></video><span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span></div>`
-          : `<div class="ms-media" role="button" tabindex="0" data-lightbox="${msrc}" data-type="image" data-caption="${mcap}"><img src="${msrc}" alt="" /></div>`)
-      : "";
+    const items = mediaList(m);
+    let media = "";
+    if (items.length === 1) {
+      const it = items[0], msrc = `/media/${escapeHtml(it.file)}`;
+      media = it.type === "video"
+        ? `<div class="ms-media" role="button" tabindex="0" data-lightbox="${msrc}" data-type="video" data-caption="${mcap}"><video src="${msrc}#t=0.1" playsinline preload="metadata" muted></video><span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span></div>`
+        : `<div class="ms-media" role="button" tabindex="0" data-lightbox="${msrc}" data-type="image" data-caption="${mcap}"><img src="${msrc}" alt="" /></div>`;
+    } else if (items.length > 1) {
+      const tiles = items.map((it) => {
+        const msrc = `/media/${escapeHtml(it.file)}`;
+        return it.type === "video"
+          ? `<div class="ms-gtile" role="button" tabindex="0" data-lightbox="${msrc}" data-type="video" data-caption="${mcap}"><video src="${msrc}#t=0.1" playsinline preload="metadata" muted></video><span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span></div>`
+          : `<div class="ms-gtile" role="button" tabindex="0" data-lightbox="${msrc}" data-type="image" data-caption="${mcap}"><img src="${msrc}" alt="" /></div>`;
+      }).join("");
+      media = `<div class="ms-gallery" data-count="${items.length}">${tiles}</div>`;
+    }
     d.innerHTML = `
       <div class="ms-card">
         <div class="ms-date">${escapeHtml(m.dateText || "")}</div>
