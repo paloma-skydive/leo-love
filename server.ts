@@ -668,7 +668,7 @@ app.get("/api/feed", requireAuth, async (_req, res) => {
   const msPosts = loadMilestones()
     .map((m) => ({
       id: "ms_" + m.id,
-      author: m.author || "Leo\u2019s mum & dad",
+      author: m.author || "Leo",   // milestone updates show as "Leo" on the feed tile (Amy)
       title: m.title || "",
       body: m.body || "",
       emoji: m.emoji || "",

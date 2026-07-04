@@ -496,7 +496,10 @@ a { color: inherit; text-decoration: none; }
 @media (max-width: 860px) { .feed-list { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 520px) { .feed-list { grid-template-columns: 1fr; } }
 .card { background: var(--white); border-radius: 18px; overflow: hidden; box-shadow: var(--shadow); display: flex; flex-direction: column; height: 100%; }
-.card-media { position: relative; background: var(--ink); display: flex; align-items: center; justify-content: center; height: clamp(180px, 18vw, 230px); overflow: hidden; cursor: pointer; }
+.card-media { position: relative; background: var(--ink); display: flex; align-items: center; justify-content: center; flex: 1 1 auto; height: auto; min-height: clamp(180px, 18vw, 230px); overflow: hidden; cursor: pointer; }
+/* The media (photo/video) grows to fill the card, so its viewing area — and the
+   play button — sits at the same level as the text-only milestone tiles in the row.
+   The body (name + caption) hugs its content at the bottom. */
 .card-media img, .card-media video { width: 100%; height: 100%; display: block; object-fit: cover; }
 /* Play badge on video tiles */
 .play-badge {
@@ -528,7 +531,7 @@ a { color: inherit; text-decoration: none; }
 .card-tile-blue { background: var(--blue); color: var(--cream); }
 .card-tile-yellow { background: var(--yellow); color: var(--ink); }
 .card-tile .ms-badge { background: rgba(255,254,245,.9); color: var(--ink); }
-.card-body { padding: 16px 18px 18px; display: flex; flex-direction: column; flex: 1; }
+.card-body { padding: 16px 18px 18px; display: flex; flex-direction: column; flex: 0 0 auto; }
 /* Milestone feed card: title as a small header above the story */
 .card-ms-title { font-family: var(--display); font-weight: 700; font-size: 1.08rem; line-height: 1.3; margin: 0 0 2px; color: var(--ink); }
 /* Milestone feed cards: keep the story tight under its title (Amy: remove the gap) */
