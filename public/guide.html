@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Averia+Libre:ital,wght@0,300;0,400;0,700;1,400&family=Fragment+Mono:ital@0;1&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="/styles.css?v=45" />
+<link rel="stylesheet" href="/styles.css?v=70" />
 <style>
   /* ---- Guide: calm, uniform, editorial. Module cards, one body type. ---- */
   /* Hero reuses the shared .hero / .hero-frame / .hero-dots / .hero-name /
@@ -15,7 +15,10 @@
      site exactly; we only recolour it ink here. */
   .hero-guide-page { background: var(--ink); color: var(--cream); }
   .hero-guide-page .hero-frame { border-color: rgba(255,254,245,.85); }
-  .hero-guide-page .sub { font-family: var(--body); font-size: 1.05rem; opacity: .82; margin: 14px 0 0; max-width: 32ch; position: relative; z-index: 5; }
+  /* Keep the accent dots inside the hero so they don't bleed onto the note card below. */
+  .hero-guide-page .dot-a { bottom: 12%; left: 6%; width: 120px; height: 120px; }
+  .hero-guide-page .dot-c { z-index: 2; }
+  .hero-guide-page .sub { font-family: var(--body); font-size: 1.05rem; opacity: .82; margin: 14px auto 0; max-width: 34ch; position: relative; z-index: 5; }
 
   /* Wider, calmer column */
   .guide { max-width: 760px; margin: -56px auto 0; padding: 0 clamp(18px,4vw,28px) 80px; position: relative; z-index: 2; }
@@ -39,7 +42,16 @@
   .g-card.k-red .g-kicker { color: var(--red); }
   .g-card.k-amber .g-kicker { color: #c9a227; }
   .g-card h2 { font-family: var(--display); font-weight: 700; font-size: 1.5rem; line-height: 1.2; margin: 0 0 14px; }
+  .g-card h2 .g-emoji { font-family: var(--body); margin-right: .35em; }
   .g-card p:last-child { margin-bottom: 0; }
+
+  /* Bullet list inside a section (matches body type, roomy) */
+  .g-list { list-style: none; padding: 0; margin: 14px 0 0; }
+  .g-list li { position: relative; padding: 0 0 0 26px; margin-bottom: 16px; }
+  .g-list li:last-child { margin-bottom: 0; }
+  .g-list li::before { content: ""; position: absolute; left: 4px; top: .62em; width: 8px; height: 8px; border-radius: 50%; background: var(--red); }
+  .g-card.k-blue .g-list li::before { background: var(--blue); }
+  .g-card.k-amber .g-list li::before { background: #c9a227; }
 
   /* Numbered steps: proper coloured tokens, generous spacing */
   .g-steps { list-style: none; counter-reset: s; padding: 0; margin: 6px 0 0; }
@@ -80,31 +92,34 @@
 
   <div class="guide">
     <div class="g-card g-note-card">
-      <p>This is a space for Leo&mdash;but really, it&rsquo;s for you two. As parents, all your love pours into him. This is a small way to pour a little back, and to remind you that even from the other side of the world, you&rsquo;re surrounded by people who love you.</p>
+      <p>This is a space for Leo&mdash;but really, it&rsquo;s for you two. As parents, all your love will pour into your child. This is a small way to pour a little back.</p>
       <p class="sign">&mdash;Amy &#x1F49B;</p>
     </div>
 
     <div class="g-card k-blue">
       <p class="g-kicker">First things first</p>
-      <h2>This page is private</h2>
-      <p>You two are the first people to land here. None of the family featured have seen it yet (I&rsquo;ve only just demanded they send me something). It isn&rsquo;t public, it won&rsquo;t show up on Google, and it lives behind a locked domain&mdash;and it stays that way until you say otherwise.</p>
+      <h2><span class="g-emoji">&#x1F512;</span>This page is private</h2>
+      <p>You two are the first people to land here. None of the family featured have seen it yet (I just demanded they send me something). It isn&rsquo;t public, it won&rsquo;t show up on Google, and it lives behind a locked domain.</p>
     </div>
 
     <div class="g-card k-red">
       <p class="g-kicker">Sharing the page</p>
-      <h2>You decide who comes in</h2>
-      <p>When you&rsquo;re ready, it&rsquo;s your call who joins&mdash;just the family who&rsquo;ve contributed, or wider family and friends, whoever you like. Whoever gets the link still lands on a password-protected page.</p>
-      <ol class="g-steps">
-        <li>Have a look through. For now it&rsquo;s only the people closest to you&mdash;I didn&rsquo;t want to get the whole clan involved just yet.</li>
-        <li>When you&rsquo;re happy for the family who&rsquo;ve shared something to come in, just tell me.</li>
-        <li>I&rsquo;ll flick a few switches and send them a family password. They&rsquo;ll land straight on the main feed&mdash;this guide stays hidden, just for you two.</li>
-      </ol>
+      <h2><span class="g-emoji">&#x1F981;</span>You decide who comes in</h2>
+      <p>When you&rsquo;re ready, it&rsquo;s your call who joins&mdash;just the family who&rsquo;ve contributed, wider family and friends, whoever you like. Whoever gets the link still lands on (another) password-protected page. It&rsquo;s Fort Knox up in here.</p>
+      <ul class="g-list">
+        <li>Have a look through. The people you see are the only people who I asked to contribute (I didn&rsquo;t want to get every single family member involved without you seeing it, so was only in touch with the people you two are closest to).</li>
+        <li>When you&rsquo;re happy for the family who&rsquo;ve shared something to come in, let me know! I&rsquo;ll flick a few switches and send them a family password. They&rsquo;ll land straight on the family password page, then over to the main feed. This guide stays hidden, just for you two.</li>
+      </ul>
     </div>
 
     <div class="g-card k-amber">
-      <p class="g-kicker">How this page works</p>
-      <h2>Look for the little &#9432;</h2>
-      <p>Each section has a small &#9432; with a quick instruction&mdash;not because I think you need it, but because you&rsquo;re probably woken every two hours (three, if you&rsquo;re lucky).</p>
+      <p class="g-kicker">Final housekeeping</p>
+      <h2><span class="g-emoji">&#x1F511;</span>Parent Mode</h2>
+      <ul class="g-list">
+        <li>You have full control over anything that&rsquo;s posted on this page&mdash;whether it&rsquo;s your own post you want to change, or someone else&rsquo;s post you want to edit (including the milestones I&rsquo;ve already added).</li>
+        <li>Scroll to the bottom of the homepage and you&rsquo;ll see &#x1F511; Parent Mode. Click to unlock it, drop in your password, and edit as you please.</li>
+        <li>If there are any site bugs that need fixing, or you want a new feature added, I&rsquo;m at your service. I&rsquo;ll also let the family know to email me if they have any issues.</li>
+      </ul>
     </div>
 
     <div class="g-cta-row">
