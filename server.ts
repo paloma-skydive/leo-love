@@ -825,6 +825,10 @@ app.post("/api/upload", requireAuth, (req, res) => {
   // From the "who's posting?" picker: kind = family | friend | newfamily; relation = free text (newfamily only)
   const posterKind = String(req.headers["x-kind"] || "").slice(0, 20);
   const posterRelation = decodeURIComponent(String(req.headers["x-relation"] || "")).slice(0, 120);
+  // Stable link to a family-tree person, chosen in the "who's posting?" picker.
+  // This is what binds a post to a tree circle — NOT the free-text author. So
+  // editing the visible name/title on a tile can never break the tree link.
+  const posterId = String(req.headers["x-poster-id"] || "").toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 40);
   const origName = decodeURIComponent(String(req.headers["x-filename"] || "upload"));
   const mime = String(req.headers["content-type"] || "application/octet-stream");
 
@@ -878,6 +882,7 @@ app.post("/api/upload", requireAuth, (req, res) => {
     // Remember when a new family member self-identifies, so it can be surfaced
     // (they asked to be added to the tree). Friends carry no such flag.
     if (posterKind) post.posterKind = posterKind;
+    if (posterId) post.posterId = posterId;
     if (posterKind === "newfamily" && posterRelation) post.posterRelation = posterRelation;
     await fsp.writeFile(path.join(POSTS_DIR, id + ".json"), JSON.stringify(post, null, 2));
     res.json({ ok: true, post });
@@ -902,6 +907,12 @@ app.post("/api/posts/:id/edit", requireParent, async (req, res) => {
   if (typeof b.caption === "string") post.caption = b.caption.slice(0, 2000);
   if (typeof b.author === "string" && b.author.trim()) post.author = b.author.trim().slice(0, 80);
   if (typeof b.posterTz === "string") post.posterTz = b.posterTz.trim().slice(0, 60);
+  // Re-bind (or clear) the tree link explicitly if asked. Editing the author
+  // text alone NEVER touches posterId — the link is deliberately independent.
+  if (typeof b.posterId === "string") {
+    const pid = b.posterId.toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 40);
+    if (pid) post.posterId = pid; else delete post.posterId;
+  }
   await fsp.writeFile(file, JSON.stringify(post, null, 2));
   res.json({ ok: true, post });
 });

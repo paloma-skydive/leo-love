@@ -171,6 +171,16 @@ function personForAuthor(author) {
   }
   return null;
 }
+// The tree link for a post. A post stamped with posterId (from the "who's
+// posting?" picker) is bound to that tree person REGARDLESS of its display
+// author text — so editing the name/title on a tile can't unlink it. Older
+// posts with no posterId fall back to fuzzy author-text matching.
+function postPersonId(post) {
+  if (!post) return null;
+  if (post.posterId && FAMILY.some((p) => p.id === post.posterId)) return post.posterId;
+  const p = personForAuthor(post.author);
+  return p ? p.id : null;
+}
 
 // ---------- Family filter cards on the feed ----------
 function renderFeedFilters() {
@@ -180,16 +190,20 @@ function renderFeedFilters() {
   const posters = [...new Set(ALL_POSTS.map((p) => (p.author || "").trim()).filter(Boolean))];
   if (posters.length < 2) { wrap.innerHTML = ""; if (outer) outer.hidden = true; return; }
   if (outer) outer.hidden = false;
-  // group posters by matched family person (so "Nana" + "Nana Jacki" become one chip)
-  const groups = []; // {key,label,tokens}
+  // group posts by their tree person (stable posterId first, then author-text
+  // fallback) so "Nana" + "Nana Jacki" — or a renamed tile — stay one chip.
+  const groups = []; // {key,personId,label,tokens}
   const seen = {};
-  for (const name of posters) {
-    const p = personForAuthor(name);
+  for (const post of ALL_POSTS) {
+    const name = (post.author || "").trim();
+    if (!name) continue;
+    const pid = postPersonId(post);
+    const p = pid ? FAMILY.find((x) => x.id === pid) : null;
     const key = p ? "p:" + p.id : "a:" + name.toLowerCase();
     if (seen[key]) continue;
     seen[key] = 1;
     groups.push(p
-      ? { key, label: p.name.split(" ")[0], tokens: personTokens(p) }
+      ? { key, personId: p.id, label: p.name.split(" ")[0], tokens: personTokens(p) }
       : { key, label: name.split(" ")[0], tokens: [norm(name)] });
   }
   const isOn = (key) => feedFilter && feedFilter.key === key;
@@ -338,7 +352,16 @@ function scatterFeed(posts) {
 function renderFeed() {
   const list = $("feed-list");
   let posts = ALL_POSTS.slice();
-  if (feedFilter && feedFilter.tokens) posts = posts.filter((p) => matchesTokens(p.author, feedFilter.tokens));
+  if (feedFilter && (feedFilter.personId || feedFilter.tokens)) {
+    posts = posts.filter((p) => {
+      if (feedFilter.personId) {
+        // Bound posts match by stable id; legacy (un-stamped) posts fall back to text.
+        if (p.posterId) return p.posterId === feedFilter.personId;
+        return matchesTokens(p.author, feedFilter.tokens);
+      }
+      return matchesTokens(p.author, feedFilter.tokens);
+    });
+  }
   if (feedSort === "shuffle") {
     // Order by a fixed shuffle rolled when Shuffle was tapped, so auto-refresh
     // doesn't reshuffle under them. New posts (not in the order) fall to the end.
@@ -665,6 +688,7 @@ async function loadMilestones() {
 // ---------- Composer ----------
 let chosenFile = null;
 let posterKind = "";        // family | friend | newfamily
+let posterPersonId = "";    // tree person id when kind=family (stable tree link)
 function setupComposer() {
   const author = $("author");
   setupWhoPicker();
@@ -729,10 +753,12 @@ async function buildWhoMenu() {
 function chooseWho(kind, id, label) {
   const nameEl = $("author"), relEl = $("who-relation"), btnLabel = $("who-btn-label");
   posterKind = kind;
+  posterPersonId = "";
   btnLabel.textContent = label;
   btnLabel.classList.remove("placeholder");
   if (kind === "family") {
     const p = FAMILY.find((x) => x.id === id);
+    posterPersonId = p ? p.id : "";
     nameEl.value = p ? ((p.title && p.title.trim()) || p.name) : "";
     nameEl.classList.add("hidden"); relEl.classList.add("hidden");
   } else if (kind === "friend") {
@@ -781,6 +807,7 @@ function submitPost() {
   xhr.setRequestHeader("X-Caption", encodeURIComponent(caption));
   xhr.setRequestHeader("X-Tz", localTz);
   if (posterKind) xhr.setRequestHeader("X-Kind", posterKind);
+  if (posterPersonId) xhr.setRequestHeader("X-Poster-Id", posterPersonId);
   if (posterKind === "newfamily" && relation) xhr.setRequestHeader("X-Relation", encodeURIComponent(relation));
   xhr.upload.onprogress = (e) => {
     if (e.lengthComputable) { const b = $("pbar"); if (b) b.style.width = (e.loaded / e.total * 100) + "%"; }
@@ -798,7 +825,7 @@ function submitPost() {
       $("preview").innerHTML = ""; $("preview").classList.add("hidden");
       $("filepick-label").innerHTML = "\u{1F4F7}  Choose a photo or video";
       // Reset the who-picker back to its prompt.
-      posterKind = "";
+      posterKind = ""; posterPersonId = "";
       if ($("who-btn-label")) { $("who-btn-label").textContent = "Who\u2019s posting? Choose your name\u2026"; $("who-btn-label").classList.add("placeholder"); }
       $("author").value = ""; $("author").classList.add("hidden");
       if ($("who-relation")) { $("who-relation").value = ""; $("who-relation").classList.add("hidden"); }
@@ -1113,7 +1140,7 @@ function onFamilyCard(id) {
   if (!p) return;
   if (p.id === "leo" || p.role === "pet") return;
   // otherwise: filter the feed to their posts (matches their name, title & nicknames)
-  feedFilter = { key: "p:" + p.id, label: p.name.split(" ")[0], tokens: personTokens(p) };
+  feedFilter = { key: "p:" + p.id, personId: p.id, label: p.name.split(" ")[0], tokens: personTokens(p) };
   setView("feed");
   setTimeout(() => { renderFeedFilters(); renderFeed(); }, 60);
 }
