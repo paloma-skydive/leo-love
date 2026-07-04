@@ -637,6 +637,7 @@ app.get("/api/feed", requireAuth, async (_req, res) => {
       author: m.author || "Leo\u2019s mum & dad",
       title: m.title || "",
       body: m.body || "",
+      emoji: m.emoji || "",
       caption: [m.title, m.body].filter(Boolean).join(" \u2014 "),
       mediaFile: m.mediaFile,
       mediaType: m.mediaType,

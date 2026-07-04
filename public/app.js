@@ -312,8 +312,9 @@ function renderFeed() {
     const cId = p.fromMilestone ? p.milestoneId : p.id;
     const extra = mediaList(p).length - 1;
     const countBadge = extra > 0 ? `<span class="media-count" aria-hidden="true"><svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M4 6h12v10H4z" opacity=".5"/><path d="M8 4h12v12H8z"/></svg> +${extra}</span>` : "";
+    const msLbAttrs = p.fromMilestone ? ` data-emoji="${escapeHtml(p.emoji || "")}" data-title="${escapeHtml(p.title || "")}" data-body="${escapeHtml(p.body || "")}"` : "";
     const mediaBlock = hasMedia
-      ? `<div class="card-media" role="button" tabindex="0" data-lightbox="${src}" data-type="${p.mediaType}" data-caption="${escapeHtml(p.caption || "")}" data-author="${escapeHtml(p.author || "Someone")}">${media}${badge}${countBadge}</div>`
+      ? `<div class="card-media" role="button" tabindex="0" data-lightbox="${src}" data-type="${p.mediaType}" data-caption="${escapeHtml(p.caption || "")}" data-author="${escapeHtml(p.author || "Someone")}"${msLbAttrs}>${media}${badge}${countBadge}</div>`
       : "";
     card.innerHTML = `
       ${mediaBlock}
@@ -485,13 +486,14 @@ async function loadMilestones() {
     d.className = "ms";
     const by = m.author ? `<div class="ms-date" style="margin-top:6px">added by ${escapeHtml(m.author)}</div>` : "";
     const mcap = escapeHtml(m.title || "");
+    const mLbAttrs = `data-emoji="${escapeHtml(m.emoji || "")}" data-title="${mcap}" data-body="${escapeHtml(m.body || "")}"`;
     const items = mediaList(m);
     let media = "";
     if (items.length === 1) {
       const it = items[0], msrc = `/media/${escapeHtml(it.file)}`;
       media = it.type === "video"
-        ? `<div class="ms-media" role="button" tabindex="0" data-lightbox="${msrc}" data-type="video" data-caption="${mcap}"><video src="${msrc}#t=0.1" playsinline preload="metadata" muted></video><span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span></div>`
-        : `<div class="ms-media" role="button" tabindex="0" data-lightbox="${msrc}" data-type="image" data-caption="${mcap}"><img src="${msrc}" alt="" /></div>`;
+        ? `<div class="ms-media" role="button" tabindex="0" data-lightbox="${msrc}" data-type="video" ${mLbAttrs}><video src="${msrc}#t=0.1" playsinline preload="metadata" muted></video><span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span></div>`
+        : `<div class="ms-media" role="button" tabindex="0" data-lightbox="${msrc}" data-type="image" ${mLbAttrs}><img src="${msrc}" alt="" /></div>`;
     } else if (items.length > 1) {
       const tiles = items.map((it) => {
         const msrc = `/media/${escapeHtml(it.file)}`;
@@ -1226,15 +1228,26 @@ function wireEmailCard(card) {
 }
 
 // ---------- Lightbox (tap a photo/video to view it big, blurred backdrop) ----------
-function openLightbox({ src, type, caption, author }) {
+function openLightbox({ src, type, caption, author, emoji, title, body }) {
   const lb = $("lightbox");
   const stage = $("lb-stage");
   stage.innerHTML = type === "video"
     ? `<video src="${src}" controls playsinline autoplay></video>`
     : `<img src="${src}" alt="" />`;
   $("lb-author").textContent = author || "";
-  $("lb-caption").textContent = caption || "";
-  $("lb-caption").style.display = caption ? "" : "none";
+  const titleEl = $("lb-title");
+  const capEl = $("lb-caption");
+  if (title) {
+    // Milestone: read the title as a header (display type + emoji), story below.
+    titleEl.innerHTML = (emoji ? `<span class="lb-emoji">${escapeHtml(emoji)}</span>` : "") + escapeHtml(title);
+    titleEl.style.display = "";
+    capEl.textContent = body || "";
+    capEl.style.display = body ? "" : "none";
+  } else {
+    titleEl.style.display = "none";
+    capEl.textContent = caption || "";
+    capEl.style.display = caption ? "" : "none";
+  }
   lb.classList.remove("hidden");
   lb.setAttribute("aria-hidden", "false");
   document.body.style.overflow = "hidden";
@@ -1266,6 +1279,9 @@ function setupLightbox() {
         type: tile.dataset.type || (tile.querySelector("video") ? "video" : "image"),
         caption: tile.dataset.caption || "",
         author: tile.dataset.author || "",
+        emoji: tile.dataset.emoji || "",
+        title: tile.dataset.title || "",
+        body: tile.dataset.body || "",
       });
       return;
     }
