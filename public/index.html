@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Averia+Libre:ital,wght@0,300;0,400;0,700;1,400&family=Fragment+Mono:ital@0;1&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="/styles.css?v=45" />
+<link rel="stylesheet" href="/styles.css?v=46" />
 </head>
 <body>
 
@@ -30,7 +30,7 @@
       <button type="submit" class="btn btn-red">Come on in</button>
     </form>
     <p id="login-err" class="login-err"></p>
-    <p class="login-private">&#x1F512; Private &amp; password-protected &mdash; this page is just for Leo&rsquo;s family &amp; friends. It&rsquo;s never public and won&rsquo;t show up on Google.</p>
+    <p class="login-private">&#x1F512; Private &amp; password-protected&mdash;this page is just for Leo&rsquo;s family &amp; friends. It&rsquo;s never public and won&rsquo;t show up on Google.</p>
   </div>
 </section>
 
@@ -44,13 +44,13 @@
   <div class="login-card">
     <p class="eyebrow">Just for Mum &amp; Dad</p>
     <h1 class="wordmark">Welcome, Luke &amp; Dana</h1>
-    <p class="login-sub">Pop in your parent code to open your private guide &mdash; a quick tour of Leo&rsquo;s page, just for you two.</p>
+    <p class="login-sub">Pop in your parent code to open your private guide&mdash;a quick tour of Leo&rsquo;s page, just for you two.</p>
     <div class="pg-form">
       <input id="pg-code" type="password" inputmode="numeric" placeholder="Parent code" maxlength="40" autocomplete="off" />
       <button id="pg-go" type="button" class="btn btn-blue">Open my guide</button>
     </div>
     <p id="pg-err" class="login-err"></p>
-    <p class="login-private"><a href="#" id="pg-skip">I&rsquo;m not a parent &mdash; take me to the family page &rarr;</a></p>
+    <p class="login-private"><a href="#" id="pg-skip">I&rsquo;m not a parent&mdash;take me to the family page &rarr;</a></p>
   </div>
 </section>
 
@@ -89,15 +89,24 @@
     <section class="section section-cream intro-section">
       <div class="intro-grid">
         <div class="intro-left">
-          <div class="intro-card">
+          <div class="intro-card" id="intro-card">
             <img class="intro-photo" src="/img/leo-eyes.jpg?v=3" alt="Baby Leo with his eyes open" />
             <h2 class="section-kicker intro-kicker">Welcome to the world, Leo <span class="kicker-dot d-red"></span></h2>
-            <p class="intro-copy">Think of this as a pinboard for Leo, Luke &amp; Dana&mdash;a place to drop a message, a photo or a video, any time and from anywhere, just to show you&rsquo;re thinking of them. Post to the feed, follow his milestones, and find your spot on the family tree. Those first hellos are only the start&mdash;the more we fill it up, the lovelier it gets.</p>
+            <div class="intro-body" id="intro-body">
+              <p class="intro-copy">This is a place where family &amp; friends can share love for Leo, Luke &amp; Dana&mdash;and enjoy baby Leo&rsquo;s milestones from afar.</p>
+              <ul class="intro-list">
+                <li>Drop a message, photo or video, and it will pop up on the feed.</li>
+                <li>Find yourself on the family tree. If you&rsquo;re related to Leo and add a video or picture, you&rsquo;ll pop up here too.</li>
+                <li>Follow along Leo&rsquo;s milestones &amp; watch him grow.</li>
+              </ul>
+              <p class="intro-copy intro-closer">Those first hellos are only the start.</p>
+            </div>
+            <button type="button" class="intro-toggle" id="intro-toggle" aria-expanded="true">Show less</button>
           </div>
         </div>
         <div class="composer">
           <h3 class="composer-title">Drop an update for Leo <span class="kicker-dot d-blue"></span></h3>
-          <p class="prompt-lead"><span class="pl-ico" aria-hidden="true">&#x21BB;</span> Click the little refresh icon for an idea starter &mdash; or post anything of your own you want to share.</p>
+          <p class="prompt-lead">Click the refresh icon for an idea starter&mdash;or post anything of your own you want to share.</p>
           <div class="prompt-card" id="prompt-card">
             <span id="prompt-text">&hellip;</span>
             <button type="button" id="prompt-shuffle" title="Tap for another idea" aria-label="Tap for another idea">
@@ -125,7 +134,11 @@
           <h2 class="feed-pill">Leo&rsquo;s Feed</h2>
         </div>
         <div class="feed-controls">
-          <div class="feed-filters" id="feed-filters"></div>
+          <div class="feed-filters-wrap" id="feed-filters-wrap" hidden>
+            <button type="button" class="ff-arrow ff-prev" id="ff-prev" aria-label="Scroll left" hidden>&#x2039;</button>
+            <div class="feed-filters" id="feed-filters"></div>
+            <button type="button" class="ff-arrow ff-next" id="ff-next" aria-label="Scroll right" hidden>&#x203A;</button>
+          </div>
           <div class="feed-sort">
             <button type="button" class="sort-btn active" data-sort="newest">Newest</button>
             <button type="button" class="sort-btn" data-sort="oldest">Oldest</button>
@@ -301,8 +314,10 @@
 
     <section class="section section-cream">
       <div class="wrap">
-        <h2 class="section-kicker">The whole gang <span class="kicker-dot d-blue"></span></h2>
-        <p class="composer-help">Tap anyone to see what they&rsquo;ve shared.<br />Grandparents&mdash;tap your own card to choose what Leo will call you (Nana, Poppa, whatever it may be).</p>
+        <div class="feed-head">
+          <h2 class="feed-pill">The whole gang</h2>
+        </div>
+        <p class="composer-help fam-intro">Tap the circles to see what each family member has shared.</p>
         <div id="family-tree"></div>
       </div>
     </section>
@@ -336,6 +351,6 @@
   </div>
 </div>
 
-<script src="/app.js?v=45"></script>
+<script src="/app.js?v=46"></script>
 </body>
 </html>

@@ -46,7 +46,7 @@ let localTz = "";
 const FAMILY_ZONES = [
   { flag: "\u{1F1F0}\u{1F1FE}", label: "Cayman", tz: "America/Cayman", home: true },
   { flag: "\u{1F1F3}\u{1F1FF}", label: "NZ", tz: "Pacific/Auckland" },
-  { flag: "\u{1F1E6}\u{1F1FA}", label: "Sydney", tz: "Australia/Sydney" },
+  { flag: "\u{1F1E6}\u{1F1FA}", label: "AUS", tz: "Australia/Sydney" },
   { flag: "\u{1F1EF}\u{1F1F5}", label: "Japan", tz: "Asia/Tokyo" },
 ];
 
@@ -112,6 +112,7 @@ function setView(v) {
   window.scrollTo({ top: 0, behavior: "smooth" });
   if (v === "timeline") loadMilestones();
   if (v === "family") loadFamily();
+  if (v === "feed") requestAnimationFrame(() => setTimeout(updateFilterArrows, 40));
 }
 document.addEventListener("click", (e) => {
   const a = e.target.closest("[data-view]");
@@ -158,8 +159,10 @@ function personForAuthor(author) {
 function renderFeedFilters() {
   const wrap = $("feed-filters");
   if (!wrap) return;
+  const outer = $("feed-filters-wrap");
   const posters = [...new Set(ALL_POSTS.map((p) => (p.author || "").trim()).filter(Boolean))];
-  if (posters.length < 2) { wrap.innerHTML = ""; return; }
+  if (posters.length < 2) { wrap.innerHTML = ""; if (outer) outer.hidden = true; return; }
+  if (outer) outer.hidden = false;
   // group posters by matched family person (so "Nana" + "Nana Jacki" become one chip)
   const groups = []; // {key,label,tokens}
   const seen = {};
@@ -183,6 +186,25 @@ function renderFeedFilters() {
     feedFilter = key ? groups.find((g) => g.key === key) || null : null;
     renderFeedFilters(); renderFeed();
   }));
+  setTimeout(updateFilterArrows, 30);
+}
+
+function updateFilterArrows() {
+  const row = $("feed-filters"), prev = $("ff-prev"), next = $("ff-next");
+  if (!row || !prev || !next) return;
+  const overflow = row.scrollWidth - row.clientWidth > 4;
+  prev.hidden = !overflow || row.scrollLeft <= 2;
+  next.hidden = !overflow || row.scrollLeft >= row.scrollWidth - row.clientWidth - 2;
+}
+
+function setupFilterArrows() {
+  const row = $("feed-filters"), prev = $("ff-prev"), next = $("ff-next");
+  if (!row) return;
+  const step = () => Math.max(140, row.clientWidth * 0.7);
+  if (prev) prev.addEventListener("click", () => row.scrollBy({ left: -step(), behavior: "smooth" }));
+  if (next) next.addEventListener("click", () => row.scrollBy({ left: step(), behavior: "smooth" }));
+  row.addEventListener("scroll", updateFilterArrows, { passive: true });
+  window.addEventListener("resize", updateFilterArrows);
 }
 
 // ---------- Feed ----------
@@ -264,21 +286,33 @@ function renderFeed() {
   $("feed-empty").classList.toggle("hidden", posts.length > 0);
   for (const p of posts) {
     const card = document.createElement("article");
-    card.className = "card";
+    const hasMedia = !!p.mediaFile;
+    card.className = hasMedia ? "card" : "card card-text";
     const src = `/media/${p.mediaFile}`;
     const media = p.mediaType === "video"
       ? `<video src="${src}#t=0.1" playsinline preload="metadata" muted></video><span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>`
       : `<img src="${src}" alt="" />`;
     const initial = (p.author || "?").trim().charAt(0).toUpperCase() || "?";
     const col = avatarColor(p.author || "?");
-    const cap = p.caption ? `<p class="card-caption" tabindex="0" title="Tap to read it all">${escapeHtml(p.caption)}</p>` : "";
+    const capClass = hasMedia ? "card-caption" : "card-caption card-caption-text";
+    let cap = "";
+    if (p.fromMilestone && p.title) {
+      // Milestone cards: title reads as a header, story sits below it.
+      const body = p.body ? `<p class="${capClass}" tabindex="0" title="Tap to read it all">${escapeHtml(p.body)}</p>` : "";
+      cap = `<h4 class="card-ms-title">${escapeHtml(p.title)}</h4>${body}`;
+    } else if (p.caption) {
+      cap = `<p class="${capClass}" tabindex="0" title="Tap to read it all">${escapeHtml(p.caption)}</p>`;
+    }
     const where = p.posterTz ? " \u00b7 " + shortTz(p.posterTz) : "";
     const badge = p.fromMilestone ? `<span class="ms-badge">\u2728 Milestone</span>` : "";
     // Milestone-derived cards share the milestone's own comment thread.
     const cType = p.fromMilestone ? "milestone" : "post";
     const cId = p.fromMilestone ? p.milestoneId : p.id;
+    const mediaBlock = hasMedia
+      ? `<div class="card-media" role="button" tabindex="0" data-lightbox="${src}" data-type="${p.mediaType}" data-caption="${escapeHtml(p.caption || "")}" data-author="${escapeHtml(p.author || "Someone")}">${media}${badge}</div>`
+      : "";
     card.innerHTML = `
-      <div class="card-media" role="button" tabindex="0" data-lightbox="${src}" data-type="${p.mediaType}" data-caption="${escapeHtml(p.caption || "")}" data-author="${escapeHtml(p.author || "Someone")}">${media}${badge}</div>
+      ${mediaBlock}
       <div class="card-body">
         <div class="card-head">
           <div class="avatar" style="background:${col}">${escapeHtml(initial)}</div>
@@ -644,6 +678,8 @@ function startApp() {
   setupCheckin();
   setupSort();
   setupEmailSignup();
+  setupIntroToggle();
+  setupFilterArrows();
   setupInfoTips();
   setupLightbox();
   loadFamily();
@@ -711,15 +747,12 @@ function renderFamily() {
 
 // Family members with a photo avatar (cropped from their video hello). Others
 // keep their coloured initial circle.
-const AVATAR_IDS = new Set([
-  "jacki", "john", "margot", "paul", "mama", "janet",
-  "antony", "kirsty", "matt", "ryleigh", "antony-luke", "roland",
-]);
+// Family cards are plain coloured circles now (Amy's call) — no photo avatars.
+const AVATAR_IDS = new Set([]);
 const AVATAR_VER = 1;
 
 function famCard(p) {
-  const editable = p.role === "grandparent";
-  const cls = `fam-card${p.id === "leo" ? " leo" : ""}${editable ? " editable" : ""}`;
+  const cls = `fam-card${p.id === "leo" ? " leo" : ""}`;
   const av = p.role === "pet" ? "\u{1F436}" : (p.name[0] || "?").toUpperCase();
   const bg = p.id === "leo" ? "var(--red)" : avatarColor(p.name);
   const avInner = AVATAR_IDS.has(p.id)
@@ -736,7 +769,6 @@ function famCard(p) {
 function onFamilyCard(id) {
   const p = FAMILY.find((x) => x.id === id);
   if (!p) return;
-  if (p.role === "grandparent") { openTitleEditor(p); return; }
   if (p.id === "leo" || p.role === "pet") return;
   // otherwise: filter the feed to their posts (matches their name, title & nicknames)
   feedFilter = { key: "p:" + p.id, label: p.name.split(" ")[0], tokens: personTokens(p) };
@@ -891,7 +923,6 @@ function emailCardHTML(compact) {
       <div class="ec-form">
         <div class="ec-lead">
           <span class="ec-title">\u{1F4EC} Get an email when there&rsquo;s news of Leo</span>
-          <span class="ec-sub">New photo, video or milestone &mdash; no app, no fuss.</span>
         </div>
         <div class="ec-row">
           <input class="field ec-name" type="text" placeholder="Your name" maxlength="80" value="${name}" />
@@ -1081,6 +1112,24 @@ function setupEmailSignup() {
 // ---------- Section info popups (ⓘ brief instructions per section) ----------
 // Replaces the old standalone Guide: each section heading has a small ⓘ that
 // shows a one-line instruction on hover (desktop) or tap (touch).
+function setupIntroToggle() {
+  const card = $("intro-card");
+  const btn = $("intro-toggle");
+  if (!card || !btn) return;
+  const apply = (collapsed) => {
+    card.classList.toggle("collapsed", collapsed);
+    btn.setAttribute("aria-expanded", String(!collapsed));
+    btn.textContent = collapsed ? "Read more" : "Show less";
+  };
+  // Default expanded on first ever visit; remember the reader's choice after that.
+  apply(localStorage.getItem("leoWelcomeCollapsed") === "1");
+  btn.addEventListener("click", () => {
+    const collapsed = !card.classList.contains("collapsed");
+    apply(collapsed);
+    try { localStorage.setItem("leoWelcomeCollapsed", collapsed ? "1" : "0"); } catch (e) {}
+  });
+}
+
 function setupInfoTips() {
   const tips = [...document.querySelectorAll(".info-tip")];
   tips.forEach((tip) => {

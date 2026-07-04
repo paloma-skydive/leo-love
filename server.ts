@@ -174,8 +174,8 @@ const DEFAULT_FAMILY = [
   // grandparents (titles editable)
   { id: "jacki", name: "Jacki", relation: "Grandma", title: "", side: "luke", location: "nz", gen: 2, role: "grandparent" },
   { id: "john", name: "John", relation: "Grandad", title: "", side: "luke", location: "nz", gen: 2, role: "grandparent" },
-  { id: "margot", name: "Margot", relation: "Grandma", title: "", side: "dana", location: "nz", gen: 2, role: "grandparent" },
-  { id: "paul", name: "Paul", relation: "Grandad", title: "", side: "dana", location: "nz", gen: 2, role: "grandparent" },
+  { id: "margot", name: "Margot", relation: "Grandma", title: "Mimi", side: "dana", location: "nz", gen: 2, role: "grandparent" },
+  { id: "paul", name: "Paul", relation: "Grandad", title: "Pop", side: "dana", location: "nz", gen: 2, role: "grandparent" },
   // great-grandparent (Dana's grandmother, Margot's mum)
   { id: "mama", name: "Mama", relation: "Great-Grandma", qualifier: "Dana's grandma", side: "dana", location: "nz", gen: 7, role: "greatgrandparent" },
   // great-aunts & uncle (Margot's siblings / Dana's aunts & uncle)
@@ -193,7 +193,7 @@ const DEFAULT_FAMILY = [
   { id: "ryleigh", name: "Ryleigh", relation: "Cousin", side: "luke", location: "nz", gen: 4, role: "cousin" },
   // wider clan (extended family & cousins sharing in Leo's pinboard)
   { id: "antony-luke", name: "Ant", relation: "Cousin", qualifier: "Dad's cousin", side: "luke", location: "nz", gen: 5, role: "extended" },
-  { id: "roland", name: "Roland", relation: "Cousin", qualifier: "Dad's cousin", side: "luke", location: "nz", gen: 5, role: "extended" },
+  { id: "roland", name: "Roland", relation: "Cousin", qualifier: "Dad's cousin", side: "luke", location: "australia", gen: 5, role: "extended" },
   { id: "matt", name: "Matt", relation: "Cousin", qualifier: "Dad's cousin", side: "luke", location: "japan", gen: 5, role: "extended" },
   { id: "kirsty", name: "Kirsty", relation: "Cousin", qualifier: "Mum's cousin", side: "dana", location: "nz", gen: 5, role: "extended" },
   { id: "dario", name: "Dario", relation: "Cousin", qualifier: "Mum's cousin", side: "dana", location: "nz", gen: 5, role: "extended" },
@@ -635,6 +635,8 @@ app.get("/api/feed", requireAuth, async (_req, res) => {
     .map((m) => ({
       id: "ms_" + m.id,
       author: m.author || "Leo\u2019s mum & dad",
+      title: m.title || "",
+      body: m.body || "",
       caption: [m.title, m.body].filter(Boolean).join(" \u2014 "),
       mediaFile: m.mediaFile,
       mediaType: m.mediaType,
