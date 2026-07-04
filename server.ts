@@ -834,6 +834,7 @@ app.post("/api/posts/:id/edit", requireParent, async (req, res) => {
   const b = req.body || {};
   if (typeof b.caption === "string") post.caption = b.caption.slice(0, 2000);
   if (typeof b.author === "string" && b.author.trim()) post.author = b.author.trim().slice(0, 80);
+  if (typeof b.posterTz === "string") post.posterTz = b.posterTz.trim().slice(0, 60);
   await fsp.writeFile(file, JSON.stringify(post, null, 2));
   res.json({ ok: true, post });
 });

@@ -436,6 +436,16 @@ a { color: inherit; text-decoration: none; }
 .card-when { font-family: var(--mono); font-size: .72rem; color: var(--soft); text-transform: uppercase; letter-spacing: .02em; }
 .card-caption { margin: 4px 0 0; white-space: pre-wrap; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; cursor: pointer; }
 .card-caption.expanded { -webkit-line-clamp: unset; }
+/* Clear "read more" affordance when a caption is truncated */
+.card-caption.clamped { position: relative; padding-bottom: 20px; }
+.card-caption.clamped::after {
+  content: "… more"; position: absolute; right: 0; bottom: 0;
+  font-family: var(--mono); text-transform: uppercase; letter-spacing: .03em;
+  font-size: .64rem; font-weight: 600; color: var(--blue);
+  padding: 2px 4px 2px 22px;
+  background: linear-gradient(90deg, transparent, var(--white) 34%);
+}
+.card-caption.expanded::after { content: none; }
 .card .comments-mount { margin-top: auto; padding-top: 10px; }
 .feed-empty { text-align: center; color: var(--soft); padding: 30px; font-size: 1.05rem; }
 
@@ -519,7 +529,10 @@ a { color: inherit; text-decoration: none; }
   border: 3px solid transparent; transition: border-color .12s, transform .1s;
 }
 .fam-chip:hover .fc-av { transform: translateY(-2px); }
-.fam-chip.on .fc-av { border-color: var(--ink); }
+/* Selected chip gets a white ring (faint edge so it reads on cream) */
+.fam-chip.on .fc-av { border-color: #fff; box-shadow: 0 0 0 1.5px rgba(21,20,20,.16); }
+/* ...except the Everyone chip, which keeps the ink ring */
+.fam-chip[data-key=""].on .fc-av { border-color: var(--ink); box-shadow: none; }
 .fam-chip .fc-name { font-size: .72rem; color: var(--soft); white-space: nowrap; }
 .fam-chip.on .fc-name { color: var(--ink); font-weight: 600; }
 .feed-sort { display: flex; gap: 8px; }
@@ -905,15 +918,20 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ---------- Email signup sitting inside the blue band ---------- */
-.email-on-band { margin-top: 20px; max-width: 460px; }
-/* Inline in the blue band — no bounding module, just a small lead + the fields */
+.email-on-band { margin-top: 20px; max-width: 480px; }
+/* Subtle module behind the signup so the label + fields read clearly on the busy blue */
 .email-on-band .email-card {
-  background: none; border: none; box-shadow: none; padding: 0; margin: 0;
+  background: rgba(21,20,20,.16); border: 1px solid rgba(255,254,245,.22);
+  box-shadow: none; padding: 16px 16px 16px; margin: 0; border-radius: 16px;
+  backdrop-filter: blur(1px);
 }
-.email-on-band .ec-lead { margin-bottom: 8px; }
-.email-on-band .ec-title { color: var(--cream); font-size: .82rem; font-family: var(--mono); font-weight: 400; text-transform: uppercase; letter-spacing: .03em; opacity: .92; }
-.email-on-band .ec-row .field { background: rgba(255,254,245,.95); border-color: transparent; font-size: .88rem; padding-top: 9px; padding-bottom: 9px; }
-.email-on-band .ec-row .ec-go { font-size: .78rem; }
+.email-on-band .ec-lead { margin-bottom: 10px; }
+.email-on-band .ec-title { color: var(--cream); font-size: .82rem; font-family: var(--mono); font-weight: 400; text-transform: uppercase; letter-spacing: .03em; opacity: .96; }
+/* Name + email share the top row, button drops full-width beneath (module is narrow) */
+.email-on-band .ec-row { flex-wrap: wrap; }
+.email-on-band .ec-row .field, .email-on-band .ec-row .ec-go { height: 46px; box-sizing: border-box; }
+.email-on-band .ec-row .field { flex: 1 1 40%; min-width: 120px; background: rgba(255,254,245,.96); border-color: transparent; font-size: .9rem; padding: 0 14px; }
+.email-on-band .ec-row .ec-go { flex: 1 1 100%; font-size: .78rem; padding-top: 0; padding-bottom: 0; display: inline-flex; align-items: center; justify-content: center; }
 .email-on-band .ec-done-title, .email-on-band .ec-done-sub { color: var(--cream); }
 .email-on-band .ec-off { color: rgba(255,254,245,.6); }
 .email-on-band .ec-off:hover { color: var(--cream); }

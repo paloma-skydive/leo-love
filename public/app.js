@@ -327,6 +327,14 @@ function renderFeed() {
     list.appendChild(card);
     mountComments(card.querySelector(".comments-mount"));
   }
+  // Flag captions that are actually truncated so we can show a clear
+  // "…more" affordance (esp. on video tiles where the text is easy to miss).
+  requestAnimationFrame(() => {
+    list.querySelectorAll(".card-caption").forEach((c) => {
+      if (c.classList.contains("expanded")) return;
+      c.classList.toggle("clamped", c.scrollHeight - c.clientHeight > 4);
+    });
+  });
   // Remember what's now drawn, so the next auto-refresh can tell if anything
   // actually changed before rebuilding (and interrupting any playing video).
   renderedFeedSig = feedSig(ALL_POSTS);
@@ -1099,7 +1107,7 @@ function setupLightbox() {
       return;
     }
     const cap = e.target.closest(".card-caption");
-    if (cap) cap.classList.toggle("expanded");
+    if (cap) { cap.classList.toggle("expanded"); if (cap.classList.contains("expanded")) cap.classList.remove("clamped"); }
   });
 }
 
