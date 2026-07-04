@@ -380,7 +380,9 @@ async function mountComments(mount) {
 
 function renderComments(mount, comments) {
   const type = mount.dataset.type, id = mount.dataset.id;
-  const name = currentName();
+  // Name field starts BLANK — on a shared family feed we don't want it
+  // pre-filled with whoever commented last.
+  const name = "";
   const items = comments.map((c) => {
     const col = avatarColor(c.author || "?");
     const initial = (c.author || "?").trim().charAt(0).toUpperCase() || "?";
@@ -399,8 +401,8 @@ function renderComments(mount, comments) {
       <span class="ct-label">${comments.length ? comments.length + (comments.length === 1 ? " comment" : " comments") : "Add a comment"}</span>
     </button>
     <div class="comments hidden">
-      ${items}
-      <div class="comment-form">
+      ${comments.length ? `<div class="comment-list">${items}</div>` : ""}
+      <div class="comment-form${comments.length ? " has-above" : ""}">
         <input class="cf-name" type="text" placeholder="Name" value="${escapeHtml(name)}" maxlength="80" />
         <input class="cf-text" type="text" placeholder="Add a comment…" maxlength="1500" />
         <button class="comment-send" type="button">Post</button>
@@ -423,7 +425,6 @@ function renderComments(mount, comments) {
     const text = textEl.value.trim();
     if (!author) { nameEl.focus(); return; }
     if (!text) { textEl.focus(); return; }
-    rememberName(author);
     const btn = mount.querySelector(".comment-send");
     btn.disabled = true;
     try {
@@ -431,7 +432,9 @@ function renderComments(mount, comments) {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ targetType: type, targetId: id, author, text }),
       });
-      if (r.ok) { textEl.value = ""; await mountComments(mount); mount.querySelector(".comments-toggle")?.click(); }
+      // Snap the comment box back to its collapsed state after posting
+      // (the fresh render is closed by default and shows the new count).
+      if (r.ok) { textEl.value = ""; await mountComments(mount); }
     } finally { btn.disabled = false; }
   };
   mount.querySelector(".comment-send").addEventListener("click", send);
