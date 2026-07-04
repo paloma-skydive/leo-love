@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Averia+Libre:ital,wght@0,300;0,400;0,700;1,400&family=Fragment+Mono:ital@0;1&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="/styles.css?v=38" />
+<link rel="stylesheet" href="/styles.css?v=40" />
 </head>
 <body>
 
@@ -30,7 +30,7 @@
       <button type="submit" class="btn btn-red">Come on in</button>
     </form>
     <p id="login-err" class="login-err"></p>
-    <p class="login-private">&#x1F512; Private &amp; password-protected &mdash; this page is just for Leo&rsquo;s family. It&rsquo;s never public and won&rsquo;t show up on Google.</p>
+    <p class="login-private">&#x1F512; Private &amp; password-protected &mdash; this page is just for Leo&rsquo;s family &amp; friends. It&rsquo;s never public and won&rsquo;t show up on Google.</p>
   </div>
 </section>
 
@@ -62,7 +62,6 @@
       <a data-view="feed" href="#feed" class="active">Feed</a>
       <a data-view="timeline" href="#timeline">Milestones</a>
       <a data-view="family" href="#family">Family</a>
-      <a data-view="guide" href="#guide">Guide</a>
     </nav>
     <div class="clocks" id="clocks">
       <div class="clock">
@@ -100,8 +99,8 @@
       <div class="intro-grid">
         <div class="intro-left">
           <img class="intro-photo" src="/img/leo-eyes.jpg?v=3" alt="Baby Leo with his eyes open" />
-          <h2 class="section-kicker intro-kicker">Welcome to the world, Leo <span class="kicker-dot d-red"></span></h2>
-          <p class="intro-copy">This is Leo&rsquo;s little pinboard&mdash;a place for all of us, near and far, to cheer him on. Those first video hellos just get things started: drop a photo, a message or a little update for Leo, Dana &amp; Luke whenever you&rsquo;re thinking of them&mdash;just to say you&rsquo;re in their corner. The more we fill it up, the lovelier it gets.</p>
+          <h2 class="section-kicker intro-kicker">Welcome to the world, Leo <span class="kicker-dot d-red"></span><span class="info-tip"><button type="button" class="info-btn" aria-label="How to post">i</button><span class="info-pop">Post a photo, a short video or a little message for Leo &mdash; any time, from anywhere. Stuck for words? Tap the &#x21BB; for an idea.</span></span></h2>
+          <p class="intro-copy">Think of this as a pinboard for Leo, Luke &amp; Dana&mdash;a place to drop a message, a photo or a video, just to show you&rsquo;re thinking of them. Those first hellos are only the start. The more we fill it up, the lovelier it gets.</p>
         </div>
         <div class="composer">
           <div class="prompt-card" id="prompt-card">
@@ -127,7 +126,7 @@
 
     <section class="section section-cream">
       <div class="wrap wrap-feed">
-        <h2 class="section-kicker">From the family <span class="kicker-dot d-yellow"></span></h2>
+        <h2 class="section-kicker">From the family <span class="kicker-dot d-yellow"></span><span class="info-tip"><button type="button" class="info-btn" aria-label="About the feed">i</button><span class="info-pop">Everyone&rsquo;s hellos, photos and videos for Leo. Tap a name to see just their posts, and comment under any one of them.</span></span></h2>
         <div class="feed-controls">
           <div class="feed-filters" id="feed-filters"></div>
           <div class="feed-sort">
@@ -150,7 +149,7 @@
       <div class="band-text">
         <p class="eyebrow light">Around the clock</p>
         <h2 class="band-title">Loved across<br />time zones</h2>
-        <p class="band-copy">From New Zealand to Cayman and all the places in between, someone in Leo&rsquo;s family is awake and cheering him on.</p>
+        <p class="band-copy">From New Zealand to Cayman and all the places in between, someone in Leo&rsquo;s family is thinking of him, his mum and his dad.</p>
       </div>
       <div class="band-art">
         <img src="/img/leo-parents.jpg?v=2" alt="Dana and Luke each holding baby Leo skin-to-skin" />
@@ -179,7 +178,7 @@
         <details class="add-ms" id="timeline-add">
           <summary>
             <span class="add-ms-plus" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
-            <span>Add to Leo&rsquo;s timeline <em>&mdash;just for Mum &amp; Dad</em></span>
+            <span>Add to Leo&rsquo;s timeline <em>&mdash;just for Mum &amp; Dad</em></span><span class="info-tip"><button type="button" class="info-btn" aria-label="About the timeline">i</button><span class="info-pop">Two ways to update: a <b>Quick update</b> in a few taps for how Leo&rsquo;s doing, or a full <b>Milestone</b> for a bigger moment. Add either any time, even days later.</span></span>
           </summary>
           <div class="add-ms-body">
             <div class="tl-tabs">
@@ -188,7 +187,7 @@
             </div>
 
             <div class="tl-panel" id="tab-quick">
-              <p class="composer-help">A few taps for the family, on the days words feel like too much. Tap anything that fits today&mdash;no pressure, no writing needed.</p>
+              <p class="composer-help">Mini updates to show how Leo&rsquo;s doing at a glance&mdash;on the days when words feel like too much. Tap anything that fits today; no writing needed.</p>
 
               <p class="chip-label">Today, Leo was&hellip;</p>
               <div class="chips" id="chips-moment">
@@ -310,81 +309,18 @@
     <section class="section section-cream">
       <div class="wrap">
         <h2 class="section-kicker">The whole gang <span class="kicker-dot d-blue"></span></h2>
-        <p class="composer-help">Tap anyone to see what they&rsquo;ve shared.<br />Grandparents&mdash;tap your own card to choose your special name (Nana, Poppa, whatever Leo will call you).</p>
+        <p class="composer-help">Tap anyone to see what they&rsquo;ve shared.<br />Grandparents&mdash;tap your own card to choose what Leo will call you (Nana, Poppa, whatever it may be).</p>
         <div id="family-tree"></div>
       </div>
     </section>
   </main>
 
-  <!-- GUIDE VIEW (for the family) -->
-  <main id="view-guide" class="view hidden">
-    <section class="hero hero-guide">
-      <div class="hero-frame"></div>
-      <div class="hero-dots" aria-hidden="true">
-        <span class="dot d-yellow dot-a"></span>
-        <span class="dot d-red dot-b"></span>
-        <span class="dot d-yellow dot-d"></span>
-      </div>
-      <div class="hero-inner">
-        <p class="eyebrow light">Welcome &mdash; so glad you&rsquo;re here</p>
-        <h1 class="hero-name">How it works</h1>
-        <p class="hero-parents">Leo&rsquo;s private family page</p>
-      </div>
-    </section>
-
-    <section class="section section-cream">
-      <div class="wrap">
-        <p class="intro-copy gd-intro">This is a private little page for Leo&rsquo;s family &mdash; a place to follow how he&rsquo;s doing and send him your love. Here&rsquo;s everything you can do. It only takes a minute. &#x1F90D;</p>
-
-        <div class="gd-step">
-          <span class="gd-num">1</span>
-          <div>
-            <h3>Send Leo some love</h3>
-            <p>On the <b>Feed</b>, post a photo, a short video or a little message. Stuck for words? Tap the &#x21BB; for a gentle idea. This is the heart of the page &mdash; the more we add, the lovelier it gets.</p>
-          </div>
-        </div>
-
-        <div class="gd-step">
-          <span class="gd-num">2</span>
-          <div>
-            <h3>Follow his story</h3>
-            <p>The <b>Milestones</b> tab is Leo&rsquo;s journey, day by day &mdash; every little win as he grows stronger. Pop in any time to see how he&rsquo;s getting on.</p>
-          </div>
-        </div>
-
-        <div class="gd-step">
-          <span class="gd-num">3</span>
-          <div>
-            <h3>Find your place in the family</h3>
-            <p>The <b>Family</b> tab shows everyone who loves Leo, from Cayman to NZ and beyond. Tap a name to see what they&rsquo;ve shared. Grandparents &mdash; tap your own card to pick what Leo will call you.</p>
-          </div>
-        </div>
-
-        <div class="gd-step">
-          <span class="gd-num">4</span>
-          <div>
-            <h3>Get news by email</h3>
-            <p>Don&rsquo;t want to keep checking back? Pop your email in below and we&rsquo;ll gently let you know when there&rsquo;s something new &mdash; every post, or just a little round-up once a day. No app, no fuss.</p>
-            <div id="email-signup-guide" class="email-mount"></div>
-          </div>
-        </div>
-
-        <div class="gd-tip">
-          <b>&#x1F512; It&rsquo;s completely private.</b> This page isn&rsquo;t public and won&rsquo;t show up on Google &mdash; only family with the password can see it. Please keep the password within the family. &#x1F90D;
-        </div>
-
-        <div class="gd-cta-row">
-          <a class="btn btn-red" data-view="feed" href="#feed">Say hello to Leo &rarr;</a>
-        </div>
-      </div>
-    </section>
-  </main>
+  <!-- GUIDE VIEW removed: per-section ⓘ instructions replace it. Standalone parent guide lives at /guide.html -->
 
   <nav class="mobnav">
     <a data-view="feed" href="#feed" class="active"><span class="mn-ico">&#x1F90D;</span><span class="mn-lbl">Feed</span></a>
     <a data-view="timeline" href="#timeline"><span class="mn-ico">&#x2728;</span><span class="mn-lbl">Milestones</span></a>
     <a data-view="family" href="#family"><span class="mn-ico">&#x1F333;</span><span class="mn-lbl">Family</span></a>
-    <a data-view="guide" href="#guide"><span class="mn-ico">&#x1F4D6;</span><span class="mn-lbl">Guide</span></a>
   </nav>
 
   <footer class="footer">
@@ -395,6 +331,6 @@
   </footer>
 </div>
 
-<script src="/app.js?v=39"></script>
+<script src="/app.js?v=40"></script>
 </body>
 </html>

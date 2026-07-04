@@ -542,7 +542,32 @@ app.post("/api/subscribe", requireAuth, async (req, res) => {
       <div style="margin:6px 0 4px;">${btn(SITE_URL, "Open Leo&rsquo;s page \u2192")}</div>`;
     sendEmail(email, "You\u2019re signed up for Leo updates \u{1F49B}", emailShell(inner, unsubUrlFor(s)));
   }
-  res.json({ ok: true, on: !off });
+  res.json({ ok: true, on: !off, already: !off && !!wasOn });
+});
+
+// Quietly pre-add family members (parent-only, NO welcome email). Lets Amy seed
+// the list ahead of time so people land on an "already on the list" state
+// instead of an empty form. Body: { subscribers: [{ email, name }] }.
+app.post("/api/subscribe/preadd", requireParent, (req, res) => {
+  const incoming = Array.isArray(req.body?.subscribers) ? req.body.subscribers : [];
+  const list = loadSubscribers();
+  let added = 0, skipped = 0;
+  for (const item of incoming) {
+    const email = normEmail(item?.email);
+    const name = String(item?.name || "").trim().slice(0, 80);
+    if (!validEmail(email)) { skipped++; continue; }
+    let s = list.find((x) => x.email === email);
+    if (s) {
+      s.freq = "instant";
+      if (name) s.name = name;
+      if (!s.token) s.token = crypto.randomBytes(16).toString("hex");
+    } else {
+      list.push({ email, name, freq: "instant", token: crypto.randomBytes(16).toString("hex"), createdAt: new Date().toISOString() });
+      added++;
+    }
+  }
+  saveSubscribers(list);
+  res.json({ ok: true, added, skipped, total: list.filter((s) => s.freq !== "off").length });
 });
 
 // One-click unsubscribe from an email link (public, no auth needed).
@@ -750,6 +775,23 @@ app.post("/api/upload", requireAuth, (req, res) => {
   out.on("error", () => {
     if (!aborted) res.status(500).json({ error: "Something went wrong saving that." });
   });
+});
+
+// ---- Edit a post's caption / author (parent-only) ----
+// Lets Leo's mum & dad (and me on their behalf) tidy up the words under a post
+// without re-uploading the media. Only caption & author are editable.
+app.post("/api/posts/:id/edit", requireParent, async (req, res) => {
+  const id = path.basename(String(req.params.id || ""));
+  const file = path.join(POSTS_DIR, id + ".json");
+  if (!fs.existsSync(file)) return res.status(404).json({ error: "Couldn't find that post." });
+  let post: any;
+  try { post = JSON.parse(await fsp.readFile(file, "utf8")); }
+  catch { return res.status(500).json({ error: "Couldn't read that post." }); }
+  const b = req.body || {};
+  if (typeof b.caption === "string") post.caption = b.caption.slice(0, 2000);
+  if (typeof b.author === "string" && b.author.trim()) post.author = b.author.trim().slice(0, 80);
+  await fsp.writeFile(file, JSON.stringify(post, null, 2));
+  res.json({ ok: true, post });
 });
 
 // ---- Serve media with range support ----

@@ -710,3 +710,40 @@ a { color: inherit; text-decoration: none; }
   color: #555; font-size: 1rem;
 }
 .ec-done .ec-off { margin-top: 18px; }
+
+/* ---------- Section info popups (ⓘ) ---------- */
+.info-tip { position: relative; display: inline-flex; vertical-align: middle; margin-left: 8px; }
+.info-btn {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 1.5px solid var(--ink); background: transparent; color: var(--ink);
+  font-family: var(--display); font-style: italic; font-weight: 700;
+  font-size: .82rem; line-height: 1; cursor: pointer; padding: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: background .15s, color .15s, transform .15s;
+}
+.info-btn:hover { background: var(--red); border-color: var(--red); color: var(--cream); transform: scale(1.08); }
+.info-pop {
+  position: absolute; left: 50%; top: calc(100% + 12px); transform: translateX(-50%) translateY(-4px);
+  width: max-content; max-width: 260px; z-index: 40;
+  background: var(--ink); color: var(--cream);
+  font-family: var(--body); font-size: .82rem; line-height: 1.5; font-weight: 400;
+  text-transform: none; letter-spacing: 0;
+  padding: 12px 14px; border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.22);
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transition: opacity .16s, transform .16s, visibility .16s;
+}
+.info-pop b { font-weight: 700; color: #fff; }
+.info-pop::before {
+  content: ""; position: absolute; left: 50%; bottom: 100%; transform: translateX(-50%);
+  border: 7px solid transparent; border-bottom-color: var(--ink);
+}
+/* Show on hover (desktop) or when tapped open (.open, mobile) */
+.info-tip:hover .info-pop,
+.info-tip.open .info-pop {
+  opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); pointer-events: auto;
+}
+/* Keep the bubble on-screen near the right edge on small viewports */
+@media (max-width: 560px) {
+  .info-pop { max-width: 200px; }
+}

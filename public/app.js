@@ -12,20 +12,18 @@ let renderedFeedSig = null;   // signature of the posts currently drawn in the D
 let pendingFeedRefresh = false; // a refresh is waiting for a playing video to stop
 
 const PROMPTS = [
-  "Tell Leo about the day he was born and where you were when you heard.",
-  "Send Luke & Dana a message of strength for today.",
-  "Share a family memory you can't wait for Leo to be part of.",
-  "What's one thing you love about being a Fraser?",
-  "Record a quick video just saying hi to Leo.",
-  "Describe the weather and view where you are right now\u2014so Leo knows his family across the world.",
-  "Tell Leo a little about his grandparents.",
-  "What song will you sing to Leo one day?",
-  "Send Dana something only another mum would understand.",
-  "Tell Luke you're proud of the dad he's becoming.",
-  "Share a photo of something that made you smile today.",
+  "Share a baby photo of Luke or Dana\u2014let's see who Leo takes after.",
+  "Post a family tradition or game you can't wait for Leo to join in on.",
+  "See something that made you think of Leo? Film a quick video and share it.",
+  "Share a mum meme to make Dana laugh after a rough night.",
+  "Drop your best (or worst) parenting advice.",
   "What adventure are you planning for when Leo's big and strong?",
-  "Send Leo a bedtime story, even a tiny one.",
-  "Tell Leo who he's named after, or who he reminds you of.",
+  "Read Leo a bedtime story on video\u2014his mum & dad can play it to him.",
+  "Post a photo of where you are right now, so Leo sees his family's world.",
+  "Record a quick hello so Leo knows your voice.",
+  "Share a song you'll sing to Leo one day.",
+  "Who does Leo remind you of? Tell him.",
+  "Send Luke & Dana a quick message for today.",
 ];
 
 // ---------- Clocks ----------
@@ -577,6 +575,7 @@ function startApp() {
   setupCheckin();
   setupSort();
   setupEmailSignup();
+  setupInfoTips();
   loadFamily();
   loadFeed();
   tickClocks(); tickAge();
@@ -584,7 +583,7 @@ function startApp() {
   setInterval(tickAge, 1000 * 30);
   setInterval(loadFeed, 1000 * 45);
   const hash = location.hash.replace("#", "");
-  if (["timeline", "family", "guide"].includes(hash)) setView(hash);
+  if (["timeline", "family"].includes(hash)) setView(hash);
 }
 
 function setupSort() {
@@ -846,17 +845,52 @@ function wireEmailCard(card) {
     formEl.classList.add("hidden");
     doneEl.classList.remove("hidden");
   }
+  function showAlready(first) {
+    // Distinct "we already have you" greeting (e.g. Amy pre-added them).
+    const doneTitle = card.querySelector(".ec-done-title");
+    if (doneTitle) doneTitle.textContent = "You\u2019re already on the list!";
+    showDone(
+      (first ? `Hi ${escapeHtml(first)} \u2014 ` : "") +
+      `good news, you\u2019re already set to hear about Leo. We\u2019ll email you whenever there\u2019s something new. \u{1F49B}`
+    );
+  }
   function showForm() {
     doneEl.classList.add("hidden");
     formEl.classList.remove("hidden");
     status.textContent = "";
     status.className = "ec-status post-status";
+    const doneTitle = card.querySelector(".ec-done-title");
+    if (doneTitle) doneTitle.textContent = "You\u2019re all set!";
   }
 
   // If this browser has already signed up, greet them with the confirmation.
   if (localStorage.getItem("leo_email_on") === "1" && localStorage.getItem("leo_email")) {
     showDone("We&rsquo;ll email you whenever there&rsquo;s something new about Leo. \u{1F49B}");
   }
+
+  // Proactive check: when someone types an email we already have on the list
+  // (e.g. Amy pre-added them), flip straight to the "already on the list" state
+  // so they don't re-enter details they don't need to.
+  let lastChecked = "";
+  async function checkExisting() {
+    const email = (emailEl.value || "").trim().toLowerCase();
+    if (email === lastChecked) return;
+    lastChecked = email;
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return;
+    try {
+      const r = await fetch("/api/subscribe/me?email=" + encodeURIComponent(email));
+      const d = await r.json().catch(() => ({}));
+      if (d.subscriber && d.subscriber.on) {
+        localStorage.setItem("leo_email", email);
+        localStorage.setItem("leo_email_on", "1");
+        if (d.subscriber.name) localStorage.setItem("leo_email_name", d.subscriber.name);
+        const first = (d.subscriber.name || "").split(/\s+/)[0];
+        showAlready(first);
+      }
+    } catch {}
+  }
+  emailEl.addEventListener("change", checkExisting);
+  emailEl.addEventListener("blur", checkExisting);
 
   async function submit(offMode) {
     const email = (emailEl.value || "").trim();
@@ -891,11 +925,15 @@ function wireEmailCard(card) {
       localStorage.setItem("leo_email", email);
       localStorage.setItem("leo_email_on", "1");
       if (name) localStorage.setItem("leo_email_name", name);
-      const first = name ? name.split(/\s+/)[0] : "";
-      showDone(
-        (first ? `Thanks, ${escapeHtml(first)} \u2014 ` : "") +
-        `we&rsquo;ll email you whenever there&rsquo;s something new about Leo. \u{1F49B}`
-      );
+      const first = name ? name.split(/\s+/)[0] : (localStorage.getItem("leo_email_name") || "").split(/\s+/)[0];
+      if (d.already) {
+        showAlready(first);
+      } else {
+        showDone(
+          (first ? `Thanks, ${escapeHtml(first)} \u2014 ` : "") +
+          `we&rsquo;ll email you whenever there&rsquo;s something new about Leo. \u{1F49B}`
+        );
+      }
     } catch {
       status.className = "ec-status post-status err";
       status.textContent = "Connection hiccup\u2014try again.";
@@ -906,17 +944,39 @@ function wireEmailCard(card) {
 }
 
 function setupEmailSignup() {
-  const guide = document.getElementById("email-signup-guide");
   const feed = document.getElementById("email-signup-feed");
-  if (guide && !guide.dataset.wired) {
-    guide.innerHTML = emailCardHTML(false);
-    wireEmailCard(guide);
-    guide.dataset.wired = "1";
-  }
   if (feed && !feed.dataset.wired) {
     feed.innerHTML = emailCardHTML(true);
     wireEmailCard(feed);
     feed.dataset.wired = "1";
+  }
+}
+
+// ---------- Section info popups (ⓘ brief instructions per section) ----------
+// Replaces the old standalone Guide: each section heading has a small ⓘ that
+// shows a one-line instruction on hover (desktop) or tap (touch).
+function setupInfoTips() {
+  const tips = [...document.querySelectorAll(".info-tip")];
+  tips.forEach((tip) => {
+    if (tip.dataset.wired) return;
+    tip.dataset.wired = "1";
+    const btn = tip.querySelector(".info-btn");
+    if (!btn) return;
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const wasOpen = tip.classList.contains("open");
+      tips.forEach((t) => t.classList.remove("open")); // one at a time
+      if (!wasOpen) tip.classList.add("open");
+    });
+  });
+  // Tap/click anywhere outside a tip closes any open tip.
+  if (!document.body.dataset.infoTipDismiss) {
+    document.body.dataset.infoTipDismiss = "1";
+    document.addEventListener("click", (e) => {
+      if (e.target && e.target.closest && e.target.closest(".info-tip")) return;
+      document.querySelectorAll(".info-tip.open").forEach((t) => t.classList.remove("open"));
+    });
   }
 }
 
