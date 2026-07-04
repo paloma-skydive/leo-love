@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Averia+Libre:ital,wght@0,300;0,400;0,700;1,400&family=Fragment+Mono:ital@0;1&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="/styles.css?v=98" />
+<link rel="stylesheet" href="/styles.css?v=99" />
 <style>
   /* ---- Guide: calm, uniform, editorial. Aligned to the main page's type scale. ---- */
   .hero-guide-page { background: var(--ink); color: var(--cream); min-height: 42vh; padding-top: 52px; padding-bottom: 56px; }
@@ -17,6 +17,11 @@
   .hero-guide-page .dot-c { z-index: 2; }
   /* Sub sits on one line (no max-width wrap). */
   .hero-guide-page .sub { font-family: var(--body); font-size: .95rem; opacity: .82; margin: 12px auto 0; position: relative; z-index: 5; }
+
+  /* On phones the decorative dots crowd the title/subtitle — hide them there. */
+  @media (max-width: 620px) {
+    .hero-guide-page .hero-dots { display: none; }
+  }
 
   /* Wider, calmer column */
   /* Wider, calmer column. z-index sits ABOVE the hero's inset frame line (z-index 4)
