@@ -290,9 +290,9 @@ a { color: inherit; text-decoration: none; }
 /* two-column welcome: text left, composer right (stacks on mobile) */
 .intro-grid {
   max-width: 980px; margin: 0 auto;
-  display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: stretch;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start;
 }
-.intro-left { align-self: stretch; display: flex; }
+.intro-left { align-self: start; display: flex; }
 .intro-card {
   position: relative; flex: 1;
   display: flex; flex-direction: column;
@@ -309,18 +309,18 @@ a { color: inherit; text-decoration: none; }
   border-radius: 50%; box-shadow: 0 10px 26px rgba(21,20,20,.22);
 }
 .intro-left .eyebrow { margin-bottom: 10px; }
-/* Welcome header matches the composer "Drop an update" title size */
-.intro-card .intro-kicker { margin: 0 0 14px; }
-.intro-copy { color: var(--soft); margin: 0; font-size: .96rem; line-height: 1.6; max-width: 42ch; }
+/* Welcome header lines up with the composer title (same margins + size) */
+.intro-card .intro-kicker { margin: 4px 0 10px; }
+.intro-copy { color: var(--soft); margin: 0; font-size: .9rem; line-height: 1.55; max-width: 42ch; }
 /* Intro lead sits in its own soft-yellow module */
-.intro-lead { margin: 0 0 4px; font-size: .96rem; line-height: 1.55;
-  background: var(--yellow); color: var(--ink); border-radius: 12px; padding: 14px 16px; }
+.intro-lead { margin: 0 0 4px; font-size: .88rem; line-height: 1.5;
+  background: var(--yellow); color: var(--ink); border-radius: 12px; padding: 12px 15px; }
 /* Scannable icon rows (replaces the dense bullet list) */
-.intro-points { list-style: none; margin: 20px 0 0; padding: 0; display: flex; flex-direction: column; gap: 15px; flex: 1; }
-.intro-points .ip { display: flex; align-items: flex-start; gap: 13px; font-size: .95rem; line-height: 1.5; color: var(--ink); }
-.intro-points .ip-ico { flex-shrink: 0; width: 34px; height: 34px; border-radius: 50%;
+.intro-points { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.intro-points .ip { display: flex; align-items: flex-start; gap: 12px; font-size: .88rem; line-height: 1.45; color: var(--ink); }
+.intro-points .ip-ico { flex-shrink: 0; width: 30px; height: 30px; border-radius: 50%;
   background: var(--cream); display: inline-flex; align-items: center; justify-content: center;
-  font-size: 1.05rem; box-shadow: inset 0 0 0 1.5px #efe9d6; }
+  font-size: .98rem; box-shadow: inset 0 0 0 1.5px #efe9d6; }
 .intro-list { color: var(--soft); margin: 14px 0 0; padding-left: 1.15em; font-size: .96rem; line-height: 1.55; max-width: 42ch; }
 .intro-list li { margin-bottom: 8px; }
 .intro-list li::marker { color: var(--red); }
@@ -337,17 +337,20 @@ a { color: inherit; text-decoration: none; }
   transition: transform .15s, box-shadow .15s;
 }
 .intro-toggle:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(21,20,20,.14); }
-.intro-toggle::before { content: "\1F441"; font-size: .95rem; }
+.intro-toggle::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--red); flex: none; }
 .intro-toggle::after { content: "\25B4"; font-size: .78rem; line-height: 1; }
 .intro-section.collapsed .intro-toggle::after { content: "\25BE"; }
 .intro-grid-wrap { overflow: hidden; transition: max-height .34s ease, opacity .28s ease; }
 .intro-section.collapsed .intro-grid { display: none; }
+/* Collapsed: drop the dead space above Leo's Feed pill */
+.intro-section.collapsed { padding-top: 28px; padding-bottom: 0; }
+.intro-section.collapsed .intro-bar { margin-bottom: 0; }
 @media (max-width: 760px) {
   .intro-grid { grid-template-columns: 1fr; gap: 24px; }
   .intro-card { padding: 24px 22px 26px; }
   .hero-photo { width: 108px; height: 108px; bottom: -46px; left: 8%; }
-  .intro-card .intro-kicker { font-size: 1.55rem; margin: 0 0 12px; }
-  .intro-copy, .intro-list { font-size: .96rem; max-width: none; }
+  .intro-card .intro-kicker { font-size: 1.3rem; margin: 4px 0 10px; }
+  .intro-copy, .intro-list { font-size: .9rem; max-width: none; }
 }
 
 /* Leo's Feed section header: centered pill module */
@@ -372,15 +375,17 @@ a { color: inherit; text-decoration: none; }
   padding: 28px 26px; box-shadow: var(--shadow);
 }
 .composer-help { color: var(--soft); margin: 0 0 16px; font-size: 1rem; }
-.fam-intro { text-align: center; margin: 0 auto 22px; max-width: 40ch; }
-.composer-title { font-family: var(--display); font-weight: 700; font-size: 1.5rem; margin: 4px 0 10px; display: flex; align-items: center; gap: 9px; }
+.fam-intro { text-align: center; margin: 0 auto 22px; max-width: none; }
+.composer-title { font-family: var(--display); font-weight: 700; font-size: 1.3rem; margin: 4px 0 10px; display: flex; align-items: center; gap: 9px; }
 .composer-title .kicker-dot { width: 11px; height: 11px; }
-.prompt-lead { font-family: var(--body); color: var(--soft); font-size: .96rem; margin: 0 0 14px; line-height: 1.55; }
+/* Composer intro copy sits in its own soft-blue module (not yellow — that's the idea card) */
+.prompt-lead { font-family: var(--body); color: var(--ink); font-size: .88rem; margin: 0 0 12px; line-height: 1.5;
+  background: rgba(53,108,192,.10); border-radius: 12px; padding: 12px 15px; }
 .prompt-card {
-  background: var(--yellow); border-radius: 12px; padding: 14px 16px;
+  background: var(--yellow); border-radius: 12px; padding: 12px 15px;
   display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
-  font-family: var(--body); font-weight: 400; font-size: .96rem;
-  line-height: 1.55;
+  font-family: var(--body); font-weight: 400; font-size: .88rem;
+  line-height: 1.5;
 }
 .prompt-card span { flex: 1; }
 .prompt-hint { font-family: var(--mono); text-transform: uppercase; letter-spacing: .02em; font-size: .68rem; color: var(--soft); margin: 0 0 16px; text-align: center; }
@@ -436,7 +441,7 @@ a { color: inherit; text-decoration: none; }
 .composer-who { position: relative; margin-bottom: 2px; }
 .who-btn { display: flex; align-items: center; justify-content: space-between; gap: 10px;
   width: 100%; text-align: left; cursor: pointer; background: var(--cream); }
-.who-btn-label { color: var(--ink); font-size: 1rem; }
+.who-btn-label { color: var(--ink); font-size: 1rem; font-weight: 400; }
 .who-btn-label.placeholder { color: #9a968a; }
 .who-btn-chevron { flex-shrink: 0; width: 0; height: 0; border-left: 5px solid transparent;
   border-right: 5px solid transparent; border-top: 6px solid var(--ink); transition: transform .18s; }
@@ -488,6 +493,21 @@ a { color: inherit; text-decoration: none; }
   transition: background .15s, transform .15s;
 }
 .card-media:hover .play-badge { background: var(--red); transform: translate(-50%,-50%) scale(1.06); }
+/* Text-only cards get a brand-coloured tile (same fixed height as a photo/video
+   tile) so every card lines up and the grid stays even. */
+.card-tile { flex-direction: column; text-align: center; padding: 22px 20px; }
+.card-tile .tile-inner { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px; max-height: 100%; overflow: hidden; }
+.card-tile .tile-emoji { font-size: 2.1rem; line-height: 1; }
+.card-tile .tile-title { font-family: var(--display); font-weight: 700; font-size: 1.16rem; line-height: 1.25; margin: 0;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.card-tile .tile-body { font-family: var(--body); font-size: .9rem; line-height: 1.45; margin: 0;
+  display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; opacity: .95; }
+.card-tile .tile-quote { font-family: var(--display); font-size: 1.2rem; line-height: 1.4; margin: 0;
+  display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden; }
+.card-tile-red { background: var(--red); color: var(--cream); }
+.card-tile-blue { background: var(--blue); color: var(--cream); }
+.card-tile-yellow { background: var(--yellow); color: var(--ink); }
+.card-tile .ms-badge { background: rgba(255,254,245,.9); color: var(--ink); }
 .card-body { padding: 16px 18px 18px; display: flex; flex-direction: column; flex: 1; }
 /* Milestone feed card: title as a small header above the story */
 .card-ms-title { font-family: var(--display); font-weight: 700; font-size: 1.08rem; line-height: 1.3; margin: 0 0 2px; color: var(--ink); }
@@ -597,7 +617,7 @@ a { color: inherit; text-decoration: none; }
 .feed-controls { display: flex; flex-direction: column; gap: 14px; margin: 18px 0 6px; }
 /* Horizontal filter scroller with a fade + arrow on each side */
 .feed-filters-wrap { position: relative; display: flex; align-items: center; }
-.feed-filters { display: flex; gap: 26px; overflow-x: auto; padding: 10px 2px 12px; -webkit-overflow-scrolling: touch; scrollbar-width: none; scroll-behavior: smooth; flex: 1; min-width: 0; }
+.feed-filters { display: flex; gap: 26px; overflow-x: auto; padding: 10px 2px 12px; -webkit-overflow-scrolling: touch; scrollbar-width: none; flex: 1; min-width: 0; }
 .feed-filters::-webkit-scrollbar { display: none; }
 /* Scroll arrows — on-brand round buttons (white circle, ink chevron, red on hover) */
 .ff-arrow {
@@ -881,6 +901,7 @@ a { color: inherit; text-decoration: none; }
 }
 .footer-dot { width: 13px; height: 13px; border-radius: 50%; display: inline-block; margin: 0 3px; }
 .footer p { margin: 14px 0 0; font-family: var(--mono); font-size: .8rem; text-transform: uppercase; letter-spacing: .02em; }
+.footer .footer-sentiment { font-family: var(--display); text-transform: none; letter-spacing: 0; font-size: 1.15rem; line-height: 1.5; color: rgba(255,254,245,.92); max-width: 34ch; margin: 18px auto 0; }
 /* Discreet parent-mode unlock for Luke & Dana */
 .parent-mode-btn {
   margin: 18px auto 0; display: inline-block; background: none; border: none; cursor: pointer;
@@ -1055,6 +1076,12 @@ a { color: inherit; text-decoration: none; }
 .lb-inner { display: flex; flex-direction: column; align-items: center; gap: 16px; max-width: min(1000px, 96vw); max-height: 92vh; }
 .lb-stage { display: flex; align-items: center; justify-content: center; max-height: 78vh; }
 .lb-stage img, .lb-stage video { max-width: 100%; max-height: 78vh; width: auto; height: auto; border-radius: 14px; box-shadow: 0 20px 60px rgba(0,0,0,.4); display: block; background: #000; }
+/* Text-only lightbox (copy milestone / text post) */
+.lb-textcard { max-width: 560px; width: 100%; background: var(--cream); border-radius: 18px; padding: 40px 34px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,.4); }
+.lb-tc-emoji { display: block; font-size: 2.6rem; line-height: 1; margin-bottom: 14px; }
+.lb-tc-title { font-family: var(--display); font-weight: 700; font-size: 1.7rem; line-height: 1.2; margin: 0; color: var(--ink); }
+.lb-tc-body { font-family: var(--body); font-size: 1rem; line-height: 1.6; margin: 14px 0 0; color: var(--ink); white-space: pre-wrap; }
+.lb-tc-quote { font-family: var(--display); font-size: 1.5rem; line-height: 1.4; margin: 0; color: var(--ink); white-space: pre-wrap; }
 .lb-meta { text-align: left; max-width: 620px; width: 100%; color: var(--ink); background: var(--cream); border-radius: 14px; padding: 16px 20px; box-shadow: 0 12px 40px rgba(0,0,0,.35); }
 .lb-author { font-family: var(--mono); text-transform: uppercase; letter-spacing: .05em; font-size: .72rem; color: var(--red); margin: 0 0 6px; }
 .lb-title { font-family: var(--display); font-weight: 700; font-size: 1.32rem; line-height: 1.25; margin: 0; color: var(--ink); }

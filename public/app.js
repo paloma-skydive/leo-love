@@ -8,7 +8,9 @@ let ALL_POSTS = [];
 let FAMILY = [];
 let MILESTONES = [];
 let feedFilter = null;
-let feedSort = "newest";
+// Default landing view scatters milestones evenly through the grid (rather than
+// clumping them at the bottom by their June dates). Newest/Oldest go strict-date.
+let feedSort = "scatter";
 
 // Pencil icon for the parent-only edit control on posts/milestones.
 const PENCIL_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
@@ -26,7 +28,6 @@ const PROMPTS = [
   "Read Leo a bedtime story on video\u2014his mum & dad can play it to him.",
   "Post a photo of where you are right now, so Leo sees his family's world.",
   "Record a quick hello so Leo knows your voice.",
-  "Share a song you'll sing to Leo one day.",
   "Who does Leo remind you of? Tell him.",
   "Send Luke & Dana a quick message for today.",
 ];
@@ -201,12 +202,33 @@ function updateFilterArrows() {
   next.hidden = !overflow || row.scrollLeft >= row.scrollWidth - row.clientWidth - 2;
 }
 
+// Eased, custom-duration horizontal glide (native "smooth" jumps too fast/hard
+// on short rows — this makes the filter arrows feel like a gentle slide).
+function glideScroll(el, delta, duration = 480) {
+  if (el._gliding) cancelAnimationFrame(el._gliding);
+  const start = el.scrollLeft;
+  const max = el.scrollWidth - el.clientWidth;
+  const target = Math.max(0, Math.min(max, start + delta));
+  const dist = target - start;
+  if (!dist) return;
+  const t0 = performance.now();
+  const ease = (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2); // easeInOutQuad
+  const step = (now) => {
+    const t = Math.min(1, (now - t0) / duration);
+    el.scrollLeft = start + dist * ease(t);
+    if (t < 1) el._gliding = requestAnimationFrame(step);
+    else el._gliding = null;
+  };
+  el._gliding = requestAnimationFrame(step);
+}
 function setupFilterArrows() {
   const row = $("feed-filters"), prev = $("ff-prev"), next = $("ff-next");
   if (!row) return;
-  const step = () => Math.max(240, row.clientWidth * 1.1);
-  if (prev) prev.addEventListener("click", () => row.scrollBy({ left: -step(), behavior: "smooth" }));
-  if (next) next.addEventListener("click", () => row.scrollBy({ left: step(), behavior: "smooth" }));
+  // A gentle nudge — about two-thirds of the visible row, so chips slide into view
+  // rather than leaping a whole screen at a time.
+  const step = () => Math.max(160, row.clientWidth * 0.66);
+  if (prev) prev.addEventListener("click", () => glideScroll(row, -step()));
+  if (next) next.addEventListener("click", () => glideScroll(row, step()));
   row.addEventListener("scroll", updateFilterArrows, { passive: true });
   window.addEventListener("resize", updateFilterArrows);
 }
@@ -271,6 +293,36 @@ async function loadFeed() {
   renderFeed();
 }
 
+// Stable pseudo-random key from an id (so a "scatter" looks random but never
+// changes between renders / auto-refreshes).
+function hashId(id) {
+  let h = 2166136261;
+  const s = String(id);
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return h >>> 0;
+}
+// Spread milestones evenly through the family posts. Family posts stay newest-first;
+// milestones are interleaved at even intervals (in a stable pseudo-random order),
+// so they're scattered across the grid rather than clumped at the bottom by date.
+function scatterFeed(posts) {
+  const fam = posts.filter((p) => !p.fromMilestone)
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  const ms = posts.filter((p) => p.fromMilestone)
+    .sort((a, b) => hashId(a.id) - hashId(b.id));
+  if (!ms.length) return fam;
+  if (!fam.length) return ms;
+  const total = fam.length + ms.length;
+  const step = total / ms.length;
+  const out = [];
+  let fi = 0, mi = 0, nextMs = step / 2;
+  for (let i = 0; i < total; i++) {
+    if (mi < ms.length && i >= Math.floor(nextMs)) { out.push(ms[mi++]); nextMs += step; }
+    else if (fi < fam.length) out.push(fam[fi++]);
+    else if (mi < ms.length) out.push(ms[mi++]);
+  }
+  return out;
+}
+
 function renderFeed() {
   const list = $("feed-list");
   let posts = ALL_POSTS.slice();
@@ -280,6 +332,11 @@ function renderFeed() {
     // doesn't reshuffle under them. New posts (not in the order) fall to the end.
     const idx = (id) => { const i = shuffleOrder.indexOf(id); return i === -1 ? 1e9 : i; };
     posts.sort((a, b) => idx(a.id) - idx(b.id));
+  } else if (feedSort === "scatter") {
+    // Default view: spread the milestones evenly through the family posts instead
+    // of letting them clump at the bottom by date. Deterministic (a stable hash of
+    // each id) so auto-refresh never reshuffles under the reader.
+    posts = scatterFeed(posts);
   } else {
     posts.sort((a, b) => {
       const d = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
@@ -291,25 +348,33 @@ function renderFeed() {
   for (const p of posts) {
     const card = document.createElement("article");
     const hasMedia = !!p.mediaFile;
-    card.className = hasMedia ? "card" : "card card-text";
+    card.className = "card";
     const src = `/media/${p.mediaFile}`;
     const media = p.mediaType === "video"
       ? `<video src="${src}#t=0.1" playsinline preload="metadata" muted></video><span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>`
       : `<img src="${src}" alt="" />`;
     const initial = (p.author || "?").trim().charAt(0).toUpperCase() || "?";
     const col = avatarColor(p.author || "?");
-    const capClass = hasMedia ? "card-caption" : "card-caption card-caption-text";
+    // Media cards keep the caption in the body below the photo. Text-only cards
+    // (copy milestones + text posts) carry their message on a brand-coloured tile
+    // instead, so every card is the same height and the grid lines stay even.
     let cap = "";
-    if (p.fromMilestone && p.title) {
-      // Milestone cards: title reads as a header, story sits below it.
-      const body = p.body ? `<p class="${capClass}" tabindex="0" title="Tap to read it all">${escapeHtml(p.body)}</p>` : "";
-      // Copy-only milestones have no media tile to carry the badge, so show it here.
-      const inlineBadge = hasMedia ? "" : `<span class="ms-badge ms-badge-inline">\u2728 Milestone</span>`;
-      cap = `${inlineBadge}<h4 class="card-ms-title">${escapeHtml(p.title)}</h4>${body}`;
-    } else if (p.caption) {
-      cap = `<p class="${capClass}" tabindex="0" title="Tap to read it all">${escapeHtml(p.caption)}</p>`;
+    if (hasMedia && p.fromMilestone && p.title) {
+      const body = p.body ? `<p class="card-caption" tabindex="0" title="Tap to read it all">${escapeHtml(p.body)}</p>` : "";
+      cap = `<h4 class="card-ms-title">${escapeHtml(p.title)}</h4>${body}`;
+    } else if (hasMedia && p.caption) {
+      cap = `<p class="card-caption" tabindex="0" title="Tap to read it all">${escapeHtml(p.caption)}</p>`;
     }
-    const where = p.posterTz ? " \u00b7 " + shortTz(p.posterTz) : "";
+    const where = p.posterTz ? shortTz(p.posterTz) : "";
+    // Milestones keep their date stamp; family posts show no date (just location if
+    // any) so the grid reads cleanly on first view.
+    let whenText;
+    if (p.fromMilestone) {
+      whenText = escapeHtml(p.dateText || "");
+      if (where) whenText += (whenText ? " \u00b7 " : "") + where;
+    } else {
+      whenText = where;
+    }
     const badge = p.fromMilestone ? `<span class="ms-badge">\u2728 Milestone</span>` : "";
     // Milestone-derived cards share the milestone's own comment thread.
     const cType = p.fromMilestone ? "milestone" : "post";
@@ -317,9 +382,18 @@ function renderFeed() {
     const extra = mediaList(p).length - 1;
     const countBadge = extra > 0 ? `<span class="media-count" aria-hidden="true"><svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M4 6h12v10H4z" opacity=".5"/><path d="M8 4h12v12H8z"/></svg> +${extra}</span>` : "";
     const msLbAttrs = p.fromMilestone ? ` data-emoji="${escapeHtml(p.emoji || "")}" data-title="${escapeHtml(p.title || "")}" data-body="${escapeHtml(p.body || "")}"` : "";
-    const mediaBlock = hasMedia
-      ? `<div class="card-media" role="button" tabindex="0" data-lightbox="${src}" data-type="${p.mediaType}" data-caption="${escapeHtml(p.caption || "")}" data-author="${escapeHtml(p.author || "Someone")}"${msLbAttrs}>${media}${badge}${countBadge}</div>`
-      : "";
+    let mediaBlock;
+    if (hasMedia) {
+      mediaBlock = `<div class="card-media" role="button" tabindex="0" data-lightbox="${src}" data-type="${p.mediaType}" data-caption="${escapeHtml(p.caption || "")}" data-author="${escapeHtml(p.author || "Someone")}"${msLbAttrs}>${media}${badge}${countBadge}</div>`;
+    } else {
+      // Brand-coloured text tile (fixed height like a photo/video tile). Tap opens
+      // the lightbox to read the whole thing.
+      const tint = ["card-tile-red", "card-tile-blue", "card-tile-yellow"][hashId(p.id) % 3];
+      const tileInner = p.fromMilestone
+        ? `${p.emoji ? `<span class="tile-emoji">${escapeHtml(p.emoji)}</span>` : ""}<h4 class="tile-title">${escapeHtml(p.title || "")}</h4>${p.body ? `<p class="tile-body">${escapeHtml(p.body)}</p>` : ""}`
+        : `<p class="tile-quote">${escapeHtml(p.caption || "")}</p>`;
+      mediaBlock = `<div class="card-media card-tile ${tint}" role="button" tabindex="0" data-lightbox="" data-type="text" data-caption="${escapeHtml(p.caption || "")}" data-author="${escapeHtml(p.author || "Someone")}"${msLbAttrs}><div class="tile-inner">${tileInner}</div>${badge}</div>`;
+    }
     // Parents (Luke & Dana) get a small pencil to fix their own posts/milestones.
     const editBtn = IS_PARENT
       ? `<button type="button" class="edit-btn" data-edit-kind="${p.fromMilestone ? "milestone" : "post"}" data-edit-id="${escapeHtml(p.fromMilestone ? p.milestoneId : p.id)}" aria-label="Edit" title="Edit">${PENCIL_SVG}</button>`
@@ -331,7 +405,7 @@ function renderFeed() {
           <div class="avatar" style="background:${col}">${escapeHtml(initial)}</div>
           <div>
             <div class="card-who">${escapeHtml(p.author || "Someone")}</div>
-            <div class="card-when">${timeAgo(p.createdAt)}${where}</div>
+            <div class="card-when">${whenText}</div>
           </div>
           ${editBtn}
         </div>
@@ -1229,6 +1303,21 @@ function wireEmailCard(card) {
 function openLightbox({ src, type, caption, author, emoji, title, body }) {
   const lb = $("lightbox");
   const stage = $("lb-stage");
+  // Text-only card (copy milestone or text post): show the message on a card
+  // rather than a media element.
+  if (type === "text" || !src) {
+    const inner = title
+      ? `${emoji ? `<span class="lb-tc-emoji">${escapeHtml(emoji)}</span>` : ""}<h3 class="lb-tc-title">${escapeHtml(title)}</h3>${body ? `<p class="lb-tc-body">${escapeHtml(body)}</p>` : ""}`
+      : `<p class="lb-tc-quote">${escapeHtml(caption || "")}</p>`;
+    stage.innerHTML = `<div class="lb-textcard">${inner}</div>`;
+    $("lb-author").textContent = author || "";
+    $("lb-title").style.display = "none";
+    $("lb-caption").style.display = "none";
+    lb.classList.remove("hidden");
+    lb.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+    return;
+  }
   stage.innerHTML = type === "video"
     ? `<video src="${src}" controls playsinline autoplay></video>`
     : `<img src="${src}" alt="" />`;
@@ -1554,12 +1643,11 @@ function setupIntroToggle() {
     btn.setAttribute("aria-expanded", String(!collapsed));
     btn.textContent = collapsed ? "Show welcome & post" : "Hide welcome";
   };
-  // Default expanded on first visit; remember the reader's choice after that.
-  apply(localStorage.getItem("leoWelcomeCollapsed") === "1");
+  // Always land on the open/expanded state (Amy's ask) — don't persist collapse across visits.
+  apply(false);
   btn.addEventListener("click", () => {
     const collapsed = !section.classList.contains("collapsed");
     apply(collapsed);
-    try { localStorage.setItem("leoWelcomeCollapsed", collapsed ? "1" : "0"); } catch (e) {}
   });
 }
 

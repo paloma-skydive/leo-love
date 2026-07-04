@@ -643,6 +643,7 @@ app.get("/api/feed", requireAuth, async (_req, res) => {
       mediaType: m.mediaType,
       media: Array.isArray(m.media) && m.media.length ? m.media : (m.mediaFile ? [{ file: m.mediaFile, type: m.mediaType || "image" }] : []),
       createdAt: m.sortISO || m.createdAt || new Date().toISOString(),
+      dateText: m.dateText || "",
       fromMilestone: true,
       milestoneId: m.id,
     }));
