@@ -37,18 +37,18 @@ const FEED_ORDER: string[] = [
   "mqrjknqlff90fa7b",        // 3  Jacki (Nana)
   "mqs01fk0ec11a71e",        // 4  John (Poppa)
   "ms:mr68k0xueb9ffc",       // 5  Home at last
-  "19f0d093196b3e04b",       // 6  Antony + Nicky
+  "mr5r9dpb42a1c7d5",        // 6  Ra
   "ms:mr68k0qj515948",       // 7  Leo’s ears work!
-  "19f0d225e57b8c57d",       // 8  Sam
-  "19f0d0b4628a79b54",       // 9  Mama (Great-Grandma)
+  "19f0d093196b3e04b",       // 8  Ant + Nicky (Antony)
+  "19f0d225e57b8c57d",       // 9  Sam
   "ms:ms19f0d20795b353ac1",  // 10 Graduated to a cot!
-  "mqtifrcs92aad18f",        // 11 Roland
+  "19f0d0b4628a79b54",       // 11 Great Grandma (Mama)
   "ms:mr65otxi8886f5",       // 12 Making his mark
-  "19f0d0b76dd81bfac",       // 13 Suzanne, Adriano & Dario
-  "ms:mr65os719354ed",       // 14 Off breathing support
+  "ms:mr65os719354ed",       // 13 Off breathing support
+  "19f0d0b76dd81bfac",       // 14 Suzanne, Adriano & Dario
   "mqskwzql95e9dc0b",        // 15 Ant
-  "19f0d0b6dc50a69a0",       // 16 Aunty Janet
-  "ms:eating-more",          // 17 Going from strength to strength
+  "ms:eating-more",          // 16 Going from strength to strength
+  "mr5pgqgqe9cb8e1b",        // 17 Marlow
   "19f0d20e1dbccc86f",       // 18 Matt
   "ms:incubator-cuddles",    // 19 Leo’s first cuddles!
   "19f0d0b9fc290ee56",       // 20 Kirsty
@@ -57,6 +57,9 @@ const FEED_ORDER: string[] = [
   "ms:first-days",           // 23 Making himself at home
   "mqs0ppq7a6e4124a",        // 24 Ryleigh
   "ms:born",                 // 25 Leo arrives
+  // Not in Amy's list — parked here at the end pending her call:
+  "mqtifrcs92aad18f",        // Roland
+  "19f0d0b6dc50a69a0",       // Aunty Janet
 ];
 
 // ---- First-boot seed ----
