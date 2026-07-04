@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Averia+Libre:ital,wght@0,300;0,400;0,700;1,400&family=Fragment+Mono:ital@0;1&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="/styles.css?v=65" />
+<link rel="stylesheet" href="/styles.css?v=66" />
 </head>
 <body>
 
@@ -189,71 +189,21 @@
       <div class="add-ms-wrap">
         <details class="add-ms" id="timeline-add">
           <summary>
-            <span class="info-tip"><button type="button" class="info-btn" aria-label="How updates work">🦁</button><span class="info-pop">Two ways to update:<br><b>1. Mini Update</b>&mdash;a few words or a pic to share how Leo&rsquo;s doing<br><b>2. Milestone</b>&mdash;for our main man&rsquo;s bigger moments</span></span>
-            <span class="add-ms-title">Luke + Dana: update the fam on how Leo&rsquo;s doing</span>
+            <span class="add-ms-title">Luke + Dana: Log Leo&rsquo;s Milestone&rsquo;s Here!</span>
             <span class="add-ms-plus" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
           </summary>
           <div class="add-ms-body">
-            <div class="tl-tabs">
-              <button type="button" class="tl-tab active" data-tab="quick">Mini Update</button>
-              <button type="button" class="tl-tab" data-tab="milestone">Milestone</button>
-            </div>
-
-            <div class="tl-panel" id="tab-quick">
-              <p class="chip-label">How&rsquo;s Leo today?</p>
-              <div class="chips tiles" id="chips-moment">
-                <button type="button" class="chip" data-emoji="&#x1F634;" data-word="sleepy"><span class="chip-emoji">&#x1F634;</span><span class="chip-word">Sleepy</span></button>
-                <button type="button" class="chip" data-emoji="&#x1F60C;" data-word="settled"><span class="chip-emoji">&#x1F60C;</span><span class="chip-word">Settled</span></button>
-                <button type="button" class="chip" data-emoji="&#x1F90D;" data-word="snuggly"><span class="chip-emoji">&#x1F90D;</span><span class="chip-word">Snuggly</span></button>
-                <button type="button" class="chip" data-emoji="&#x1F37C;" data-word="feeding well"><span class="chip-emoji">&#x1F37C;</span><span class="chip-word">Good feeds</span></button>
-                <button type="button" class="chip" data-emoji="&#x1F440;" data-word="bright-eyed"><span class="chip-emoji">&#x1F440;</span><span class="chip-word">Bright eyed</span></button>
-                <button type="button" class="chip" data-emoji="&#x1F63E;" data-word="a bit scratchy"><span class="chip-emoji">&#x1F63E;</span><span class="chip-word">Scratchy</span></button>
-                <button type="button" class="chip chip-add" id="chip-add-own"><span class="chip-emoji">&#x2795;</span><span class="chip-word">Your own</span></button>
-              </div>
-              <div class="chip-own hidden" id="chip-own-row">
-                <input id="ci-own-emoji" class="field chip-own-emoji" maxlength="4" placeholder="&#x1F642;" aria-label="Emoji" />
-                <input id="ci-own-word" class="field chip-own-word" maxlength="24" placeholder="Add your own&hellip;" aria-label="Your own state" />
-                <button type="button" class="chip-own-add" id="ci-own-add">Add</button>
-              </div>
-
-              <div class="ms-field mini-gap">
-                <span>Date</span>
-                <div class="datepick">
-                  <button type="button" class="dp-field"><span class="dp-val dp-placeholder">Pick a date</span><svg class="dp-ico" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4.5" width="18" height="17" rx="2.5"/><line x1="16" y1="2.5" x2="16" y2="6.5"/><line x1="8" y1="2.5" x2="8" y2="6.5"/><line x1="3" y1="9.5" x2="21" y2="9.5"/></svg></button>
-                  <input type="hidden" id="ci-date" />
-                </div>
-              </div>
-              <div class="ms-field">
-                <span>Leo&rsquo;s vibe today:</span>
-                <input id="ci-note" type="text" class="field" placeholder="As few or as many words as you want" maxlength="280" />
-              </div>
-              <label class="filepick" id="ci-filepick">
-                <input id="ci-file" type="file" accept="image/*,video/*" hidden />
-                <span id="ci-filepick-label">&#x1F4F7;  Add a photo or video (optional)</span>
-              </label>
-              <div id="ci-preview" class="preview hidden"></div>
-              <div class="ms-field">
-                <span>From</span>
-                <div class="who-pick" id="ci-who">
-                  <button type="button" class="who-btn" data-who="Dana">&#x1F49B; Dana</button>
-                  <button type="button" class="who-btn" data-who="Luke">&#x1F499; Luke</button>
-                </div>
-              </div>
-              <button id="ci-save" class="btn btn-blue full" type="button">Post mini update</button>
-              <div id="ci-status" class="post-status"></div>
-            </div>
-
-            <div class="tl-panel hidden" id="tab-milestone">
+            <div class="tl-panel" id="tab-milestone">
               <div class="ms-field">
                 <span>Date</span>
                 <div class="datepick">
-                  <button type="button" class="dp-field"><span class="dp-val dp-placeholder">Pick a date</span><svg class="dp-ico" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4.5" width="18" height="17" rx="2.5"/><line x1="16" y1="2.5" x2="16" y2="6.5"/><line x1="8" y1="2.5" x2="8" y2="6.5"/><line x1="3" y1="9.5" x2="21" y2="9.5"/></svg></button>
+                  <button type="button" class="dp-field"><svg class="dp-ico" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4.5" width="18" height="17" rx="2.5"/><line x1="16" y1="2.5" x2="16" y2="6.5"/><line x1="8" y1="2.5" x2="8" y2="6.5"/><line x1="3" y1="9.5" x2="21" y2="9.5"/></svg><span class="dp-val dp-placeholder">Pick a date</span></button>
                   <input type="hidden" id="ms-date" />
                 </div>
               </div>
               <label class="ms-field">
                 <span>Title</span>
-                <input id="ms-title" type="text" class="field" placeholder="e.g. Reached birth weight" maxlength="140" />
+                <input id="ms-title" type="text" class="field" placeholder="e.g. Reached birth weight!" maxlength="140" />
               </label>
               <input id="ms-emoji" type="hidden" />
               <div class="ms-field">
@@ -264,7 +214,7 @@
                   <button type="button" class="eq" data-emoji="&#x1F37C;">&#x1F37C;</button>
                   <button type="button" class="eq" data-emoji="&#x1F354;">&#x1F354;</button>
                   <button type="button" class="eq" data-emoji="&#x1F4AA;">&#x1F4AA;</button>
-                  <button type="button" class="eq" data-emoji="&#x1FAC1;">&#x1FAC1;</button>
+                  <button type="button" class="eq" data-emoji="&#x1F331;">&#x1F331;</button>
                   <button type="button" class="eq" data-emoji="&#x1F60E;">&#x1F60E;</button>
                   <button type="button" class="eq" data-emoji="&#x1F440;">&#x1F440;</button>
                   <button type="button" class="eq" data-emoji="&#x2696;&#xFE0F;">&#x2696;&#xFE0F;</button>
@@ -277,7 +227,7 @@
               </div>
               <label class="ms-field">
                 <span>The Story <em>(optional)</em></span>
-                <textarea id="ms-body" class="field" rows="3" placeholder="e.g. Took 4ml today&mdash;basically a feast! Greedy guts." maxlength="4000"></textarea>
+                <textarea id="ms-body" class="field" rows="3" placeholder="Share how it all went down for the fam" maxlength="4000"></textarea>
               </label>
               <label class="filepick" id="ms-filepick">
                 <input id="ms-file" type="file" accept="image/*,video/*" hidden />
@@ -353,6 +303,7 @@
     <span class="footer-dot d-yellow"></span>
     <span class="footer-dot d-blue"></span>
     <p>Made with love for Leo, from your family across the world &middot; NZ &harr; Cayman</p>
+    <button type="button" id="parent-mode-btn" class="parent-mode-btn">Luke &amp; Dana</button>
   </footer>
 </div>
 
@@ -392,7 +343,7 @@
         <button type="button" class="eq" data-emoji="&#x1F37C;">&#x1F37C;</button>
         <button type="button" class="eq" data-emoji="&#x1F354;">&#x1F354;</button>
         <button type="button" class="eq" data-emoji="&#x1F4AA;">&#x1F4AA;</button>
-        <button type="button" class="eq" data-emoji="&#x1FAC1;">&#x1FAC1;</button>
+        <button type="button" class="eq" data-emoji="&#x1F331;">&#x1F331;</button>
         <button type="button" class="eq" data-emoji="&#x1F60E;">&#x1F60E;</button>
         <button type="button" class="eq" data-emoji="&#x1F440;">&#x1F440;</button>
         <button type="button" class="eq" data-emoji="&#x1F393;">&#x1F393;</button>
@@ -409,7 +360,7 @@
       <textarea id="em-body" class="em-input em-area" rows="4" maxlength="4000" placeholder="The lovely details&hellip;"></textarea>
       <label class="em-label">Date</label>
       <div class="datepick">
-        <button type="button" class="dp-field"><span class="dp-val dp-placeholder">Pick a date</span><svg class="dp-ico" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4.5" width="18" height="17" rx="2.5"/><line x1="16" y1="2.5" x2="16" y2="6.5"/><line x1="8" y1="2.5" x2="8" y2="6.5"/><line x1="3" y1="9.5" x2="21" y2="9.5"/></svg></button>
+        <button type="button" class="dp-field"><svg class="dp-ico" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4.5" width="18" height="17" rx="2.5"/><line x1="16" y1="2.5" x2="16" y2="6.5"/><line x1="8" y1="2.5" x2="8" y2="6.5"/><line x1="3" y1="9.5" x2="21" y2="9.5"/></svg><span class="dp-val dp-placeholder">Pick a date</span></button>
         <input type="hidden" id="em-date" />
       </div>
     </div>
@@ -435,6 +386,21 @@
   </div>
 </div>
 
-<script src="/app.js?v=65"></script>
+<!-- Parent mode unlock (Luke & Dana) — reveals the edit pencils on posts/milestones -->
+<div id="parent-unlock" class="edit-modal hidden" aria-hidden="true">
+  <div class="em-card em-card-narrow" role="dialog" aria-modal="true" aria-labelledby="pu-title">
+    <button type="button" class="em-close" id="pu-close" aria-label="Close">&times;</button>
+    <h3 class="em-title" id="pu-title">Parent mode</h3>
+    <p class="pu-lead">Luke &amp; Dana&mdash;pop in your parent code to edit posts and milestones.</p>
+    <input id="pu-code" class="em-input" type="password" inputmode="numeric" placeholder="Parent code" maxlength="40" autocomplete="off" />
+    <p class="em-error hidden" id="pu-error"></p>
+    <div class="em-actions-right" style="margin-top:18px">
+      <button type="button" class="em-cancel" id="pu-cancel">Cancel</button>
+      <button type="button" class="btn em-save" id="pu-go">Unlock</button>
+    </div>
+  </div>
+</div>
+
+<script src="/app.js?v=66"></script>
 </body>
 </html>

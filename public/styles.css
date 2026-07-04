@@ -400,7 +400,7 @@ a { color: inherit; text-decoration: none; }
 .field:focus { border-color: var(--blue); }
 /* Custom date picker — on-brand calendar anchored under the field */
 .datepick { position: relative; }
-.dp-field { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+.dp-field { width: 100%; display: flex; align-items: center; justify-content: flex-start; gap: 10px;
   font-family: var(--body); font-size: 1rem; color: var(--ink); text-align: left;
   padding: 14px 15px; border: 2px solid var(--line); border-radius: 12px; background: var(--cream); cursor: pointer;
   transition: border-color .12s; }
@@ -472,7 +472,7 @@ a { color: inherit; text-decoration: none; }
 
 /* ---------- FEED ---------- */
 .wrap-feed { max-width: 1140px; }
-.feed-list { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-top: 18px; align-items: stretch; }
+.feed-list { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-top: 18px; align-items: start; }
 @media (max-width: 860px) { .feed-list { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 520px) { .feed-list { grid-template-columns: 1fr; } }
 .card { background: var(--white); border-radius: 18px; overflow: hidden; box-shadow: var(--shadow); display: flex; flex-direction: column; }
@@ -498,7 +498,7 @@ a { color: inherit; text-decoration: none; }
 .card-text .card-body { padding: 18px 20px 18px; }
 /* Uniform tiles: cards in a row match height (align-items:stretch), so anchor the
    attribution + comments to the bottom of every card and the note/caption to the top. */
-.card-text .card-head { order: 2; margin: auto 0 0; }
+.card-text .card-head { order: 2; margin: 14px 0 0; }
 .card-caption-text { order: 1; margin: 0; font-family: var(--display); font-size: 1.12rem; line-height: 1.4; color: var(--ink); -webkit-line-clamp: 6; }
 .card-text .comments-mount { order: 3; margin-top: 12px; }
 .card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
@@ -512,14 +512,20 @@ a { color: inherit; text-decoration: none; }
 .card-caption { margin: 4px 0 0; white-space: pre-wrap; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; cursor: pointer; font-size: .92rem; line-height: 1.5; }
 /* With equal-height tiles (stretch), the comment toggle is anchored to the bottom,
    so no caption-height reserve is needed. */
+/* Reserve a consistent caption height so resting media cards in a row line up */
+.card:not(.card-text) .card-caption { min-height: 4.4em; }
 .card-caption.expanded { -webkit-line-clamp: unset; min-height: 0; }
 /* Clear "read more" affordance when a caption is truncated (clean line-clamp, no half-faded words) */
 .card-caption.clamped { -webkit-line-clamp: 3; }
 .cap-more {
-  display: inline-block; margin: 6px 0 0; padding: 0; background: none; border: none; cursor: pointer;
+  display: block; align-self: flex-start; text-align: left;
+  margin: 6px 0 0; padding: 0; background: none; border: none; cursor: pointer;
   font-family: var(--mono); text-transform: uppercase; letter-spacing: .03em;
   font-size: .64rem; font-weight: 600; color: var(--blue);
 }
+/* In text/milestone cards the caption is flex order 1, so keep Read more with it
+   (a default-order button would float up above the body). */
+.card-text .cap-more { order: 1; }
 .cap-more:hover { filter: brightness(.85); }
 .card-caption.expanded + .cap-more { display: none; }
 .card .comments-mount { margin-top: auto; padding-top: 10px; }
@@ -814,7 +820,7 @@ a { color: inherit; text-decoration: none; }
 .chip-own-add:hover { background: var(--blue); color: #fff; }
 
 /* Milestone emoji quick-pick palette — tiles fill the column width */
-.emoji-quick { display: grid; grid-template-columns: repeat(auto-fit, minmax(44px, 1fr)); gap: 8px; margin: 0 0 4px; }
+.emoji-quick { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin: 0 0 4px; }
 .emoji-quick .eq { font-size: 1.25rem; line-height: 1; height: 46px; border-radius: 12px;
   border: 2px solid var(--line); background: var(--white); cursor: pointer; transition: border-color .12s, background .12s, transform .1s; }
 .emoji-quick .eq:hover { border-color: var(--blue); }
@@ -854,7 +860,8 @@ a { color: inherit; text-decoration: none; }
 /* Multi-photo milestone gallery: full-bleed edge tiles, side by side (stacks 1-col on very narrow) */
 .ms-gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin: 13px -18px 15px; }
 .ms-gallery[data-count="1"] { grid-template-columns: 1fr; }
-.ms-gtile { position: relative; overflow: hidden; background: var(--ink); height: 240px; }
+.ms-gtile { position: relative; overflow: hidden; background: var(--ink); height: 240px; cursor: pointer; }
+.ms-gtile[data-lightbox] { cursor: pointer; }
 .ms-gtile img, .ms-gtile video { width: 100%; height: 100%; object-fit: cover; display: block; }
 @media (max-width: 460px) { .ms-gtile { height: 200px; } }
 /* '+N more photos' badge on feed milestone tiles */
@@ -874,6 +881,17 @@ a { color: inherit; text-decoration: none; }
 }
 .footer-dot { width: 13px; height: 13px; border-radius: 50%; display: inline-block; margin: 0 3px; }
 .footer p { margin: 14px 0 0; font-family: var(--mono); font-size: .8rem; text-transform: uppercase; letter-spacing: .02em; }
+/* Discreet parent-mode unlock for Luke & Dana */
+.parent-mode-btn {
+  margin: 18px auto 0; display: inline-block; background: none; border: none; cursor: pointer;
+  font-family: var(--mono); text-transform: uppercase; letter-spacing: .08em;
+  font-size: .62rem; color: rgba(255,254,245,.34); padding: 4px 6px;
+  transition: color .15s;
+}
+.parent-mode-btn:hover { color: rgba(255,254,245,.75); }
+.parent-mode-btn.on { color: var(--yellow); }
+.em-card-narrow { width: min(400px, 96vw); }
+.pu-lead { margin: 0 0 16px; color: var(--soft); font-size: .95rem; line-height: 1.5; }
 
 /* ============================================================
    MOBILE
@@ -1042,7 +1060,7 @@ a { color: inherit; text-decoration: none; }
 .lb-title { font-family: var(--display); font-weight: 700; font-size: 1.32rem; line-height: 1.25; margin: 0; color: var(--ink); }
 .lb-title .lb-emoji { margin-right: .3em; }
 .lb-title + .lb-caption { margin-top: 8px; }
-.lb-caption { font-family: var(--body); font-size: 1.02rem; line-height: 1.6; margin: 0; color: var(--ink); white-space: pre-wrap; }
+.lb-caption { font-family: var(--body); font-size: .92rem; line-height: 1.58; margin: 0; color: var(--ink); white-space: pre-wrap; }
 .lb-meta:empty { display: none; }
 .lb-close {
   position: absolute; top: 16px; right: 20px; z-index: 2;
@@ -1054,7 +1072,7 @@ a { color: inherit; text-decoration: none; }
 .lb-close:hover { background: rgba(255,254,245,.28); }
 @media (max-width: 620px) {
   .lb-title { font-size: 1.16rem; }
-  .lb-caption { font-size: .98rem; }
+  .lb-caption { font-size: .9rem; }
   .lightbox { padding: 14px; }
 }
 

@@ -529,8 +529,8 @@ async function loadMilestones() {
       const tiles = items.map((it) => {
         const msrc = `/media/${escapeHtml(it.file)}`;
         return it.type === "video"
-          ? `<div class="ms-gtile"><video src="${msrc}#t=0.1" playsinline preload="metadata" muted></video></div>`
-          : `<div class="ms-gtile"><img src="${msrc}" alt="" /></div>`;
+          ? `<div class="ms-gtile" role="button" tabindex="0" data-lightbox="${msrc}" data-type="video" ${mLbAttrs}><video src="${msrc}#t=0.1" playsinline preload="metadata" muted></video><span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span></div>`
+          : `<div class="ms-gtile" role="button" tabindex="0" data-lightbox="${msrc}" data-type="image" ${mLbAttrs}><img src="${msrc}" alt="" /></div>`;
       }).join("");
       media = `<div class="ms-gallery" data-count="${items.length}">${tiles}</div>`;
     }
@@ -901,26 +901,11 @@ function setupMilestoneForm() {
   });
 }
 
-function setupTimelineTabs() {
-  const tabs = document.querySelectorAll(".tl-tab");
-  if (!tabs.length || tabs[0].dataset.wired) return;
-  tabs.forEach((t) => {
-    t.dataset.wired = "1";
-    t.addEventListener("click", () => {
-      tabs.forEach((x) => x.classList.toggle("active", x === t));
-      $("tab-quick").classList.toggle("hidden", t.dataset.tab !== "quick");
-      $("tab-milestone").classList.toggle("hidden", t.dataset.tab !== "milestone");
-    });
-  });
-}
-
 function startApp() {
   $("login").classList.add("hidden");
   $("app").classList.remove("hidden");
   setupComposer();
   setupMilestoneForm();
-  setupTimelineTabs();
-  setupCheckin();
   setupSort();
   setupEmailSignup();
   setupIntroToggle();
@@ -928,6 +913,7 @@ function startApp() {
   setupInfoTips();
   setupLightbox();
   setupEditModal();
+  setupParentMode();
   loadFamily();
   loadFeed();
   renderWorldClocks(); tickAge();
@@ -1054,108 +1040,6 @@ function openTitleEditor(p) {
       if (r.ok) { await loadFamily(); }
       else { const d = await r.json().catch(() => ({})); st.className = "post-status err"; st.textContent = d.error || "Couldn't save."; }
     } catch { st.className = "post-status err"; st.textContent = "Connection hiccup\u2014try again."; }
-  });
-}
-
-// ---------- Mini Update (states + a note + optional photo/video) ----------
-let ciFile = null;
-function setupCheckin() {
-  const btn = $("ci-save");
-  if (!btn || btn.dataset.wired) return;
-  btn.dataset.wired = "1";
-  const today = new Date().toISOString().slice(0, 10);
-  setupDatePicker("ci-date", true);
-  setupParentPills("ci-who");
-
-  // States — multi-select
-  $("chips-moment").addEventListener("click", (e) => {
-    const add = e.target.closest("#chip-add-own");
-    if (add) { $("chip-own-row").classList.remove("hidden"); $("ci-own-word").focus(); return; }
-    const c = e.target.closest(".chip"); if (!c || c.id === "chip-add-own") return;
-    c.classList.toggle("on");
-  });
-
-  // "+ Your own": Luke & Dana add their own state (emoji optional), tap-selected.
-  const addOwn = () => {
-    const word = $("ci-own-word").value.trim();
-    if (!word) { $("ci-own-word").focus(); return; }
-    const emoji = $("ci-own-emoji").value.trim();
-    const chip = document.createElement("button");
-    chip.type = "button";
-    chip.className = "chip on";
-    chip.dataset.word = word.toLowerCase();
-    chip.dataset.emoji = emoji || "\u2728";
-    chip.innerHTML = `<span class="chip-emoji">${escapeHtml(emoji || "\u2728")}</span><span class="chip-word">${escapeHtml(word)}</span>`;
-    $("chip-add-own").before(chip);
-    $("ci-own-word").value = ""; $("ci-own-emoji").value = "";
-    $("chip-own-row").classList.add("hidden");
-  };
-  $("ci-own-add").addEventListener("click", addOwn);
-  $("ci-own-word").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); addOwn(); } });
-
-  // Optional photo / video
-  const fileEl = $("ci-file");
-  if (fileEl) fileEl.addEventListener("change", (e) => {
-    ciFile = e.target.files[0] || null;
-    const prev = $("ci-preview");
-    prev.innerHTML = "";
-    if (!ciFile) { prev.classList.add("hidden"); $("ci-filepick-label").innerHTML = "\u{1F4F7}  Add a photo or video (optional)"; return; }
-    $("ci-filepick-label").textContent = ciFile.name;
-    const url = URL.createObjectURL(ciFile);
-    prev.innerHTML = ciFile.type.startsWith("video/") ? `<video src="${url}" controls playsinline></video>` : `<img src="${url}" alt="preview" />`;
-    prev.classList.remove("hidden");
-  });
-
-  btn.addEventListener("click", async () => {
-    const status = $("ci-status");
-    const picks = [...$("chips-moment").querySelectorAll(".chip.on")];
-    const date = $("ci-date").value;
-    const note = $("ci-note").value.trim();
-    const author = whoValue("ci-who");
-    if (!date) { status.className = "post-status err"; status.textContent = "Pick a date."; return; }
-    if (!picks.length && !note && !ciFile) { status.className = "post-status err"; status.textContent = "Tap a state, add a note, or a photo \u{1F60A}"; return; }
-    if (!author) { status.className = "post-status err"; status.textContent = "Tap Dana or Luke."; return; }
-
-    const words = picks.map((c) => c.dataset.word);
-    const emoji = picks.length ? picks[0].dataset.emoji : "\u2728";
-    let title = "A mini update on Leo";
-    if (words.length) {
-      const joined = words.length === 1 ? words[0]
-        : words.slice(0, -1).join(", ") + " and " + words[words.length - 1];
-      title = "Today Leo was " + joined;
-    }
-    const body = note;
-
-    btn.disabled = true; status.className = "post-status"; status.textContent = ciFile ? "Uploading\u2026" : "Posting\u2026";
-    try {
-      let mediaFile = "", mediaType = "";
-      if (ciFile) {
-        const up = await fetch("/api/milestone-media", {
-          method: "POST",
-          headers: { "Content-Type": ciFile.type || "application/octet-stream", "X-Filename": encodeURIComponent(ciFile.name) },
-          body: ciFile,
-        });
-        if (up.ok) { const ud = await up.json(); mediaFile = ud.mediaFile; mediaType = ud.mediaType; }
-        else { const ud = await up.json().catch(() => ({})); status.className = "post-status err"; status.textContent = ud.error || "Couldn\u2019t upload that."; btn.disabled = false; return; }
-      }
-      const r = await fetch("/api/milestones", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ date, title, body, emoji, author, mediaFile, mediaType }),
-      });
-      if (r.ok) {
-        status.className = "post-status ok"; status.textContent = "Posted \u2728";
-        [...document.querySelectorAll("#chips-moment .chip.on")].forEach((c) => c.classList.remove("on"));
-        $("ci-note").value = "";
-        $("ci-file").value = ""; ciFile = null; $("ci-preview").innerHTML = ""; $("ci-preview").classList.add("hidden");
-        $("ci-filepick-label").innerHTML = "\u{1F4F7}  Add a photo or video (optional)";
-        await loadMilestones(); if (typeof loadFeed === "function") loadFeed();
-        setTimeout(() => { $("timeline-add").removeAttribute("open"); status.textContent = ""; }, 1400);
-      } else {
-        const d = await r.json().catch(() => ({}));
-        status.className = "post-status err"; status.textContent = d.error || "Couldn\u2019t post that.";
-      }
-    } catch { status.className = "post-status err"; status.textContent = "Connection hiccup\u2014try again."; }
-    finally { btn.disabled = false; }
   });
 }
 
@@ -1504,6 +1388,72 @@ async function deleteItem() {
   }
 }
 
+// ---------- Parent mode unlock (Luke & Dana) ----------
+// Lets a parent flip into edit mode from the page itself (the edit pencils only
+// show when IS_PARENT), without being funnelled through the guide.
+function reflectParentMode() {
+  const btn = $("parent-mode-btn");
+  if (!btn) return;
+  btn.classList.toggle("on", IS_PARENT);
+  btn.textContent = IS_PARENT ? "Parent mode on" : "Luke & Dana";
+}
+function setupParentMode() {
+  const btn = $("parent-mode-btn");
+  const modal = $("parent-unlock");
+  if (!btn || !modal || modal.dataset.wired) return;
+  modal.dataset.wired = "1";
+  reflectParentMode();
+
+  const open = () => {
+    if (IS_PARENT) return; // already unlocked
+    $("pu-error").classList.add("hidden");
+    $("pu-code").value = "";
+    modal.classList.remove("hidden");
+    modal.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+    setTimeout(() => $("pu-code").focus(), 40);
+  };
+  const close = () => {
+    modal.classList.add("hidden");
+    modal.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+  };
+  const go = async () => {
+    const code = $("pu-code").value.trim();
+    if (!code) { $("pu-code").focus(); return; }
+    const goBtn = $("pu-go");
+    goBtn.disabled = true;
+    try {
+      const r = await fetch("/api/parent-login", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code }),
+      });
+      if (!r.ok) { const j = await r.json().catch(() => ({})); throw new Error(j.error || "That code didn\u2019t work."); }
+      IS_PARENT = true;
+      reflectParentMode();
+      close();
+      // Re-render so the edit pencils appear immediately.
+      renderedFeedSig = null;
+      await loadFeed();
+      if (!$("view-timeline").classList.contains("hidden")) await loadMilestones();
+    } catch (e) {
+      const err = $("pu-error");
+      err.textContent = e.message || "That code didn\u2019t work.";
+      err.classList.remove("hidden");
+    } finally {
+      goBtn.disabled = false;
+    }
+  };
+
+  btn.addEventListener("click", open);
+  $("pu-close").addEventListener("click", close);
+  $("pu-cancel").addEventListener("click", close);
+  $("pu-go").addEventListener("click", go);
+  $("pu-code").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); go(); } });
+  modal.addEventListener("click", (e) => { if (e.target === modal) close(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !modal.classList.contains("hidden")) close(); });
+}
+
 function setupEditModal() {
   const modal = $("edit-modal");
   if (!modal || modal.dataset.wired) return;
@@ -1555,7 +1505,7 @@ function setupLightbox() {
 
   // Delegated: open lightbox on any media tile; toggle caption on caption tap.
   document.addEventListener("click", (e) => {
-    const tile = e.target.closest(".card-media[data-lightbox], .ms-media[data-lightbox]");
+    const tile = e.target.closest(".card-media[data-lightbox], .ms-media[data-lightbox], .ms-gtile[data-lightbox]");
     if (tile) {
       openLightbox({
         src: tile.dataset.lightbox,
