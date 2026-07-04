@@ -870,6 +870,9 @@ app.post("/api/milestones/:id/edit", requireParent, (req, res) => {
   if (typeof b.title === "string" && b.title.trim()) m.title = b.title.trim().slice(0, 140);
   if (typeof b.body === "string") m.body = b.body.slice(0, 4000);
   if (typeof b.emoji === "string") m.emoji = b.emoji.trim().slice(0, 8);
+  // Allow re-dating a milestone (dateText shown; sortISO orders the timeline).
+  if (typeof b.dateText === "string" && b.dateText.trim()) m.dateText = b.dateText.trim().slice(0, 60);
+  if (typeof b.sortISO === "string" && b.sortISO.trim()) m.sortISO = b.sortISO.trim().slice(0, 40);
   if (typeof b.author === "string" && b.author.trim()) m.author = b.author.trim().slice(0, 80);
   // Attach / replace media. Single mediaFile, OR a full media array [{file,type}].
   if (typeof b.mediaFile === "string" && b.mediaFile.trim()) {
@@ -888,6 +891,19 @@ app.post("/api/milestones/:id/edit", requireParent, (req, res) => {
   }
   saveMilestones(list);
   res.json({ ok: true, milestone: m });
+});
+
+// ---- Delete a milestone (parent-only) ----
+// Used to prune the timeline. The media files on disk are left in place so a
+// deleted milestone can be recreated verbatim if needed.
+app.post("/api/milestones/:id/delete", requireParent, (req, res) => {
+  const id = String(req.params.id || "");
+  const list = loadMilestones();
+  const idx = list.findIndex((x) => x.id === id);
+  if (idx < 0) return res.status(404).json({ error: "Couldn't find that milestone." });
+  const [removed] = list.splice(idx, 1);
+  saveMilestones(list);
+  res.json({ ok: true, removed });
 });
 
 // ---- Serve media with range support ----
