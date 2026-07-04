@@ -27,6 +27,38 @@ const EMAIL_FROM = process.env.EMAIL_FROM || "Leo \u{1F49B} <leo@leo-love.com>";
 const SITE_URL = (process.env.SITE_URL || "https://leo-love.com").replace(/\/$/, "");
 const emailReady = () => !!RESEND_API_KEY;
 
+// ---- Amy's hand-curated feed order (see /api/feed) ----
+// Family posts keyed by post id; milestones by "ms:<id>". Rearrange to re-order.
+// Anything not listed falls after these, newest-first (e.g. Ra & Marlow — Amy is
+// deciding where they go).
+const FEED_ORDER: string[] = [
+  "19f0cfd8e415151bf",       // 1  Margot
+  "19f0cfd8f01176b1b",       // 2  Paul
+  "mqrjknqlff90fa7b",        // 3  Jacki (Nana)
+  "mqs01fk0ec11a71e",        // 4  John (Poppa)
+  "ms:mr68k0xueb9ffc",       // 5  Home at last
+  "19f0d093196b3e04b",       // 6  Antony + Nicky
+  "ms:mr68k0qj515948",       // 7  Leo’s ears work!
+  "19f0d225e57b8c57d",       // 8  Sam
+  "19f0d0b4628a79b54",       // 9  Mama (Great-Grandma)
+  "ms:ms19f0d20795b353ac1",  // 10 Graduated to a cot!
+  "mqtifrcs92aad18f",        // 11 Roland
+  "ms:mr65otxi8886f5",       // 12 Making his mark
+  "19f0d0b76dd81bfac",       // 13 Suzanne, Adriano & Dario
+  "ms:mr65os719354ed",       // 14 Off breathing support
+  "mqskwzql95e9dc0b",        // 15 Ant
+  "19f0d0b6dc50a69a0",       // 16 Aunty Janet
+  "ms:eating-more",          // 17 Going from strength to strength
+  "19f0d20e1dbccc86f",       // 18 Matt
+  "ms:incubator-cuddles",    // 19 Leo’s first cuddles!
+  "19f0d0b9fc290ee56",       // 20 Kirsty
+  "ms:first-feed",           // 21 Leo’s first meal!
+  "mr6dqm9gc583e5a1",        // 22 Max
+  "ms:first-days",           // 23 Making himself at home
+  "mqs0ppq7a6e4124a",        // 24 Ryleigh
+  "ms:born",                 // 25 Leo arrives
+];
+
 // ---- First-boot seed ----
 // A fresh Render persistent disk is empty. On first boot only, copy the bundled
 // snapshot of the family's data (config, milestones, family, posts, uploads,
@@ -647,9 +679,19 @@ app.get("/api/feed", requireAuth, async (_req, res) => {
       fromMilestone: true,
       milestoneId: m.id,
     }));
-  const all = [...posts, ...msPosts].sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  );
+  const all = [...posts, ...msPosts];
+  // Amy's hand-curated feed order. Key a family post by its post id, a milestone
+  // by "ms:<milestoneId>". Listed items appear in exactly this order at the top;
+  // anything not listed (new posts, Ra/Marlow) falls after, newest-first.
+  // To re-order: just rearrange this list. Max's slot is held until his post lands.
+  const ord = new Map(FEED_ORDER.map((k, i) => [k, i]));
+  const keyOf = (p: any) => (p.fromMilestone ? "ms:" + p.milestoneId : p.id);
+  all.sort((a, b) => {
+    const ia = ord.has(keyOf(a)) ? ord.get(keyOf(a))! : Infinity;
+    const ib = ord.has(keyOf(b)) ? ord.get(keyOf(b))! : Infinity;
+    if (ia !== ib) return ia - ib;
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
   res.json({ posts: all });
 });
 

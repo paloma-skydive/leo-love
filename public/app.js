@@ -10,7 +10,7 @@ let MILESTONES = [];
 let feedFilter = null;
 // Default landing view scatters milestones evenly through the grid (rather than
 // clumping them at the bottom by their June dates). Newest/Oldest go strict-date.
-let feedSort = "scatter";
+let feedSort = "curated";
 
 // Pencil icon for the parent-only edit control on posts/milestones.
 const PENCIL_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
@@ -332,11 +332,9 @@ function renderFeed() {
     // doesn't reshuffle under them. New posts (not in the order) fall to the end.
     const idx = (id) => { const i = shuffleOrder.indexOf(id); return i === -1 ? 1e9 : i; };
     posts.sort((a, b) => idx(a.id) - idx(b.id));
-  } else if (feedSort === "scatter") {
-    // Default view: spread the milestones evenly through the family posts instead
-    // of letting them clump at the bottom by date. Deterministic (a stable hash of
-    // each id) so auto-refresh never reshuffles under the reader.
-    posts = scatterFeed(posts);
+  } else if (feedSort === "curated") {
+    // Default view: keep the server's hand-curated order (FEED_ORDER) exactly as
+    // returned — no client-side reordering.
   } else {
     posts.sort((a, b) => {
       const d = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
