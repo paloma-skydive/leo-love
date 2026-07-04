@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Averia+Libre:ital,wght@0,300;0,400;0,700;1,400&family=Fragment+Mono:ital@0;1&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="/styles.css?v=44" />
+<link rel="stylesheet" href="/styles.css?v=45" />
 </head>
 <body>
 
@@ -89,13 +89,15 @@
     <section class="section section-cream intro-section">
       <div class="intro-grid">
         <div class="intro-left">
-          <img class="intro-photo" src="/img/leo-eyes.jpg?v=3" alt="Baby Leo with his eyes open" />
-          <h2 class="section-kicker intro-kicker">Welcome to the world, Leo <span class="kicker-dot d-red"></span><span class="info-tip"><button type="button" class="info-btn" aria-label="How to post">i</button><span class="info-pop">Post a photo, a short video or a little message for Leo &mdash; any time, from anywhere. Stuck for words? Tap the &#x21BB; for an idea.</span></span></h2>
-          <p class="intro-copy">Think of this as a pinboard for Leo, Luke &amp; Dana&mdash;a place to drop a message, a photo or a video, just to show you&rsquo;re thinking of them. Those first hellos are only the start. The more we fill it up, the lovelier it gets.</p>
+          <div class="intro-card">
+            <img class="intro-photo" src="/img/leo-eyes.jpg?v=3" alt="Baby Leo with his eyes open" />
+            <h2 class="section-kicker intro-kicker">Welcome to the world, Leo <span class="kicker-dot d-red"></span></h2>
+            <p class="intro-copy">Think of this as a pinboard for Leo, Luke &amp; Dana&mdash;a place to drop a message, a photo or a video, any time and from anywhere, just to show you&rsquo;re thinking of them. Post to the feed, follow his milestones, and find your spot on the family tree. Those first hellos are only the start&mdash;the more we fill it up, the lovelier it gets.</p>
+          </div>
         </div>
         <div class="composer">
-          <h3 class="composer-title">Drop an update for Leo <span class="kicker-dot d-blue"></span><span class="info-tip"><button type="button" class="info-btn" aria-label="How to post">i</button><span class="info-pop">Write a little update, attach a photo or video, or just do one &mdash; whatever you feel like. It all lands on Leo&rsquo;s feed.</span></span></h3>
-          <p class="prompt-lead">Click the <span class="pl-ico" aria-hidden="true">&#x21BB;</span> for an idea &mdash; or write &amp; post your own.</p>
+          <h3 class="composer-title">Drop an update for Leo <span class="kicker-dot d-blue"></span></h3>
+          <p class="prompt-lead"><span class="pl-ico" aria-hidden="true">&#x21BB;</span> Click the little refresh icon for an idea starter &mdash; or post anything of your own you want to share.</p>
           <div class="prompt-card" id="prompt-card">
             <span id="prompt-text">&hellip;</span>
             <button type="button" id="prompt-shuffle" title="Tap for another idea" aria-label="Tap for another idea">
@@ -119,7 +121,9 @@
 
     <section class="section section-cream">
       <div class="wrap wrap-feed">
-        <h2 class="section-kicker">From the family <span class="kicker-dot d-yellow"></span><span class="info-tip"><button type="button" class="info-btn" aria-label="About the feed">i</button><span class="info-pop">Everyone&rsquo;s hellos, photos and videos for Leo. Tap a name to see just their posts, and comment under any one of them.</span></span></h2>
+        <div class="feed-head">
+          <h2 class="feed-pill">Leo&rsquo;s Feed</h2>
+        </div>
         <div class="feed-controls">
           <div class="feed-filters" id="feed-filters"></div>
           <div class="feed-sort">
@@ -332,6 +336,6 @@
   </div>
 </div>
 
-<script src="/app.js?v=44"></script>
+<script src="/app.js?v=45"></script>
 </body>
 </html>
