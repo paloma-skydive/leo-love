@@ -302,27 +302,32 @@ a { color: inherit; text-decoration: none; }
   border: 4px solid var(--white); z-index: 2;
 }
 .intro-left .eyebrow { margin-bottom: 10px; }
-.intro-kicker { font-size: 1.9rem; margin: 58px 0 14px; }
+/* Higher specificity so .section-kicker's margin:0 doesn't win and crowd the photo */
+.intro-card .intro-kicker { font-size: 1.9rem; margin: 60px 0 14px; }
 .intro-copy { color: var(--soft); margin: 0; font-size: 1.02rem; line-height: 1.6; max-width: 42ch; }
 .intro-list { color: var(--soft); margin: 12px 0 0; padding-left: 1.15em; font-size: 1.02rem; line-height: 1.55; max-width: 42ch; }
 .intro-list li { margin-bottom: 8px; }
 .intro-list li::marker { color: var(--red); }
+.intro-link { color: var(--blue); font-weight: 600; text-decoration: underline; text-underline-offset: 2px; text-decoration-thickness: 1.5px; }
+.intro-link:hover { color: var(--red); }
 .intro-closer { margin-top: 12px; }
-.intro-body { overflow: hidden; max-height: 520px; transition: max-height .32s ease, opacity .28s ease; }
-.intro-card.collapsed .intro-body { max-height: 0 !important; opacity: 0; margin-top: -4px; }
+/* Whole first section (welcome + composer) collapses together */
+.intro-bar { display: flex; justify-content: flex-end; margin-bottom: 14px; }
 .intro-toggle {
-  margin-top: 14px; background: none; border: none; padding: 0; cursor: pointer;
+  background: none; border: none; padding: 6px 2px; cursor: pointer;
   font-family: var(--mono); text-transform: uppercase; letter-spacing: .04em;
-  font-size: .72rem; color: var(--red); display: inline-flex; align-items: center; gap: 6px;
+  font-size: .72rem; color: var(--red); display: inline-flex; align-items: center; gap: 7px;
 }
-.intro-toggle::after { content: "\2013"; font-size: .9rem; line-height: 1; }
-.intro-card.collapsed .intro-toggle::after { content: "+"; }
+.intro-toggle::after { content: "\25B4"; font-size: .8rem; line-height: 1; }
+.intro-section.collapsed .intro-toggle::after { content: "\25BE"; }
 .intro-toggle:hover { filter: brightness(.9); }
+.intro-grid-wrap { overflow: hidden; transition: max-height .34s ease, opacity .28s ease; }
+.intro-section.collapsed .intro-grid { display: none; }
 @media (max-width: 760px) {
   .intro-grid { grid-template-columns: 1fr; gap: 24px; }
   .intro-card { padding: 24px 22px 26px; }
   .intro-photo { width: 84px; height: 84px; top: -26px; left: 16px; }
-  .intro-kicker { font-size: 1.55rem; margin: 46px 0 12px; }
+  .intro-card .intro-kicker { font-size: 1.55rem; margin: 46px 0 12px; }
   .intro-copy, .intro-list { font-size: .96rem; max-width: none; }
 }
 

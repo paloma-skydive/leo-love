@@ -86,22 +86,24 @@
       </div>
     </section>
 
-    <section class="section section-cream intro-section">
-      <div class="intro-grid">
+    <section class="section section-cream intro-section" id="intro-section">
+      <div class="intro-bar">
+        <button type="button" class="intro-toggle" id="intro-toggle" aria-expanded="true" aria-controls="intro-grid">Hide welcome</button>
+      </div>
+      <div class="intro-grid" id="intro-grid">
         <div class="intro-left">
           <div class="intro-card" id="intro-card">
             <img class="intro-photo" src="/img/leo-eyes.jpg?v=3" alt="Baby Leo with his eyes open" />
             <h2 class="section-kicker intro-kicker">Welcome to the world, Leo <span class="kicker-dot d-red"></span></h2>
-            <div class="intro-body" id="intro-body">
+            <div class="intro-body">
               <p class="intro-copy">This is a place where family &amp; friends can share love for Leo, Luke &amp; Dana&mdash;and enjoy baby Leo&rsquo;s milestones from afar.</p>
               <ul class="intro-list">
                 <li>Drop a message, photo or video, and it will pop up on the feed.</li>
-                <li>Find yourself on the family tree. If you&rsquo;re related to Leo and add a video or picture, you&rsquo;ll pop up here too.</li>
-                <li>Follow along Leo&rsquo;s milestones &amp; watch him grow.</li>
+                <li>Find yourself on the <a class="intro-link" data-view="family" href="#family">family tree</a>. If you&rsquo;re related to Leo and add a video or picture, you&rsquo;ll pop up here too.</li>
+                <li>Follow along <a class="intro-link" data-view="timeline" href="#timeline">Leo&rsquo;s milestones</a> &amp; watch him grow.</li>
               </ul>
               <p class="intro-copy intro-closer">Those first hellos are only the start.</p>
             </div>
-            <button type="button" class="intro-toggle" id="intro-toggle" aria-expanded="true">Show less</button>
           </div>
         </div>
         <div class="composer">

@@ -1113,18 +1113,18 @@ function setupEmailSignup() {
 // Replaces the old standalone Guide: each section heading has a small ⓘ that
 // shows a one-line instruction on hover (desktop) or tap (touch).
 function setupIntroToggle() {
-  const card = $("intro-card");
+  const section = $("intro-section");
   const btn = $("intro-toggle");
-  if (!card || !btn) return;
+  if (!section || !btn) return;
   const apply = (collapsed) => {
-    card.classList.toggle("collapsed", collapsed);
+    section.classList.toggle("collapsed", collapsed);
     btn.setAttribute("aria-expanded", String(!collapsed));
-    btn.textContent = collapsed ? "Read more" : "Show less";
+    btn.textContent = collapsed ? "Show welcome & post" : "Hide welcome";
   };
-  // Default expanded on first ever visit; remember the reader's choice after that.
+  // Default expanded on first visit; remember the reader's choice after that.
   apply(localStorage.getItem("leoWelcomeCollapsed") === "1");
   btn.addEventListener("click", () => {
-    const collapsed = !card.classList.contains("collapsed");
+    const collapsed = !section.classList.contains("collapsed");
     apply(collapsed);
     try { localStorage.setItem("leoWelcomeCollapsed", collapsed ? "1" : "0"); } catch (e) {}
   });
