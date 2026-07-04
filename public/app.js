@@ -299,7 +299,9 @@ function renderFeed() {
     if (p.fromMilestone && p.title) {
       // Milestone cards: title reads as a header, story sits below it.
       const body = p.body ? `<p class="${capClass}" tabindex="0" title="Tap to read it all">${escapeHtml(p.body)}</p>` : "";
-      cap = `<h4 class="card-ms-title">${escapeHtml(p.title)}</h4>${body}`;
+      // Copy-only milestones have no media tile to carry the badge, so show it here.
+      const inlineBadge = hasMedia ? "" : `<span class="ms-badge ms-badge-inline">\u2728 Milestone</span>`;
+      cap = `${inlineBadge}<h4 class="card-ms-title">${escapeHtml(p.title)}</h4>${body}`;
     } else if (p.caption) {
       cap = `<p class="${capClass}" tabindex="0" title="Tap to read it all">${escapeHtml(p.caption)}</p>`;
     }
@@ -352,7 +354,7 @@ function rememberName(n) {
 }
 
 // Parent who-picker (Dana / Luke) used in the timeline forms
-function setupWhoPicker(wrapId) {
+function setupParentPills(wrapId) {
   const wrap = $(wrapId);
   if (!wrap || wrap.dataset.wired) return;
   wrap.dataset.wired = "1";
@@ -688,10 +690,18 @@ async function boot() {
 
 let msFile = null;
 function setupMilestoneForm() {
-  setupWhoPicker("ms-who");
+  setupParentPills("ms-who");
   const btn = $("ms-save");
   if (btn.dataset.wired) return;
   btn.dataset.wired = "1";
+
+  // Tap-to-pick emoji (so it works on desktop too, where there's no emoji key)
+  const eq = $("ms-emoji-quick");
+  if (eq) eq.addEventListener("click", (e) => {
+    const b = e.target.closest(".eq"); if (!b) return;
+    $("ms-emoji").value = b.dataset.emoji;
+    eq.querySelectorAll(".eq").forEach((x) => x.classList.toggle("on", x === b));
+  });
 
   // file picker for milestone media
   const fileEl = $("ms-file");
@@ -709,7 +719,6 @@ function setupMilestoneForm() {
   btn.addEventListener("click", async () => {
     const status = $("ms-status");
     const date = $("ms-date").value;
-    const time = $("ms-time").value;
     const title = $("ms-title").value.trim();
     const body = $("ms-body").value.trim();
     const emoji = $("ms-emoji").value.trim();
@@ -733,14 +742,15 @@ function setupMilestoneForm() {
       }
       const r = await fetch("/api/milestones", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ date, time, title, body, emoji, author, mediaFile, mediaType }),
+        body: JSON.stringify({ date, title, body, emoji, author, mediaFile, mediaType }),
       });
       if (r.ok) {
         status.className = "post-status ok"; status.textContent = "Added to Leo\u2019s timeline \u2728";
-        $("ms-title").value = ""; $("ms-body").value = ""; $("ms-emoji").value = ""; $("ms-time").value = "";
+        $("ms-title").value = ""; $("ms-body").value = ""; $("ms-emoji").value = "";
+        $("ms-emoji-quick") && $("ms-emoji-quick").querySelectorAll(".eq").forEach((x) => x.classList.remove("on"));
         $("ms-file").value = ""; msFile = null; $("ms-preview").innerHTML = ""; $("ms-preview").classList.add("hidden");
         $("ms-filepick-label").innerHTML = "\u{1F4F7}  Add a photo or video (optional)";
-        await loadMilestones();
+        await loadMilestones(); if (typeof loadFeed === "function") loadFeed();
         setTimeout(() => { $("timeline-add").removeAttribute("open"); status.textContent = ""; status.className = "post-status"; }, 1400);
       } else {
         const d = await r.json().catch(() => ({}));
@@ -907,56 +917,102 @@ function openTitleEditor(p) {
   });
 }
 
-// ---------- Quick update (consolidated single chip group) ----------
+// ---------- Mini Update (states + a note + optional photo/video) ----------
+let ciFile = null;
 function setupCheckin() {
   const btn = $("ci-save");
   if (!btn || btn.dataset.wired) return;
   btn.dataset.wired = "1";
   const today = new Date().toISOString().slice(0, 10);
-  $("ci-date").value = today;
-  setupWhoPicker("ci-who");
+  const dateEl = $("ci-date");
+  dateEl.value = today;
+  // Make the whole date field reliably open the native picker (fixes the
+  // "click function weird" — some browsers only opened it from the tiny icon).
+  dateEl.addEventListener("click", () => { try { dateEl.showPicker && dateEl.showPicker(); } catch (e) {} });
+  setupParentPills("ci-who");
 
-  // one gentle category, multi-select
+  // States — multi-select
   $("chips-moment").addEventListener("click", (e) => {
-    const c = e.target.closest(".chip"); if (!c) return;
+    const add = e.target.closest("#chip-add-own");
+    if (add) { $("chip-own-row").classList.remove("hidden"); $("ci-own-word").focus(); return; }
+    const c = e.target.closest(".chip"); if (!c || c.id === "chip-add-own") return;
     c.classList.toggle("on");
+  });
+
+  // "+ Your own": Luke & Dana add their own state (emoji optional), tap-selected.
+  const addOwn = () => {
+    const word = $("ci-own-word").value.trim();
+    if (!word) { $("ci-own-word").focus(); return; }
+    const emoji = $("ci-own-emoji").value.trim();
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "chip on";
+    chip.dataset.word = word.toLowerCase();
+    chip.dataset.emoji = emoji || "\u2728";
+    chip.textContent = (emoji ? emoji + " " : "") + word;
+    $("chip-add-own").before(chip);
+    $("ci-own-word").value = ""; $("ci-own-emoji").value = "";
+    $("chip-own-row").classList.add("hidden");
+  };
+  $("ci-own-add").addEventListener("click", addOwn);
+  $("ci-own-word").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); addOwn(); } });
+
+  // Optional photo / video
+  const fileEl = $("ci-file");
+  if (fileEl) fileEl.addEventListener("change", (e) => {
+    ciFile = e.target.files[0] || null;
+    const prev = $("ci-preview");
+    prev.innerHTML = "";
+    if (!ciFile) { prev.classList.add("hidden"); $("ci-filepick-label").innerHTML = "\u{1F4F7}  Add a photo or video (optional)"; return; }
+    $("ci-filepick-label").textContent = ciFile.name;
+    const url = URL.createObjectURL(ciFile);
+    prev.innerHTML = ciFile.type.startsWith("video/") ? `<video src="${url}" controls playsinline></video>` : `<img src="${url}" alt="preview" />`;
+    prev.classList.remove("hidden");
   });
 
   btn.addEventListener("click", async () => {
     const status = $("ci-status");
     const picks = [...$("chips-moment").querySelectorAll(".chip.on")];
     const date = $("ci-date").value;
-    const weight = $("ci-weight").value.trim();
     const note = $("ci-note").value.trim();
     const author = whoValue("ci-who");
     if (!date) { status.className = "post-status err"; status.textContent = "Pick a date."; return; }
-    if (!picks.length && !note && !weight) { status.className = "post-status err"; status.textContent = "Tap at least one thing \u{1F60A}"; return; }
+    if (!picks.length && !note && !ciFile) { status.className = "post-status err"; status.textContent = "Tap a state, add a note, or a photo \u{1F60A}"; return; }
     if (!author) { status.className = "post-status err"; status.textContent = "Tap Dana or Luke."; return; }
 
     const words = picks.map((c) => c.dataset.word);
     const emoji = picks.length ? picks[0].dataset.emoji : "\u2728";
-    let title = "A little note on today";
+    let title = "A mini update on Leo";
     if (words.length) {
       const joined = words.length === 1 ? words[0]
         : words.slice(0, -1).join(", ") + " and " + words[words.length - 1];
       title = "Today Leo was " + joined;
     }
-    const parts = [];
-    if (weight) parts.push(`Weighing in at ${weight}.`);
-    if (note) parts.push(note);
-    const body = parts.join(" ");
+    const body = note;
 
-    btn.disabled = true; status.className = "post-status"; status.textContent = "Posting\u2026";
+    btn.disabled = true; status.className = "post-status"; status.textContent = ciFile ? "Uploading\u2026" : "Posting\u2026";
     try {
+      let mediaFile = "", mediaType = "";
+      if (ciFile) {
+        const up = await fetch("/api/milestone-media", {
+          method: "POST",
+          headers: { "Content-Type": ciFile.type || "application/octet-stream", "X-Filename": encodeURIComponent(ciFile.name) },
+          body: ciFile,
+        });
+        if (up.ok) { const ud = await up.json(); mediaFile = ud.mediaFile; mediaType = ud.mediaType; }
+        else { const ud = await up.json().catch(() => ({})); status.className = "post-status err"; status.textContent = ud.error || "Couldn\u2019t upload that."; btn.disabled = false; return; }
+      }
       const r = await fetch("/api/milestones", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ date, title, body, emoji, author }),
+        body: JSON.stringify({ date, title, body, emoji, author, mediaFile, mediaType }),
       });
       if (r.ok) {
         status.className = "post-status ok"; status.textContent = "Posted \u2728";
-        [...document.querySelectorAll("#chips-moment .chip")].forEach((c) => c.classList.remove("on"));
-        $("ci-weight").value = ""; $("ci-note").value = "";
-        await loadMilestones();
+        [...document.querySelectorAll("#chips-moment .chip.on")].forEach((c) => c.classList.remove("on"));
+        $("ci-note").value = "";
+        $("ci-file").value = ""; ciFile = null; $("ci-preview").innerHTML = ""; $("ci-preview").classList.add("hidden");
+        $("ci-filepick-label").innerHTML = "\u{1F4F7}  Add a photo or video (optional)";
+        await loadMilestones(); if (typeof loadFeed === "function") loadFeed();
         setTimeout(() => { $("timeline-add").removeAttribute("open"); status.textContent = ""; }, 1400);
       } else {
         const d = await r.json().catch(() => ({}));

@@ -627,11 +627,11 @@ async function readPosts() {
 
 app.get("/api/feed", requireAuth, async (_req, res) => {
   const posts = await readPosts();
-  // Milestones that carry a photo/video also appear in the feed (Amy's ask), so
-  // the big moments live in both places. Shaped like a post, flagged fromMilestone
-  // so the client can badge/link them. De-duped by id prefix; sorted together.
+  // EVERY milestone also appears in the feed (Amy's ask) — including copy-only
+  // ones — so the timeline and the feed tell the same story. Shaped like a post,
+  // flagged fromMilestone so the client can badge/link them and route comments to
+  // the milestone's own thread. Sorted together with regular posts.
   const msPosts = loadMilestones()
-    .filter((m) => m.mediaFile && (m.mediaType === "image" || m.mediaType === "video"))
     .map((m) => ({
       id: "ms_" + m.id,
       author: m.author || "Leo\u2019s mum & dad",

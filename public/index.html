@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Averia+Libre:ital,wght@0,300;0,400;0,700;1,400&family=Fragment+Mono:ital@0;1&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="/styles.css?v=51" />
+<link rel="stylesheet" href="/styles.css?v=53" />
 </head>
 <body>
 
@@ -192,82 +192,82 @@
         <details class="add-ms" id="timeline-add">
           <summary>
             <span class="add-ms-plus" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
-            <span>Add to Leo&rsquo;s timeline<em>&mdash;just for Mum &amp; Dad</em></span><span class="info-tip"><button type="button" class="info-btn" aria-label="About the timeline">🦁</button><span class="info-pop">Two ways to update: a <b>Quick update</b> in a few taps for how Leo&rsquo;s doing, or a full <b>Milestone</b> for a bigger moment. Add either any time, even days later.</span></span>
+            <span class="add-ms-head"><span class="add-ms-title">Luke + Dana: update the fam on how Leo&rsquo;s doing</span><span class="info-tip"><button type="button" class="info-btn" aria-label="How updates work">🦁</button><span class="info-pop">Two ways to update:<br><b>1. Mini Update</b>&mdash;a few words or a pic to share how Leo&rsquo;s doing<br><b>2. Milestone</b>&mdash;for our main man&rsquo;s bigger moments</span></span></span>
           </summary>
           <div class="add-ms-body">
             <div class="tl-tabs">
-              <button type="button" class="tl-tab active" data-tab="quick">Quick update</button>
+              <button type="button" class="tl-tab active" data-tab="quick">Mini Update</button>
               <button type="button" class="tl-tab" data-tab="milestone">Milestone</button>
             </div>
 
             <div class="tl-panel" id="tab-quick">
-              <p class="composer-help">Mini updates to show how Leo&rsquo;s doing at a glance&mdash;on the days when words feel like too much. Tap anything that fits today; no writing needed.</p>
-
-              <p class="chip-label">Today, Leo was&hellip;</p>
+              <p class="chip-label">How&rsquo;s Leo today?</p>
               <div class="chips" id="chips-moment">
                 <button type="button" class="chip" data-emoji="&#x1F634;" data-word="sleepy">&#x1F634; Sleepy</button>
                 <button type="button" class="chip" data-emoji="&#x1F60C;" data-word="settled">&#x1F60C; Settled</button>
                 <button type="button" class="chip" data-emoji="&#x1F90D;" data-word="snuggly">&#x1F90D; Snuggly</button>
-                <button type="button" class="chip" data-emoji="&#x1F4AA;" data-word="holding strong">&#x1F4AA; Holding strong</button>
-                <button type="button" class="chip" data-emoji="&#x1F37C;" data-word="a good eater">&#x1F37C; A good feed</button>
-                <button type="button" class="chip" data-emoji="&#x2696;&#xFE0F;" data-word="a little bigger">&#x2696;&#xFE0F; A little bigger</button>
-                <button type="button" class="chip" data-emoji="&#x1F321;&#xFE0F;" data-word="keeping cosy and warm">&#x1F321;&#xFE0F; Cosy &amp; warm</button>
-                <button type="button" class="chip" data-emoji="&#x1FAC1;" data-word="breathing easier">&#x1FAC1; Breathing easier</button>
-                <button type="button" class="chip" data-emoji="&#x1F932;" data-word="out for a cuddle">&#x1F932; Cuddle time</button>
-                <button type="button" class="chip" data-emoji="&#x1F440;" data-word="bright-eyed">&#x1F440; Bright-eyed</button>
-                <button type="button" class="chip" data-emoji="&#x1F4A4;" data-word="resting well">&#x1F4A4; Resting well</button>
-                <button type="button" class="chip" data-emoji="&#x1F90F;" data-word="holding on tight">&#x1F90F; Holding on tight</button>
+                <button type="button" class="chip" data-emoji="&#x1F37C;" data-word="feeding well">&#x1F37C; Good feeds</button>
+                <button type="button" class="chip" data-emoji="&#x1F440;" data-word="bright-eyed">&#x1F440; Bright eyed</button>
+                <button type="button" class="chip" data-emoji="&#x1F63E;" data-word="a bit scratchy">&#x1F63E; Scratchy</button>
+                <button type="button" class="chip chip-add" id="chip-add-own">&#x2795; Your own</button>
+              </div>
+              <div class="chip-own hidden" id="chip-own-row">
+                <input id="ci-own-emoji" class="field chip-own-emoji" maxlength="4" placeholder="&#x1F642;" aria-label="Emoji" />
+                <input id="ci-own-word" class="field chip-own-word" maxlength="24" placeholder="Add your own&hellip;" aria-label="Your own state" />
+                <button type="button" class="chip-own-add" id="ci-own-add">Add</button>
               </div>
 
-              <div class="ms-row">
-                <label class="ms-field">
-                  <span>Date</span>
-                  <input id="ci-date" type="date" class="field" />
-                </label>
-                <label class="ms-field">
-                  <span>Weight <em>(optional)</em></span>
-                  <input id="ci-weight" type="text" class="field" placeholder="e.g. 1.9kg" maxlength="20" />
-                </label>
+              <div class="ms-field mini-gap">
+                <span>Date</span>
+                <input id="ci-date" type="date" class="field" />
               </div>
-              <label class="ms-field">
-                <span>Anything else? <em>(optional)</em></span>
-                <input id="ci-note" type="text" class="field" placeholder="A tiny note&hellip;" maxlength="280" />
+              <div class="ms-field">
+                <span>Leo&rsquo;s vibe today:</span>
+                <input id="ci-note" type="text" class="field" placeholder="As few or as many words as you want" maxlength="280" />
+              </div>
+              <label class="filepick" id="ci-filepick">
+                <input id="ci-file" type="file" accept="image/*,video/*" hidden />
+                <span id="ci-filepick-label">&#x1F4F7;  Add a photo or video (optional)</span>
               </label>
-              <label class="ms-field">
+              <div id="ci-preview" class="preview hidden"></div>
+              <div class="ms-field">
                 <span>From</span>
                 <div class="who-pick" id="ci-who">
                   <button type="button" class="who-btn" data-who="Dana">&#x1F49B; Dana</button>
                   <button type="button" class="who-btn" data-who="Luke">&#x1F499; Luke</button>
                 </div>
-              </label>
-              <button id="ci-save" class="btn btn-blue full" type="button">Post update</button>
+              </div>
+              <button id="ci-save" class="btn btn-blue full" type="button">Post mini update</button>
               <div id="ci-status" class="post-status"></div>
             </div>
 
             <div class="tl-panel hidden" id="tab-milestone">
-              <p class="composer-help">A bigger moment worth remembering&mdash;add the story and a photo or video.</p>
-              <div class="ms-row">
-                <label class="ms-field">
-                  <span>Date</span>
-                  <input id="ms-date" type="date" class="field" />
-                </label>
-                <label class="ms-field">
-                  <span>Time <em>(optional)</em></span>
-                  <input id="ms-time" type="time" class="field" />
-                </label>
+              <div class="ms-field">
+                <span>Date</span>
+                <input id="ms-date" type="date" class="field" />
               </div>
               <div class="ms-row">
                 <label class="ms-field grow">
                   <span>Title</span>
-                  <input id="ms-title" type="text" class="field" placeholder="e.g. First time off the CPAP" maxlength="140" />
+                  <input id="ms-title" type="text" class="field" placeholder="e.g. Reached birth weight" maxlength="140" />
                 </label>
-                <label class="ms-field emoji-field">
+                <div class="ms-field emoji-field">
                   <span>Emoji</span>
                   <input id="ms-emoji" type="text" class="field" placeholder="⭐" maxlength="4" />
-                </label>
+                </div>
+              </div>
+              <div class="emoji-quick" id="ms-emoji-quick" aria-label="Pick an emoji">
+                <button type="button" class="eq" data-emoji="&#x2B50;">&#x2B50;</button>
+                <button type="button" class="eq" data-emoji="&#x1F981;">&#x1F981;</button>
+                <button type="button" class="eq" data-emoji="&#x1F37C;">&#x1F37C;</button>
+                <button type="button" class="eq" data-emoji="&#x2696;&#xFE0F;">&#x2696;&#xFE0F;</button>
+                <button type="button" class="eq" data-emoji="&#x1F4AA;">&#x1F4AA;</button>
+                <button type="button" class="eq" data-emoji="&#x1FAC1;">&#x1FAC1;</button>
+                <button type="button" class="eq" data-emoji="&#x1F389;">&#x1F389;</button>
+                <button type="button" class="eq" data-emoji="&#x2764;&#xFE0F;">&#x2764;&#xFE0F;</button>
               </div>
               <label class="ms-field">
-                <span>The story <em>(optional&mdash;add the lovely details)</em></span>
+                <span>The Story <em>(optional)</em></span>
                 <textarea id="ms-body" class="field" rows="3" placeholder="e.g. Took 4ml today&mdash;basically a feast! Greedy guts." maxlength="4000"></textarea>
               </label>
               <label class="filepick" id="ms-filepick">
@@ -275,14 +275,14 @@
                 <span id="ms-filepick-label">&#x1F4F7;  Add a photo or video (optional)</span>
               </label>
               <div id="ms-preview" class="preview hidden"></div>
-              <label class="ms-field">
+              <div class="ms-field">
                 <span>From</span>
                 <div class="who-pick" id="ms-who">
                   <button type="button" class="who-btn" data-who="Dana">&#x1F49B; Dana</button>
                   <button type="button" class="who-btn" data-who="Luke">&#x1F499; Luke</button>
                 </div>
-              </label>
-              <button id="ms-save" class="btn btn-blue full" type="button">Add milestone</button>
+              </div>
+              <button id="ms-save" class="btn btn-blue full" type="button">Post milestone</button>
               <div id="ms-status" class="post-status"></div>
             </div>
           </div>
@@ -359,6 +359,6 @@
   </div>
 </div>
 
-<script src="/app.js?v=51"></script>
+<script src="/app.js?v=53"></script>
 </body>
 </html>

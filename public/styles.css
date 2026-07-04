@@ -739,6 +739,37 @@ a { color: inherit; text-decoration: none; }
 .ms-field.grow { flex: 2.6; }
 .emoji-field { flex: 0 0 80px; }
 .emoji-field .field { text-align: center; font-size: 1.3rem; }
+
+/* Add-ms summary: one bold title with the lion tucked right up beside it */
+.add-ms-head { display: inline-flex; align-items: center; gap: 6px; }
+.add-ms-head .info-tip { margin-left: 0; }
+.add-ms-title { font-weight: 700; }
+
+/* Mini Update: breathing room between the state chips and the date field */
+.mini-gap { margin-top: 20px; }
+
+/* "+ Your own" state chip + its inline add row */
+.chip-add { border-style: dashed; color: var(--soft); }
+.chip-add:hover { color: var(--blue); }
+.chip-own { display: flex; gap: 8px; align-items: stretch; margin: 4px 0 6px; }
+.chip-own.hidden { display: none; }
+.chip-own .field { margin-bottom: 0; }
+.chip-own-emoji { flex: 0 0 58px; text-align: center; }
+.chip-own-word { flex: 1; min-width: 0; }
+.chip-own-add { font-family: var(--mono); text-transform: uppercase; letter-spacing: .02em;
+  font-size: .72rem; padding: 0 16px; border-radius: 10px; border: 2px solid var(--blue);
+  background: var(--white); color: var(--blue); cursor: pointer; }
+.chip-own-add:hover { background: var(--blue); color: #fff; }
+
+/* Milestone emoji quick-pick palette */
+.emoji-quick { display: flex; flex-wrap: wrap; gap: 6px; margin: -4px 0 14px; }
+.emoji-quick .eq { font-size: 1.15rem; line-height: 1; width: 40px; height: 40px; border-radius: 10px;
+  border: 2px solid var(--line); background: var(--white); cursor: pointer; transition: border-color .12s, background .12s; }
+.emoji-quick .eq:hover { border-color: var(--blue); }
+.emoji-quick .eq.on { border-color: var(--blue); background: var(--blue); }
+
+/* Milestone badge inline on copy-only feed cards (no media tile to sit on) */
+.ms-badge.ms-badge-inline { position: static; display: inline-block; margin: 0 0 10px; }
 @media (max-width: 460px) {
   .ms-row { flex-wrap: wrap; }
   .ms-field.grow, .emoji-field { flex: 1 1 100%; }
