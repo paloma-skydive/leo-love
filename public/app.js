@@ -713,15 +713,91 @@ async function boot() {
 }
 
 let msFile = null;
+// ---------- Custom date picker ----------
+// Replaces the native <input type="date"> (which can't be styled and drops its
+// popup on the wrong side) with an on-brand calendar anchored under the field.
+// Writes an ISO yyyy-mm-dd string to the hidden input the forms already read.
+const DP_MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const DP_DOW = ["M","T","W","T","F","S","S"];
+function dpPad(n) { return String(n).padStart(2, "0"); }
+function dpTodayISO() { const t = new Date(); return `${t.getFullYear()}-${dpPad(t.getMonth() + 1)}-${dpPad(t.getDate())}`; }
+function dpFmt(iso) {
+  if (!iso) return "";
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short", year: "numeric" });
+}
+function setupDatePicker(inputId, defaultToday) {
+  const input = document.getElementById(inputId);
+  if (!input || input.dataset.dpWired) return;
+  const wrap = input.closest(".datepick");
+  if (!wrap) return;
+  input.dataset.dpWired = "1";
+  const trigger = wrap.querySelector(".dp-field");
+  const valEl = wrap.querySelector(".dp-val");
+  let pop = null, view = null;
+
+  function setValue(iso) {
+    input.value = iso || "";
+    valEl.textContent = iso ? dpFmt(iso) : "Pick a date";
+    valEl.classList.toggle("dp-placeholder", !iso);
+  }
+  function build() {
+    const y = view.y, m = view.m;
+    let start = (new Date(y, m, 1).getDay() + 6) % 7; // Monday-first
+    const days = new Date(y, m + 1, 0).getDate();
+    const todayISO = dpTodayISO(), sel = input.value;
+    let cells = "";
+    for (let i = 0; i < start; i++) cells += `<span class="dp-day dp-empty"></span>`;
+    for (let d = 1; d <= days; d++) {
+      const iso = `${y}-${dpPad(m + 1)}-${dpPad(d)}`;
+      const cls = ["dp-day"];
+      if (iso === sel) cls.push("sel");
+      if (iso === todayISO) cls.push("today");
+      cells += `<button type="button" class="${cls.join(" ")}" data-iso="${iso}">${d}</button>`;
+    }
+    pop.innerHTML =
+      `<div class="dp-head">` +
+        `<button type="button" class="dp-nav" data-nav="-1" aria-label="Previous month">\u2039</button>` +
+        `<span class="dp-title">${DP_MONTHS[m]} ${y}</span>` +
+        `<button type="button" class="dp-nav" data-nav="1" aria-label="Next month">\u203a</button>` +
+      `</div>` +
+      `<div class="dp-dow">${DP_DOW.map((x) => `<span>${x}</span>`).join("")}</div>` +
+      `<div class="dp-days">${cells}</div>` +
+      `<div class="dp-foot"><button type="button" class="dp-today">Today</button></div>`;
+  }
+  function open() {
+    if (pop) return;
+    pop = document.createElement("div");
+    pop.className = "dp-pop";
+    const base = input.value ? input.value.split("-").map(Number) : (function () { const t = new Date(); return [t.getFullYear(), t.getMonth() + 1, t.getDate()]; })();
+    view = { y: base[0], m: base[1] - 1 };
+    build();
+    wrap.appendChild(pop);
+    trigger.classList.add("open");
+  }
+  function close() { if (pop) { pop.remove(); pop = null; trigger.classList.remove("open"); } }
+
+  trigger.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); pop ? close() : open(); });
+  wrap.addEventListener("click", (e) => {
+    if (!pop) return;
+    const nav = e.target.closest(".dp-nav");
+    if (nav) { e.stopPropagation(); view.m += parseInt(nav.dataset.nav, 10); if (view.m < 0) { view.m = 11; view.y--; } if (view.m > 11) { view.m = 0; view.y++; } build(); return; }
+    const day = e.target.closest(".dp-day[data-iso]");
+    if (day) { e.stopPropagation(); setValue(day.dataset.iso); close(); return; }
+    if (e.target.closest(".dp-today")) { e.stopPropagation(); setValue(dpTodayISO()); close(); return; }
+  });
+  document.addEventListener("click", (e) => { if (pop && !e.target.closest(".datepick")) close(); });
+
+  if (defaultToday && !input.value) setValue(dpTodayISO());
+  else setValue(input.value);
+}
+
 function setupMilestoneForm() {
   setupParentPills("ms-who");
+  setupDatePicker("ms-date", false);
   const btn = $("ms-save");
   if (btn.dataset.wired) return;
   btn.dataset.wired = "1";
-
-  // Whole date field opens the native picker (not just the tiny icon)
-  const msDate = $("ms-date");
-  if (msDate) msDate.addEventListener("click", () => { try { msDate.showPicker && msDate.showPicker(); } catch (e) {} });
 
   // Tap-to-pick emoji (so it works on desktop too, where there's no emoji key)
   const eq = $("ms-emoji-quick");
@@ -952,11 +1028,7 @@ function setupCheckin() {
   if (!btn || btn.dataset.wired) return;
   btn.dataset.wired = "1";
   const today = new Date().toISOString().slice(0, 10);
-  const dateEl = $("ci-date");
-  dateEl.value = today;
-  // Make the whole date field reliably open the native picker (fixes the
-  // "click function weird" — some browsers only opened it from the tiny icon).
-  dateEl.addEventListener("click", () => { try { dateEl.showPicker && dateEl.showPicker(); } catch (e) {} });
+  setupDatePicker("ci-date", true);
   setupParentPills("ci-who");
 
   // States — multi-select

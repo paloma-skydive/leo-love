@@ -393,10 +393,36 @@ a { color: inherit; text-decoration: none; }
   background: var(--cream); outline: none; margin-bottom: 12px; resize: vertical;
 }
 .field:focus { border-color: var(--blue); }
-/* Date fields: keep the body font + a consistent look with the other inputs */
-input[type="date"].field { font-family: var(--body); color: var(--ink); cursor: pointer; min-height: 50px; }
-input[type="date"].field::-webkit-calendar-picker-indicator { cursor: pointer; opacity: .5; transition: opacity .12s; }
-input[type="date"].field::-webkit-calendar-picker-indicator:hover { opacity: 1; }
+/* Custom date picker — on-brand calendar anchored under the field */
+.datepick { position: relative; }
+.dp-field { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  font-family: var(--body); font-size: 1rem; color: var(--ink); text-align: left;
+  padding: 14px 15px; border: 2px solid var(--line); border-radius: 12px; background: var(--cream); cursor: pointer;
+  transition: border-color .12s; }
+.dp-field:hover, .dp-field.open { border-color: var(--blue); }
+.dp-val.dp-placeholder { color: var(--soft); }
+.dp-ico { color: var(--blue); flex-shrink: 0; }
+.dp-pop { position: absolute; top: 100%; left: 0; margin-top: 8px; z-index: 50; width: 300px; max-width: 100%;
+  background: var(--white); border: 2px solid var(--line); border-radius: 16px; box-shadow: 0 16px 44px rgba(21,20,20,.18); padding: 14px; }
+.dp-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.dp-title { font-family: var(--display); font-weight: 700; font-size: 1.02rem; color: var(--ink); }
+.dp-nav { width: 32px; height: 32px; border-radius: 9px; border: none; background: var(--cream); color: var(--ink);
+  font-size: 1.3rem; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .12s, color .12s; }
+.dp-nav:hover { background: var(--blue); color: #fff; }
+.dp-dow { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-bottom: 4px; }
+.dp-dow span { font-family: var(--mono); text-transform: uppercase; font-size: .62rem; letter-spacing: .02em; color: var(--soft); text-align: center; padding: 4px 0; }
+.dp-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.dp-day { aspect-ratio: 1 / 1; border: none; background: none; border-radius: 9px; font-family: var(--body); font-size: .9rem;
+  color: var(--ink); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .1s, color .1s; }
+.dp-day.dp-empty { visibility: hidden; cursor: default; }
+.dp-day:hover:not(.dp-empty) { background: var(--cream); }
+.dp-day.today { color: var(--blue); font-weight: 700; }
+.dp-day.sel { background: var(--blue); color: #fff; font-weight: 700; }
+.dp-foot { display: flex; justify-content: flex-end; margin-top: 8px; }
+.dp-today { font-family: var(--mono); text-transform: uppercase; letter-spacing: .03em; font-size: .7rem; color: var(--blue);
+  background: none; border: none; cursor: pointer; padding: 4px 6px; }
+.dp-today:hover { text-decoration: underline; }
+@media (max-width: 460px) { .dp-pop { width: 280px; } }
 /* compact composer: name + file picker share a row */
 .composer-row { display: flex; gap: 10px; align-items: stretch; flex-wrap: wrap; }
 .composer-row #author { flex: 1 1 55%; min-width: 140px; margin-bottom: 12px; }

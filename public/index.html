@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Averia+Libre:ital,wght@0,300;0,400;0,700;1,400&family=Fragment+Mono:ital@0;1&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="/styles.css?v=62" />
+<link rel="stylesheet" href="/styles.css?v=63" />
 </head>
 <body>
 
@@ -74,7 +74,7 @@
         <span class="dot d-blue dot-b"></span>
         <span class="dot d-yellow dot-d"></span>
       </div>
-      <img class="hero-photo" src="/img/leo-hero-bw.jpg?v=62" alt="Baby Leo asleep in his maroon beanie" />
+      <img class="hero-photo" src="/img/leo-hero-bw.jpg?v=63" alt="Baby Leo asleep in his maroon beanie" />
       <div class="hero-inner">
         <p class="eyebrow light">Born 16 June, 1:46pm &middot; Georgetown</p>
         <h1 class="hero-name">Leo John Paul<br />Fraser</h1>
@@ -221,7 +221,10 @@
 
               <div class="ms-field mini-gap">
                 <span>Date</span>
-                <input id="ci-date" type="date" class="field" />
+                <div class="datepick">
+                  <button type="button" class="dp-field"><span class="dp-val dp-placeholder">Pick a date</span><svg class="dp-ico" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4.5" width="18" height="17" rx="2.5"/><line x1="16" y1="2.5" x2="16" y2="6.5"/><line x1="8" y1="2.5" x2="8" y2="6.5"/><line x1="3" y1="9.5" x2="21" y2="9.5"/></svg></button>
+                  <input type="hidden" id="ci-date" />
+                </div>
               </div>
               <div class="ms-field">
                 <span>Leo&rsquo;s vibe today:</span>
@@ -246,7 +249,10 @@
             <div class="tl-panel hidden" id="tab-milestone">
               <div class="ms-field">
                 <span>Date</span>
-                <input id="ms-date" type="date" class="field" />
+                <div class="datepick">
+                  <button type="button" class="dp-field"><span class="dp-val dp-placeholder">Pick a date</span><svg class="dp-ico" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4.5" width="18" height="17" rx="2.5"/><line x1="16" y1="2.5" x2="16" y2="6.5"/><line x1="8" y1="2.5" x2="8" y2="6.5"/><line x1="3" y1="9.5" x2="21" y2="9.5"/></svg></button>
+                  <input type="hidden" id="ms-date" />
+                </div>
               </div>
               <label class="ms-field">
                 <span>Title</span>
@@ -366,6 +372,6 @@
   </div>
 </div>
 
-<script src="/app.js?v=62"></script>
+<script src="/app.js?v=63"></script>
 </body>
 </html>
