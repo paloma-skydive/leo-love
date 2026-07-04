@@ -435,8 +435,14 @@ function escapeHtml(s) {
 function flagClampedCaptions() {
   const list = $("feed-list");
   if (!list) return;
+  // Don't measure while the feed is hidden or laid out at zero height (e.g. the
+  // user switched to Milestones/Family, or a transition is mid-flight). A zero
+  // measurement reads every caption as "not truncated" and would wrongly strip the
+  // Read more buttons — the bug where Read more vanished after interacting elsewhere.
+  if (!list.offsetParent || list.clientHeight === 0) return;
   list.querySelectorAll(".card-caption").forEach((c) => {
     if (c.classList.contains("expanded")) return;
+    if (c.clientHeight === 0) return;   // caption not laid out yet — don't touch it
     const clamped = c.scrollHeight - c.clientHeight > 4;
     c.classList.toggle("clamped", clamped);
     const next = c.nextElementSibling;
