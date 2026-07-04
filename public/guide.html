@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Averia+Libre:ital,wght@0,300;0,400;0,700;1,400&family=Fragment+Mono:ital@0;1&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="/styles.css?v=81" />
+<link rel="stylesheet" href="/styles.css?v=90" />
 <style>
   /* ---- Guide: calm, uniform, editorial. Aligned to the main page's type scale. ---- */
   .hero-guide-page { background: var(--ink); color: var(--cream); }
@@ -19,7 +19,7 @@
   .hero-guide-page .sub { font-family: var(--body); font-size: .95rem; opacity: .82; margin: 12px auto 0; position: relative; z-index: 5; }
 
   /* Wider, calmer column */
-  .guide { max-width: 720px; margin: -56px auto 0; padding: 0 clamp(18px,4vw,28px) 80px; position: relative; z-index: 2; }
+  .guide { max-width: 720px; margin: -24px auto 0; padding: 0 clamp(18px,4vw,28px) 80px; position: relative; z-index: 2; }
 
   /* Uniform body copy — same size as the main page body (.92rem) */
   .guide p, .guide li { font-family: var(--body); font-size: .92rem; line-height: 1.55; color: var(--ink); }
@@ -29,14 +29,27 @@
     background: var(--white); border-radius: 20px; box-shadow: var(--shadow);
     padding: 26px clamp(22px,4vw,32px); margin: 0 0 18px;
   }
-  .g-note-card { border-top: 5px solid var(--yellow); }
+  /* Amy's opening note: a coloured module (blue) with white copy + a cream inset
+     frame line sitting OVER the text (mirrors the hero frame). */
+  .g-note-card {
+    position: relative; background: var(--blue); color: var(--cream);
+    border-top: none; overflow: hidden;
+  }
+  .g-note-card::before {
+    content: ""; position: absolute; inset: 12px; border: 1.5px solid rgba(255,254,245,.85);
+    border-radius: 13px; pointer-events: none; z-index: 2;
+  }
+  .g-note-card p { position: relative; z-index: 1; }
+  .guide .g-note-card p, .guide .g-note-card li { color: var(--cream); }
   .g-note-card p { margin: 0 0 12px; }
   .g-note-card p:last-child { margin-bottom: 0; }
-  .guide .g-note-card .sign { font-family: var(--mono); text-transform: uppercase; letter-spacing: .06em; font-size: .74rem; color: var(--soft); }
+  .guide .g-note-card .sign { font-family: var(--mono); text-transform: uppercase; letter-spacing: .06em; font-size: .74rem; color: rgba(255,254,245,.8); }
 
   /* Section heading: mono eyebrow kicker + Averia title (matches main page eyebrows + headers).
-     Prefixed with .guide so it wins over the .guide p base rule (specificity). */
-  .guide .g-kicker { font-family: var(--mono); text-transform: uppercase; letter-spacing: .1em; font-size: .68rem; line-height: 1.4; margin: 0 0 8px; }
+     Prefixed with .guide so it wins over the .guide p base rule (specificity).
+     Kicker sized to match the main-page .eyebrow (.8rem), with breathing room below
+     the previous section's content before the next kicker. */
+  .guide .g-kicker { font-family: var(--mono); text-transform: uppercase; letter-spacing: .02em; font-size: .8rem; font-weight: 400; line-height: 1.4; margin: 0 0 13px; }
   .g-card.k-blue .g-kicker { color: var(--blue); }
   .g-card.k-red .g-kicker { color: var(--red); }
   .g-card.k-amber .g-kicker { color: #c9a227; }
@@ -44,11 +57,11 @@
   .g-card h2 .g-emoji { font-family: var(--body); margin-right: .3em; }
   .g-card p:last-child { margin-bottom: 0; }
 
-  /* Bullet list inside a section */
+  /* Bullet list inside a section — tighter spacing between items */
   .g-list { list-style: none; padding: 0; margin: 12px 0 0; }
-  .g-list li { position: relative; padding: 0 0 0 24px; margin-bottom: 12px; }
+  .g-list li { position: relative; padding: 0 0 0 24px; margin-bottom: 7px; line-height: 1.5; }
   .g-list li:last-child { margin-bottom: 0; }
-  .g-list li::before { content: ""; position: absolute; left: 3px; top: .6em; width: 7px; height: 7px; border-radius: 50%; background: var(--red); }
+  .g-list li::before { content: ""; position: absolute; left: 3px; top: .58em; width: 7px; height: 7px; border-radius: 50%; background: var(--red); }
   .g-card.k-blue .g-list li::before { background: var(--blue); }
   .g-card.k-amber .g-list li::before { background: #c9a227; }
 
@@ -93,11 +106,9 @@
       <h2><span class="g-emoji">&#x1F981;</span>You decide who comes in</h2>
       <ul class="g-list">
         <li>When you&rsquo;re ready, it&rsquo;s your call who you share it with.</li>
-        <li>This might just be the family who&rsquo;ve contributed, or wider family and friends as well&mdash;this is up to you.</li>
-        <li>Whoever receives the link will land on a family password-protected page. It&rsquo;s Fort Knox up in here.</li>
-        <li>The people you see here are the only people who I&rsquo;ve asked to contribute. (I didn&rsquo;t want to get every single family member involved before you&rsquo;d seen it, so was only in touch with the people you two are closest to).</li>
-        <li>If you&rsquo;re happy for the family who&rsquo;ve shared something to come in, let me know! I&rsquo;ll flick a few switches, send them the link + the family code.</li>
-        <li>The link will land them on a locked page, then take over to the main feed.</li>
+        <li>This might just be with family members who&rsquo;ve contributed, or wider family and friends as well&mdash;it&rsquo;s up to you. Whoever receives the link will land on a family password-protected page. It&rsquo;s Fort Knox up in here.</li>
+        <li>The people you see here are the only ones I asked to contribute. I didn&rsquo;t want to get every single family member involved before you&rsquo;d seen it&mdash;so was only in touch with the people you&rsquo;re closest to.</li>
+        <li>If you&rsquo;re happy for the family who&rsquo;ve shared something to come on in, let me know! I&rsquo;ll flick a few switches, send them the link + the family code. I&rsquo;ll also share this code with you when I&rsquo;ve set it up, so you can share with anyone you like.</li>
         <li>This guide stays hidden, just for you two.</li>
       </ul>
     </div>
@@ -109,7 +120,7 @@
         <li>You have full editing control over what&rsquo;s posted on this page&mdash;whether it&rsquo;s your own post or someone else&rsquo;s (including the milestones I&rsquo;ve already added).</li>
         <li>How to do this: scroll to the bottom of the homepage and you&rsquo;ll see &#x1F511; Parent Mode.</li>
         <li>Click to unlock it, drop in your password, and edit as you please.</li>
-        <li>If there are any site bugs that need fixing, or you want a new feature added, I&rsquo;m at your service.</li>
+        <li>If you spot a bug that needs fixing, or you want a new feature added, I&rsquo;m at your service.</li>
       </ul>
     </div>
 
