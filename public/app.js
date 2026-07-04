@@ -14,6 +14,7 @@ let feedSort = "curated";
 
 // Pencil icon for the parent-only edit control on posts/milestones.
 const PENCIL_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
+const TRASH_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>';
 const MONTHS_FULL = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 let shuffleOrder = [];
 let renderedFeedSig = null;   // signature of the posts currently drawn in the DOM
@@ -128,7 +129,16 @@ function setView(v, opts) {
 const KNOWN_VIEWS = ["feed", "timeline", "family"];
 document.addEventListener("click", (e) => {
   const a = e.target.closest("[data-view]");
-  if (a) { e.preventDefault(); setView(a.dataset.view); }
+  if (a) {
+    e.preventDefault();
+    // The "Leo" brand/logo always returns to the full homepage feed — clear any
+    // active family filter so it never lands on a filtered/empty view.
+    if (a.classList.contains("brand") && feedFilter) {
+      feedFilter = null;
+      renderFeedFilters(); renderFeed();
+    }
+    setView(a.dataset.view);
+  }
 });
 // Browser back/forward (and manual URL edits) drive the view via the hash.
 window.addEventListener("hashchange", () => {
@@ -449,7 +459,7 @@ function renderFeed() {
     }
     // Parents (Luke & Dana) get a small pencil to fix their own posts/milestones.
     const editBtn = IS_PARENT
-      ? `<button type="button" class="edit-btn" data-edit-kind="${p.fromMilestone ? "milestone" : "post"}" data-edit-id="${escapeHtml(p.fromMilestone ? p.milestoneId : p.id)}" aria-label="Edit" title="Edit">${PENCIL_SVG}</button>`
+      ? `<button type="button" class="edit-btn" data-edit-kind="${p.fromMilestone ? "milestone" : "post"}" data-edit-scope="${p.fromMilestone ? "feed" : "post"}" data-edit-id="${escapeHtml(p.fromMilestone ? p.milestoneId : p.id)}" aria-label="Edit" title="Edit">${PENCIL_SVG}</button>`
       : "";
     card.innerHTML = `
       ${mediaBlock}
@@ -572,10 +582,17 @@ function renderComments(mount, comments) {
   const items = comments.map((c) => {
     const col = avatarColor(c.author || "?");
     const initial = (c.author || "?").trim().charAt(0).toUpperCase() || "?";
-    return `<div class="comment">
+    // Parent mode only: edit + delete controls on every comment (feed or milestone).
+    const controls = IS_PARENT
+      ? `<span class="comment-actions">
+          <button type="button" class="comment-edit" data-cid="${escapeHtml(c.id)}" aria-label="Edit comment" title="Edit">${PENCIL_SVG}</button>
+          <button type="button" class="comment-del" data-cid="${escapeHtml(c.id)}" aria-label="Delete comment" title="Delete">${TRASH_SVG}</button>
+        </span>`
+      : "";
+    return `<div class="comment" data-cid="${escapeHtml(c.id)}">
       <div class="cav" style="background:${col}">${escapeHtml(initial)}</div>
       <div class="comment-main">
-        <div><span class="comment-who">${escapeHtml(c.author || "Someone")}</span><span class="comment-when">${timeAgo(c.createdAt)}</span></div>
+        <div class="comment-head"><span class="comment-who">${escapeHtml(c.author || "Someone")}</span><span class="comment-when">${timeAgo(c.createdAt)}${c.editedAt ? " \u00b7 edited" : ""}</span>${controls}</div>
         <p class="comment-text">${escapeHtml(c.text)}</p>
       </div>
     </div>`;
@@ -635,6 +652,59 @@ function renderComments(mount, comments) {
   };
   mount.querySelector(".comment-send").addEventListener("click", send);
   textEl.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); send(); } });
+
+  // Parent mode: edit / delete controls on each comment.
+  if (IS_PARENT) {
+    mount.querySelectorAll(".comment-del").forEach((btn) => btn.addEventListener("click", async () => {
+      const cid = btn.dataset.cid;
+      const row = mount.querySelector(`.comment[data-cid="${cid}"]`);
+      // Two-step inline confirm (no native confirm dialog).
+      if (!row.querySelector(".comment-confirm")) {
+        const bar = document.createElement("div");
+        bar.className = "comment-confirm";
+        bar.innerHTML = `<span>Delete this comment?</span><button type="button" class="cc-yes">Delete</button><button type="button" class="cc-no">Keep</button>`;
+        row.querySelector(".comment-main").appendChild(bar);
+        bar.querySelector(".cc-no").addEventListener("click", () => bar.remove());
+        bar.querySelector(".cc-yes").addEventListener("click", async () => {
+          bar.querySelector(".cc-yes").disabled = true;
+          const r = await fetch("/api/comments/delete", {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ targetType: type, targetId: id, id: cid }),
+          });
+          if (r.ok) await mountComments(mount);
+        });
+      }
+    }));
+    mount.querySelectorAll(".comment-edit").forEach((btn) => btn.addEventListener("click", () => {
+      const cid = btn.dataset.cid;
+      const row = mount.querySelector(`.comment[data-cid="${cid}"]`);
+      const textP = row.querySelector(".comment-text");
+      if (row.querySelector(".comment-edit-box")) return;
+      const current = textP.textContent;
+      const box = document.createElement("div");
+      box.className = "comment-edit-box";
+      box.innerHTML = `<input class="ce-input" type="text" maxlength="1500" /><button type="button" class="ce-save">Save</button><button type="button" class="ce-cancel">Cancel</button>`;
+      box.querySelector(".ce-input").value = current;
+      textP.style.display = "none";
+      textP.after(box);
+      const inp = box.querySelector(".ce-input");
+      inp.focus();
+      const close = () => { box.remove(); textP.style.display = ""; };
+      box.querySelector(".ce-cancel").addEventListener("click", close);
+      const save = async () => {
+        const val = inp.value.trim();
+        if (!val) { inp.focus(); return; }
+        box.querySelector(".ce-save").disabled = true;
+        const r = await fetch("/api/comments/edit", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ targetType: type, targetId: id, id: cid, text: val }),
+        });
+        if (r.ok) await mountComments(mount); else { box.querySelector(".ce-save").disabled = false; }
+      };
+      box.querySelector(".ce-save").addEventListener("click", save);
+      inp.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); save(); } if (e.key === "Escape") close(); });
+    }));
+  }
 }
 
 // ---------- Milestones ----------
@@ -668,7 +738,7 @@ async function loadMilestones() {
       media = `<div class="ms-gallery" data-count="${items.length}">${tiles}</div>`;
     }
     const editBtn = IS_PARENT
-      ? `<button type="button" class="edit-btn" data-edit-kind="milestone" data-edit-id="${escapeHtml(m.id)}" aria-label="Edit" title="Edit">${PENCIL_SVG}</button>`
+      ? `<button type="button" class="edit-btn" data-edit-kind="milestone" data-edit-scope="timeline" data-edit-id="${escapeHtml(m.id)}" aria-label="Edit" title="Edit">${PENCIL_SVG}</button>`
       : "";
     d.innerHTML = `
       <div class="ms-card">
@@ -1429,14 +1499,20 @@ function setEditDate(iso) {
   }
 }
 
-async function openEditModal(kind, id) {
+async function openEditModal(kind, id, scope) {
   const modal = $("edit-modal");
   const postFields = modal.querySelector(".em-post");
   const msFields = modal.querySelector(".em-ms");
+  const note = $("em-note");
+  const dateWrap = modal.querySelector(".em-date-wrap");
+  const delBtn = $("em-delete");
+  const resetBtn = $("em-reset");
   $("em-error").classList.add("hidden");
   $("em-confirm").classList.add("hidden");
   modal.querySelector(".em-actions").classList.remove("em-modal-hide");
-  editState = { kind, id };
+  note.classList.add("hidden");
+  if (resetBtn) resetBtn.classList.add("hidden");
+  editState = { kind, id, scope: scope || "timeline" };
 
   if (kind === "post") {
     const p = ALL_POSTS.find((x) => x.id === id);
@@ -1457,16 +1533,35 @@ async function openEditModal(kind, id) {
       } catch {}
     }
     if (!m) return;
-    $("em-title").textContent = "Edit milestone";
-    $("em-emoji").value = m.emoji || "";
-    $("em-title-input").value = m.title || "";
-    $("em-body").value = m.body || "";
-    setEditDate((m.sortISO || "").slice(0, 10));
+    const feedScope = editState.scope === "feed";
+    if (feedScope) {
+      // Editing how the milestone READS on the homepage tile only — the timeline
+      // milestone is untouched. Prefill with the current feed text (override if set,
+      // otherwise the real milestone text).
+      $("em-title").textContent = "Edit feed tile";
+      $("em-emoji").value = (m.feedEmoji != null ? m.feedEmoji : m.emoji) || "";
+      $("em-title-input").value = (m.feedTitle != null ? m.feedTitle : m.title) || "";
+      $("em-body").value = (m.feedBody != null ? m.feedBody : m.body) || "";
+      note.textContent = "This changes how the milestone looks on the feed only — the timeline stays as written.";
+      note.classList.remove("hidden");
+      dateWrap.classList.add("hidden");   // date is a timeline concern
+      delBtn.classList.add("hidden");     // deleting is a timeline action
+      // Offer a reset only when an override is actually in place.
+      if (resetBtn && (m.feedTitle != null || m.feedBody != null || m.feedEmoji != null)) resetBtn.classList.remove("hidden");
+    } else {
+      $("em-title").textContent = "Edit milestone";
+      $("em-emoji").value = m.emoji || "";
+      $("em-title-input").value = m.title || "";
+      $("em-body").value = m.body || "";
+      setEditDate((m.sortISO || "").slice(0, 10));
+      dateWrap.classList.remove("hidden");
+      delBtn.classList.remove("hidden");
+      $("em-confirm-text").textContent = "Delete this milestone? It\u2019ll be removed from the timeline and feed.";
+    }
     const eq = $("em-emoji-quick");
-    eq.querySelectorAll(".eq").forEach((b) => b.classList.toggle("on", b.dataset.emoji === (m.emoji || "")));
+    eq.querySelectorAll(".eq").forEach((b) => b.classList.toggle("on", b.dataset.emoji === $("em-emoji").value));
     postFields.classList.add("hidden");
     msFields.classList.remove("hidden");
-    $("em-confirm-text").textContent = "Delete this milestone? It\u2019ll be removed from the timeline and feed.";
   }
   modal.classList.remove("hidden");
   modal.setAttribute("aria-hidden", "false");
@@ -1489,7 +1584,7 @@ async function refreshAfterEdit() {
 
 async function saveEdit() {
   if (!editState) return;
-  const { kind, id } = editState;
+  const { kind, id, scope } = editState;
   $("em-error").classList.add("hidden");
   const saveBtn = $("em-save");
   saveBtn.disabled = true;
@@ -1498,6 +1593,13 @@ async function saveEdit() {
     if (kind === "post") {
       url = `/api/posts/${encodeURIComponent(id)}/edit`;
       body = { caption: $("em-caption").value, author: $("em-author").value.trim() };
+    } else if (scope === "feed") {
+      // Feed-tile edit: save as display-only overrides. The root milestone (timeline)
+      // is never touched. Title required for the tile; empty story is allowed.
+      const title = $("em-title-input").value.trim();
+      if (!title) { showEditError("Give the tile a short title."); saveBtn.disabled = false; return; }
+      body = { feedTitle: title, feedBody: $("em-body").value, feedEmoji: $("em-emoji").value.trim() };
+      url = `/api/milestones/${encodeURIComponent(id)}/edit`;
     } else {
       const title = $("em-title-input").value.trim();
       if (!title) { showEditError("Give the milestone a short title."); saveBtn.disabled = false; return; }
@@ -1518,6 +1620,27 @@ async function saveEdit() {
     showEditError(e.message || "Couldn\u2019t save that.");
   } finally {
     saveBtn.disabled = false;
+  }
+}
+
+// Feed-tile "Reset to timeline text": clears the display overrides so the tile
+// shows the real milestone again.
+async function resetFeedOverride() {
+  if (!editState || editState.kind !== "milestone") return;
+  const { id } = editState;
+  const btn = $("em-reset");
+  btn.disabled = true;
+  try {
+    const r = await fetch(`/api/milestones/${encodeURIComponent(id)}/edit`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ resetFeed: true }),
+    });
+    if (!r.ok) { const j = await r.json().catch(() => ({})); throw new Error(j.error || "Couldn\u2019t reset that."); }
+    closeEditModal();
+    await refreshAfterEdit();
+  } catch (e) {
+    showEditError(e.message || "Couldn\u2019t reset that.");
+  } finally {
+    btn.disabled = false;
   }
 }
 
@@ -1625,6 +1748,7 @@ function setupEditModal() {
   $("em-cancel").addEventListener("click", closeEditModal);
   modal.addEventListener("click", (e) => { if (e.target === modal) closeEditModal(); });
   $("em-save").addEventListener("click", saveEdit);
+  if ($("em-reset")) $("em-reset").addEventListener("click", resetFeedOverride);
 
   // Delete → reveal confirm sub-panel, then act.
   $("em-delete").addEventListener("click", () => {
@@ -1642,7 +1766,7 @@ function setupEditModal() {
     const btn = e.target.closest(".edit-btn[data-edit-kind]");
     if (!btn) return;
     e.preventDefault(); e.stopPropagation();
-    openEditModal(btn.dataset.editKind, btn.dataset.editId);
+    openEditModal(btn.dataset.editKind, btn.dataset.editId, btn.dataset.editScope || "timeline");
   });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !modal.classList.contains("hidden")) closeEditModal(); });
 }

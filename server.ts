@@ -666,21 +666,30 @@ app.get("/api/feed", requireAuth, async (_req, res) => {
   // flagged fromMilestone so the client can badge/link them and route comments to
   // the milestone's own thread. Sorted together with regular posts.
   const msPosts = loadMilestones()
-    .map((m) => ({
-      id: "ms_" + m.id,
-      author: m.author || "Leo",   // milestone updates show as "Leo" on the feed tile (Amy)
-      title: m.title || "",
-      body: m.body || "",
-      emoji: m.emoji || "",
-      caption: [m.title, m.body].filter(Boolean).join(" \u2014 "),
-      mediaFile: m.mediaFile,
-      mediaType: m.mediaType,
-      media: Array.isArray(m.media) && m.media.length ? m.media : (m.mediaFile ? [{ file: m.mediaFile, type: m.mediaType || "image" }] : []),
-      createdAt: m.sortISO || m.createdAt || new Date().toISOString(),
-      dateText: m.dateText || "",
-      fromMilestone: true,
-      milestoneId: m.id,
-    }));
+    .map((m) => {
+      // Feed-display OVERRIDES: Amy can tweak how a milestone reads on the homepage
+      // tile (title/story/emoji, for spacing/aesthetics) WITHOUT changing the root
+      // milestone shown on the timeline. feedTitle/feedBody/feedEmoji win on the feed
+      // only; when unset, the feed shows the real milestone text.
+      const fTitle = (typeof m.feedTitle === "string" && m.feedTitle.length) ? m.feedTitle : (m.title || "");
+      const fBody = (typeof m.feedBody === "string") ? m.feedBody : (m.body || "");
+      const fEmoji = (typeof m.feedEmoji === "string" && m.feedEmoji.length) ? m.feedEmoji : (m.emoji || "");
+      return {
+        id: "ms_" + m.id,
+        author: m.author || "Leo",   // milestone updates show as "Leo" on the feed tile (Amy)
+        title: fTitle,
+        body: fBody,
+        emoji: fEmoji,
+        caption: [fTitle, fBody].filter(Boolean).join(" \u2014 "),
+        mediaFile: m.mediaFile,
+        mediaType: m.mediaType,
+        media: Array.isArray(m.media) && m.media.length ? m.media : (m.mediaFile ? [{ file: m.mediaFile, type: m.mediaType || "image" }] : []),
+        createdAt: m.sortISO || m.createdAt || new Date().toISOString(),
+        dateText: m.dateText || "",
+        fromMilestone: true,
+        milestoneId: m.id,
+      };
+    });
   const all = [...posts, ...msPosts];
   // Amy's hand-curated feed order. Key a family post by its post id, a milestone
   // by "ms:<milestoneId>". Listed items appear in exactly this order at the top;
@@ -817,6 +826,40 @@ app.post("/api/comments", requireAuth, (req, res) => {
   res.json({ ok: true, comment });
 });
 
+// ---- Edit / delete a comment (parent-only) ----
+// Luke & Dana (parent mode) can tidy up or remove any comment on a feed post or
+// milestone. Works for both because comments are stored the same way, keyed by
+// targetType + targetId. Family (non-parent) visitors have no such control.
+app.post("/api/comments/edit", requireParent, (req, res) => {
+  const b = req.body || {};
+  const targetType = String(b.targetType || "");
+  const targetId = String(b.targetId || "");
+  const cid = String(b.id || "");
+  const text = String(b.text || "").trim();
+  if (!validTarget(targetType) || !targetId) return res.status(400).json({ error: "bad target" });
+  if (!text) return res.status(400).json({ error: "Write something first." });
+  const list = loadComments(targetType, targetId);
+  const c = list.find((x) => x.id === cid);
+  if (!c) return res.status(404).json({ error: "Couldn't find that comment." });
+  c.text = text.slice(0, 1500);
+  c.editedAt = new Date().toISOString();
+  fs.writeFileSync(commentsPath(targetType, targetId), JSON.stringify(list, null, 2));
+  res.json({ ok: true, comment: c });
+});
+app.post("/api/comments/delete", requireParent, (req, res) => {
+  const b = req.body || {};
+  const targetType = String(b.targetType || "");
+  const targetId = String(b.targetId || "");
+  const cid = String(b.id || "");
+  if (!validTarget(targetType) || !targetId) return res.status(400).json({ error: "bad target" });
+  const list = loadComments(targetType, targetId);
+  const idx = list.findIndex((x) => x.id === cid);
+  if (idx === -1) return res.status(404).json({ error: "Couldn't find that comment." });
+  list.splice(idx, 1);
+  fs.writeFileSync(commentsPath(targetType, targetId), JSON.stringify(list, null, 2));
+  res.json({ ok: true });
+});
+
 // ---- Upload: raw body streamed to disk ----
 app.post("/api/upload", requireAuth, (req, res) => {
   const author = String(req.headers["x-author"] || "Someone in the family");
@@ -936,6 +979,12 @@ app.post("/api/milestones/:id/edit", requireParent, (req, res) => {
   const m = list.find((x) => x.id === id);
   if (!m) return res.status(404).json({ error: "Couldn't find that milestone." });
   const b = req.body || {};
+  // Feed-display overrides (see /api/feed). These NEVER touch the root milestone
+  // text shown on the timeline. resetFeed clears them (feed reverts to root text).
+  if (b.resetFeed) { delete m.feedTitle; delete m.feedBody; delete m.feedEmoji; }
+  if (typeof b.feedTitle === "string") m.feedTitle = b.feedTitle.trim().slice(0, 140);
+  if (typeof b.feedBody === "string") m.feedBody = b.feedBody.slice(0, 4000);
+  if (typeof b.feedEmoji === "string") m.feedEmoji = b.feedEmoji.trim().slice(0, 8);
   if (typeof b.title === "string" && b.title.trim()) m.title = b.title.trim().slice(0, 140);
   if (typeof b.body === "string") m.body = b.body.slice(0, 4000);
   if (typeof b.emoji === "string") m.emoji = b.emoji.trim().slice(0, 8);

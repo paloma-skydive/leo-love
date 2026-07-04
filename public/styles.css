@@ -284,7 +284,7 @@ a { color: inherit; text-decoration: none; }
   padding: 64px var(--pad-x);
 }
 .section-cream { background: var(--cream); }
-.intro-section { padding-top: 56px; padding-bottom: 56px; }
+.intro-section { position: relative; padding-top: 34px; padding-bottom: 34px; }
 .wrap { max-width: 680px; margin: 0 auto; }
 
 /* two-column welcome: text left, composer right (stacks on mobile).
@@ -351,8 +351,15 @@ a { color: inherit; text-decoration: none; }
 .intro-grid-wrap { overflow: hidden; transition: max-height .34s ease, opacity .28s ease; }
 .intro-section.collapsed .intro-grid { display: none; }
 /* Collapsed: drop the dead space above Leo's Feed pill */
-.intro-section.collapsed { padding-top: 28px; padding-bottom: 0; }
-.intro-section.collapsed .intro-bar { margin-bottom: 0; }
+.intro-section.collapsed { padding-top: 26px; padding-bottom: 8px; }
+.intro-section.collapsed .intro-bar { margin-bottom: 0; position: static; }
+/* Desktop: float the Hide-welcome pill into the right margin so its top lines up
+   with the top of the two modules (pulls the modules up to meet it). Only kicks in
+   wide enough that the pill sits clear to the RIGHT of the 980px grid, never over it. */
+@media (min-width: 1024px) {
+  .intro-bar { position: absolute; top: 34px; right: var(--pad-x); margin: 0; z-index: 5; }
+  .intro-section.collapsed .intro-bar { position: static; }
+}
 @media (max-width: 760px) {
   .intro-grid { grid-template-columns: 1fr; gap: 24px; }
   .intro-card { padding: 24px 22px 26px; }
@@ -587,6 +594,36 @@ a { color: inherit; text-decoration: none; }
 .comment-who { font-weight: 700; font-size: .92rem; }
 .comment-when { font-family: var(--mono); font-size: .68rem; color: var(--soft); margin-left: 7px; text-transform: uppercase; }
 .comment-text { margin: 1px 0 0; font-size: .96rem; white-space: pre-wrap; }
+/* Parent-mode edit/delete controls on a comment */
+.comment-head { display: flex; align-items: center; gap: 0; }
+.comment-actions { margin-left: auto; display: inline-flex; gap: 4px; }
+.comment-edit, .comment-del {
+  width: 24px; height: 24px; padding: 5px; border: none; cursor: pointer;
+  background: transparent; border-radius: 50%; color: var(--soft);
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: background .15s, color .15s;
+}
+.comment-edit svg, .comment-del svg { width: 100%; height: 100%; }
+.comment-edit:hover { background: rgba(53,108,192,.12); color: var(--blue); }
+.comment-del:hover { background: rgba(235,40,50,.12); color: var(--red); }
+.comment-edit-box { display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
+.comment-edit-box .ce-input {
+  flex: 1 1 60%; min-width: 140px; padding: 7px 10px; border-radius: 9px;
+  border: 1.5px solid #e7e1cf; font-family: var(--body); font-size: .92rem;
+}
+.comment-edit-box .ce-save, .comment-edit-box .ce-cancel {
+  padding: 6px 12px; border-radius: 999px; border: none; cursor: pointer;
+  font-family: var(--mono); text-transform: uppercase; letter-spacing: .04em; font-size: .66rem;
+}
+.comment-edit-box .ce-save { background: var(--blue); color: var(--white); }
+.comment-edit-box .ce-cancel { background: #efe9d8; color: var(--ink); }
+.comment-confirm { display: flex; align-items: center; gap: 8px; margin-top: 6px; font-size: .82rem; color: var(--soft); flex-wrap: wrap; }
+.comment-confirm .cc-yes, .comment-confirm .cc-no {
+  padding: 5px 11px; border-radius: 999px; border: none; cursor: pointer;
+  font-family: var(--mono); text-transform: uppercase; letter-spacing: .04em; font-size: .64rem;
+}
+.comment-confirm .cc-yes { background: var(--red); color: var(--white); }
+.comment-confirm .cc-no { background: #efe9d8; color: var(--ink); }
 /* Collapsible comments: a small toggle chip that accordions open the thread + form */
 .comments-toggle {
   display: inline-flex; align-items: center; gap: 7px;
@@ -1210,6 +1247,21 @@ a { color: inherit; text-decoration: none; }
 }
 .em-close:hover { opacity: 1; }
 .em-title { font-family: var(--display); font-weight: 700; font-size: 1.4rem; margin: 0 0 16px; color: var(--ink); }
+/* Feed-tile edit note (shown when editing how a milestone reads on the feed only) */
+.em-note {
+  margin: -6px 0 14px; padding: 10px 13px; border-radius: 11px;
+  background: rgba(53,108,192,.10); color: var(--ink);
+  font-size: .84rem; line-height: 1.45;
+}
+.em-note.hidden { display: none; }
+.em-date-wrap.hidden, .em-date-label.hidden { display: none; }
+.em-reset {
+  background: none; border: 1.5px solid var(--line); border-radius: 999px; cursor: pointer;
+  color: var(--soft); font-family: var(--mono); text-transform: uppercase; letter-spacing: .04em;
+  font-size: .66rem; padding: 8px 14px; transition: color .15s, border-color .15s;
+}
+.em-reset:hover { color: var(--blue); border-color: var(--blue); }
+.em-reset.hidden { display: none; }
 .em-label {
   display: block; font-family: var(--mono); text-transform: uppercase; letter-spacing: .04em;
   font-size: .66rem; color: var(--soft); margin: 14px 0 6px;
