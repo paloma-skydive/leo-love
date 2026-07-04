@@ -107,21 +107,33 @@ function tickAge() {
 }
 
 // ---------- Views ----------
-function setView(v) {
+function setView(v, opts) {
   document.querySelectorAll(".view").forEach((el) => el.classList.add("hidden"));
   $("view-" + v).classList.remove("hidden");
   document.querySelectorAll("[data-view]").forEach((a) => {
     if (a.classList.contains("brand")) return;
     a.classList.toggle("active", a.dataset.view === v);
   });
+  // Keep the URL in sync so each page is bookmarkable and browser back/forward works.
+  // (opts.fromHash means we're reacting to a hash change already — don't rewrite it.)
+  const targetHash = "#" + v;
+  if (!(opts && opts.fromHash) && location.hash !== targetHash) {
+    location.hash = targetHash;   // pushes a history entry
+  }
   window.scrollTo({ top: 0, behavior: "smooth" });
   if (v === "timeline") loadMilestones();
   if (v === "family") loadFamily();
   if (v === "feed") requestAnimationFrame(() => setTimeout(() => { updateFilterArrows(); flagClampedCaptions(); }, 40));
 }
+const KNOWN_VIEWS = ["feed", "timeline", "family"];
 document.addEventListener("click", (e) => {
   const a = e.target.closest("[data-view]");
   if (a) { e.preventDefault(); setView(a.dataset.view); }
+});
+// Browser back/forward (and manual URL edits) drive the view via the hash.
+window.addEventListener("hashchange", () => {
+  const h = location.hash.replace("#", "");
+  setView(KNOWN_VIEWS.includes(h) ? h : "feed", { fromHash: true });
 });
 
 // ---------- Time-ago ----------
@@ -342,7 +354,20 @@ function renderFeed() {
     });
   }
   list.innerHTML = "";
-  $("feed-empty").classList.toggle("hidden", posts.length > 0);
+  const emptyEl = $("feed-empty");
+  if (posts.length === 0 && feedFilter && feedFilter.label) {
+    // Filtered to a family member who hasn't shared anything yet — say so clearly
+    // and give a one-tap way back to everyone (rather than a blank "no messages").
+    emptyEl.classList.remove("hidden");
+    emptyEl.innerHTML = `${escapeHtml(feedFilter.label)} hasn\u2019t shared anything yet \u{1F49B}<br><button type="button" class="see-everyone" id="see-everyone">See everyone\u2019s posts</button>`;
+    const be = $("see-everyone");
+    if (be) be.addEventListener("click", () => { feedFilter = null; renderFeedFilters(); renderFeed(); });
+  } else {
+    emptyEl.classList.toggle("hidden", posts.length > 0);
+    if (posts.length === 0 && !feedFilter) {
+      emptyEl.innerHTML = 'No messages yet\u2014be the first to say hello to Leo. \u{1F90D}';
+    }
+  }
   for (const p of posts) {
     const card = document.createElement("article");
     const hasMedia = !!p.mediaFile;
@@ -353,14 +378,20 @@ function renderFeed() {
       : `<img src="${src}" alt="" />`;
     const initial = (p.author || "?").trim().charAt(0).toUpperCase() || "?";
     const col = avatarColor(p.author || "?");
-    // Media cards keep the caption in the body below the photo. Text-only cards
-    // (copy milestones + text posts) carry their message on a brand-coloured tile
-    // instead, so every card is the same height and the grid lines stay even.
+    // Every card = a fixed-height visual block on top + text in the body below.
+    // Photo/video: media tile + caption. Milestone: emoji+title on a colour tile +
+    // the STORY as the body caption (so the body fills like a photo card — no white gap).
     let cap = "";
     if (hasMedia && p.fromMilestone && p.title) {
       const body = p.body ? `<p class="card-caption" tabindex="0" title="Tap to read it all">${escapeHtml(p.body)}</p>` : "";
       cap = `<h4 class="card-ms-title">${escapeHtml(p.title)}</h4>${body}`;
     } else if (hasMedia && p.caption) {
+      cap = `<p class="card-caption" tabindex="0" title="Tap to read it all">${escapeHtml(p.caption)}</p>`;
+    } else if (!hasMedia && p.fromMilestone && p.body) {
+      // Text milestone: story goes in the body (the title lives on the colour tile).
+      cap = `<p class="card-caption" tabindex="0" title="Tap to read it all">${escapeHtml(p.body)}</p>`;
+    } else if (!hasMedia && !p.fromMilestone && p.caption) {
+      // Text post: message goes in the body (a quote mark sits on the colour tile).
       cap = `<p class="card-caption" tabindex="0" title="Tap to read it all">${escapeHtml(p.caption)}</p>`;
     }
     const where = p.posterTz ? shortTz(p.posterTz) : "";
@@ -384,12 +415,13 @@ function renderFeed() {
     if (hasMedia) {
       mediaBlock = `<div class="card-media" role="button" tabindex="0" data-lightbox="${src}" data-type="${p.mediaType}" data-caption="${escapeHtml(p.caption || "")}" data-author="${escapeHtml(p.author || "Someone")}"${msLbAttrs}>${media}${badge}${countBadge}</div>`;
     } else {
-      // Brand-coloured text tile (fixed height like a photo/video tile). Tap opens
-      // the lightbox to read the whole thing.
+      // Brand-coloured tile (fixed height, same as a photo/video tile). Milestone:
+      // emoji + title. Text post: a decorative quote mark. The wording itself lives
+      // in the body below so the card fills like a photo card (no empty white gap).
       const tint = ["card-tile-red", "card-tile-blue", "card-tile-yellow"][hashId(p.id) % 3];
       const tileInner = p.fromMilestone
-        ? `${p.emoji ? `<span class="tile-emoji">${escapeHtml(p.emoji)}</span>` : ""}<h4 class="tile-title">${escapeHtml(p.title || "")}</h4>${p.body ? `<p class="tile-body">${escapeHtml(p.body)}</p>` : ""}`
-        : `<p class="tile-quote">${escapeHtml(p.caption || "")}</p>`;
+        ? `${p.emoji ? `<span class="tile-emoji">${escapeHtml(p.emoji)}</span>` : ""}<h4 class="tile-title">${escapeHtml(p.title || "")}</h4>`
+        : `<span class="tile-quote-mark" aria-hidden="true">&ldquo;</span>`;
       mediaBlock = `<div class="card-media card-tile ${tint}" role="button" tabindex="0" data-lightbox="" data-type="text" data-caption="${escapeHtml(p.caption || "")}" data-author="${escapeHtml(p.author || "Someone")}"${msLbAttrs}><div class="tile-inner">${tileInner}</div>${badge}</div>`;
     }
     // Parents (Luke & Dana) get a small pencil to fix their own posts/milestones.
@@ -999,7 +1031,7 @@ function startApp() {
   setInterval(tickAge, 1000 * 30);
   setInterval(loadFeed, 1000 * 45);
   const hash = location.hash.replace("#", "");
-  if (["timeline", "family"].includes(hash)) setView(hash);
+  if (["timeline", "family"].includes(hash)) setView(hash, { fromHash: true });
 }
 
 function setupSort() {

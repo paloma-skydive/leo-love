@@ -519,14 +519,12 @@ a { color: inherit; text-decoration: none; }
    photo/video tile, so its content centres at the same level as a video's play button
    and the grid stays even. Do NOT flex-grow it. */
 .card-tile { flex-direction: column; text-align: center; padding: 22px 20px; }
-.card-tile .tile-inner { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px; max-height: 100%; overflow: hidden; }
-.card-tile .tile-emoji { font-size: 2.1rem; line-height: 1; }
-.card-tile .tile-title { font-family: var(--display); font-weight: 700; font-size: 1.16rem; line-height: 1.25; margin: 0;
-  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.card-tile .tile-body { font-family: var(--body); font-size: .9rem; line-height: 1.45; margin: 0;
-  display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; opacity: .95; }
-.card-tile .tile-quote { font-family: var(--display); font-size: 1.2rem; line-height: 1.4; margin: 0;
-  display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden; }
+.card-tile .tile-inner { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; max-height: 100%; overflow: hidden; padding: 6px; }
+.card-tile .tile-emoji { font-size: 2.4rem; line-height: 1; }
+.card-tile .tile-title { font-family: var(--display); font-weight: 700; font-size: 1.28rem; line-height: 1.22; margin: 0;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+/* Decorative quote glyph for a text post's tile (the message sits in the body) */
+.card-tile .tile-quote-mark { font-family: var(--display); font-weight: 700; font-size: 4rem; line-height: .6; opacity: .5; }
 .card-tile-red { background: var(--red); color: var(--cream); }
 .card-tile-blue { background: var(--blue); color: var(--cream); }
 .card-tile-yellow { background: var(--yellow); color: var(--ink); }
@@ -573,6 +571,9 @@ a { color: inherit; text-decoration: none; }
 .card-caption.expanded + .cap-more { display: none; }
 .card .comments-mount { margin-top: auto; padding-top: 10px; }
 .feed-empty { text-align: center; color: var(--soft); padding: 30px; font-size: 1.05rem; }
+.feed-empty .see-everyone { margin-top: 14px; display: inline-block; background: var(--blue); color: #fff; border: none; cursor: pointer;
+  font-family: var(--mono); text-transform: uppercase; letter-spacing: .03em; font-size: .72rem; padding: 11px 22px; border-radius: 999px; }
+.feed-empty .see-everyone:hover { filter: brightness(1.06); }
 
 /* ---------- COMMENTS ---------- */
 .comments { border-top: 1px solid var(--line); margin-top: 14px; padding-top: 14px; }
@@ -955,7 +956,7 @@ a { color: inherit; text-decoration: none; }
   .mobnav { display: flex; }
   .footer { padding-bottom: 92px; }
   .topbar { gap: 10px; padding: 11px 16px; }
-  .wc-track { max-width: none; flex: 1; }
+  .wc-track { max-width: none; flex: 1 1 0; min-width: 0; }
   .wc-label { display: none; }
   .wc-pill { padding: 5px 9px; gap: 4px; }
   .hero { min-height: 74vh; }
