@@ -49,17 +49,16 @@ const FEED_ORDER: string[] = [
   "mqskwzql95e9dc0b",        // 15 Ant
   "ms:eating-more",          // 16 Going from strength to strength
   "mr5pgqgqe9cb8e1b",        // 17 Marlow
-  "19f0d20e1dbccc86f",       // 18 Matt
+  "mqtifrcs92aad18f",        // 18 Roland
   "ms:incubator-cuddles",    // 19 Leo’s first cuddles!
   "19f0d0b9fc290ee56",       // 20 Kirsty
   "ms:first-feed",           // 21 Leo’s first meal!
-  "mr6dqm9gc583e5a1",        // 22 Max
-  "ms:first-days",           // 23 Making himself at home
-  "mqs0ppq7a6e4124a",        // 24 Ryleigh
-  "ms:born",                 // 25 Leo arrives
-  // Not in Amy's list — parked here at the end pending her call:
-  "mqtifrcs92aad18f",        // Roland
-  "19f0d0b6dc50a69a0",       // Aunty Janet
+  "19f0d20e1dbccc86f",       // 22 Matt
+  "19f0d0b6dc50a69a0",       // 23 Aunty Janet
+  "ms:first-days",           // 24 Making himself at home
+  "mr6dqm9gc583e5a1",        // 25 Max
+  "mqs0ppq7a6e4124a",        // 26 Ryleigh
+  "ms:born",                 // 27 Leo arrives
 ];
 
 // ---- First-boot seed ----

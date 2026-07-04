@@ -407,6 +407,10 @@ a { color: inherit; text-decoration: none; }
   background: var(--cream); outline: none; margin-bottom: 12px; resize: vertical;
 }
 .field:focus { border-color: var(--blue); }
+/* Smaller, softer placeholder/prompt text in the composer fields (Amy) */
+.composer #caption::placeholder { font-size: .88rem; }
+.composer .who-btn-label.placeholder { font-size: .88rem; }
+.composer .who-name::placeholder, .composer .who-relation::placeholder { font-size: .88rem; }
 /* Custom date picker — on-brand calendar anchored under the field */
 .datepick { position: relative; }
 .dp-field { width: 100%; display: flex; align-items: center; justify-content: flex-start; gap: 10px;
