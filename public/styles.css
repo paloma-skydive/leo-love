@@ -319,9 +319,13 @@ a { color: inherit; text-decoration: none; }
   background: var(--yellow); color: var(--ink); border-radius: 12px; padding: 12px 15px; }
 /* Scannable icon rows (replaces the dense bullet list). Sit in their own soft-blue
    module and grow to fill the card so the welcome height matches the taller composer. */
-.intro-points { list-style: none; margin: 14px 0 0; padding: 16px 16px; display: flex; flex-direction: column; flex: 1; justify-content: space-between; gap: 13px;
+.intro-points { list-style: none; margin: 14px 0 0; padding: 16px 18px; display: flex; flex-direction: column; flex: 1; justify-content: center; gap: 12px;
   background: rgba(53,108,192,.08); border-radius: 14px; }
-.intro-points .ip { display: flex; align-items: flex-start; gap: 12px; font-size: .88rem; line-height: 1.45; color: var(--ink); }
+.intro-points .ip { display: flex; align-items: flex-start; gap: 11px; font-size: .88rem; line-height: 1.4; color: var(--ink); }
+.intro-points .ip-dot { flex-shrink: 0; width: 9px; height: 9px; border-radius: 50%; margin-top: .42em; }
+.intro-points .ip-dot.d-red { background: var(--red); }
+.intro-points .ip-dot.d-blue { background: var(--blue); }
+.intro-points .ip-dot.d-yellow { background: var(--yellow); }
 .intro-points .ip-ico { flex-shrink: 0; width: 30px; height: 30px; border-radius: 50%;
   background: var(--white); display: inline-flex; align-items: center; justify-content: center;
   font-size: .98rem; box-shadow: 0 1px 3px rgba(21,20,20,.1); }
