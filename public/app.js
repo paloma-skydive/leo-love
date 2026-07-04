@@ -8,6 +8,8 @@ let ALL_POSTS = [];
 let FAMILY = [];
 let feedFilter = null;
 let feedSort = "newest";
+let renderedFeedSig = null;   // signature of the posts currently drawn in the DOM
+let pendingFeedRefresh = false; // a refresh is waiting for a playing video to stop
 
 const PROMPTS = [
   "Tell Leo about the day he was born and where you were when you heard.",
@@ -144,11 +146,61 @@ function renderFeedFilters() {
 }
 
 // ---------- Feed ----------
+// A lightweight signature of the feed's content. Two loads with the same
+// signature mean nothing visible changed, so we can leave the DOM (and any
+// playing videos) completely untouched. Comments are deliberately excluded so a
+// new comment never tears the whole feed down.
+function feedSig(posts) {
+  return (posts || [])
+    .map((p) => `${p.id}:${p.mediaFile || ""}:${p.caption || ""}:${p.author || ""}`)
+    .join("|");
+}
+
+// Is a video in the feed actually playing right now? If so, a rebuild would snap
+// it back to the start — so we hold off until it's paused or finished.
+function feedVideosPlaying() {
+  return [...document.querySelectorAll("#feed-list video")].filter(
+    (v) => !v.paused && !v.ended && v.readyState > 2
+  );
+}
+
+// When we've deferred a refresh, re-run it once the video the family was
+// watching has stopped.
+function flushPendingFeed() {
+  if (!pendingFeedRefresh) return;
+  if (feedVideosPlaying().length) return; // something else is still playing
+  pendingFeedRefresh = false;
+  renderFeedFilters();
+  renderFeed();
+}
+
 async function loadFeed() {
   const r = await fetch("/api/feed");
   if (!r.ok) return;
   const { posts } = await r.json();
+  const sig = feedSig(posts);
+
+  // Nothing changed since what's on screen — refresh the data but don't touch the
+  // DOM, so videos keep playing and comment boxes keep their focus/text.
+  if (sig === renderedFeedSig && $("feed-list").children.length) {
+    ALL_POSTS = posts;
+    return;
+  }
+
   ALL_POSTS = posts;
+
+  // There's a real change, but if someone's mid-video, don't yank it out from
+  // under them. Stash the update and apply it the moment the video stops.
+  const playing = feedVideosPlaying();
+  if (playing.length && $("feed-list").children.length) {
+    pendingFeedRefresh = true;
+    playing.forEach((v) => {
+      v.addEventListener("pause", flushPendingFeed, { once: true });
+      v.addEventListener("ended", flushPendingFeed, { once: true });
+    });
+    return;
+  }
+
   renderFeedFilters();
   renderFeed();
 }
@@ -189,6 +241,9 @@ function renderFeed() {
     list.appendChild(card);
     mountComments(card.querySelector(".comments-mount"));
   }
+  // Remember what's now drawn, so the next auto-refresh can tell if anything
+  // actually changed before rebuilding (and interrupting any playing video).
+  renderedFeedSig = feedSig(ALL_POSTS);
 }
 
 function escapeHtml(s) {
