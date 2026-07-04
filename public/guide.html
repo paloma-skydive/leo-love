@@ -7,24 +7,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Averia+Libre:ital,wght@0,300;0,400;0,700;1,400&family=Fragment+Mono:ital@0;1&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="/styles.css?v=43" />
+<link rel="stylesheet" href="/styles.css?v=44" />
 <style>
   /* ---- Guide: calm, uniform, editorial. Module cards, one body type. ---- */
-  .g-hero {
-    position: relative; min-height: 80vh;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    background: var(--ink); color: var(--cream);
-    padding: 40px clamp(20px,5vw,40px); text-align: center; overflow: hidden;
-  }
-  .g-hero .hero-frame { position: absolute; inset: 16px; border: 1.5px solid rgba(255,254,245,.55); border-radius: 18px; pointer-events: none; }
-  /* Dots pinned to the corners so they never crowd the text */
-  .g-hero .gd-dot { position: absolute; border-radius: 50%; }
-  .g-hero .gd-1 { width: 130px; height: 130px; background: var(--red); top: -46px; left: -40px; }
-  .g-hero .gd-2 { width: 90px; height: 90px; background: var(--yellow); bottom: -30px; right: 40px; }
-  .g-hero .gd-3 { width: 60px; height: 60px; background: var(--blue); bottom: 54px; left: 30px; }
-  .g-hero .eye { font-family: var(--mono); text-transform: uppercase; letter-spacing: .16em; font-size: .74rem; opacity: .85; margin: 0 0 16px; position: relative; }
-  .g-hero h1 { font-family: var(--display); font-weight: 700; font-size: clamp(2.4rem,8vw,3.6rem); margin: 0; position: relative; line-height: 1.05; }
-  .g-hero .sub { font-family: var(--body); font-size: 1.02rem; opacity: .8; margin: 16px 0 0; position: relative; max-width: 30ch; }
+  /* Hero reuses the shared .hero / .hero-frame / .hero-dots / .hero-name /
+     .eyebrow classes from styles.css so the typeface + dots match the main
+     site exactly; we only recolour it ink here. */
+  .hero-guide-page { background: var(--ink); color: var(--cream); }
+  .hero-guide-page .hero-frame { border-color: rgba(255,254,245,.85); }
+  .hero-guide-page .sub { font-family: var(--body); font-size: 1.05rem; opacity: .82; margin: 14px 0 0; max-width: 32ch; position: relative; z-index: 5; }
 
   /* Wider, calmer column */
   .guide { max-width: 760px; margin: -56px auto 0; padding: 0 clamp(18px,4vw,28px) 80px; position: relative; z-index: 2; }
@@ -73,15 +64,19 @@
 </style>
 </head>
 <body>
-  <div class="g-hero">
-    <span class="gd-dot gd-1"></span>
-    <span class="gd-dot gd-2"></span>
-    <span class="gd-dot gd-3"></span>
+  <section class="hero hero-guide-page">
     <div class="hero-frame"></div>
-    <p class="eye">For Luke &amp; Dana</p>
-    <h1>Leo&rsquo;s little guide</h1>
-    <p class="sub">A quick tour of Leo&rsquo;s page &mdash; just for you two.</p>
-  </div>
+    <div class="hero-dots" aria-hidden="true">
+      <span class="dot d-red dot-c"></span>
+      <span class="dot d-blue dot-d"></span>
+      <span class="dot d-yellow dot-a"></span>
+    </div>
+    <div class="hero-inner">
+      <p class="eyebrow light">For Luke &amp; Dana</p>
+      <h1 class="hero-name">Leo&rsquo;s little guide</h1>
+      <p class="sub">A quick tour of Leo&rsquo;s page &mdash; just for you two.</p>
+    </div>
+  </section>
 
   <div class="guide">
     <div class="g-card g-note-card">

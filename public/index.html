@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Averia+Libre:ital,wght@0,300;0,400;0,700;1,400&family=Fragment+Mono:ital@0;1&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="/styles.css?v=43" />
+<link rel="stylesheet" href="/styles.css?v=44" />
 </head>
 <body>
 
@@ -133,17 +133,12 @@
       </div>
     </section>
 
-    <section class="section section-cream">
-      <div class="wrap">
-        <div id="email-signup-feed" class="email-mount"></div>
-      </div>
-    </section>
-
     <section class="band band-blue">
       <div class="band-text">
         <p class="eyebrow light">Around the clock</p>
         <h2 class="band-title">Loved across<br />time zones</h2>
         <p class="band-copy">From New Zealand to Cayman and all the places in between, someone in Leo&rsquo;s family is thinking of him, his mum and his dad.</p>
+        <div id="email-signup-feed" class="email-mount email-on-band"></div>
       </div>
       <div class="band-art">
         <img src="/img/leo-parents.jpg?v=2" alt="Dana and Luke each holding baby Leo skin-to-skin" />
@@ -325,6 +320,18 @@
   </footer>
 </div>
 
-<script src="/app.js?v=43"></script>
+<!-- Lightbox: click any feed/milestone photo or video to view it big -->
+<div id="lightbox" class="lightbox hidden" aria-hidden="true">
+  <button type="button" class="lb-close" aria-label="Close">&times;</button>
+  <div class="lb-inner">
+    <div class="lb-stage" id="lb-stage"></div>
+    <div class="lb-meta">
+      <p class="lb-author" id="lb-author"></p>
+      <p class="lb-caption" id="lb-caption"></p>
+    </div>
+  </div>
+</div>
+
+<script src="/app.js?v=44"></script>
 </body>
 </html>

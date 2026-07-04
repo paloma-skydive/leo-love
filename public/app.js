@@ -265,15 +265,20 @@ function renderFeed() {
   for (const p of posts) {
     const card = document.createElement("article");
     card.className = "card";
+    const src = `/media/${p.mediaFile}`;
     const media = p.mediaType === "video"
-      ? `<video src="/media/${p.mediaFile}" controls playsinline preload="metadata"></video>`
-      : `<img src="/media/${p.mediaFile}" loading="lazy" alt="" />`;
+      ? `<video src="${src}#t=0.1" playsinline preload="metadata" muted></video><span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>`
+      : `<img src="${src}" alt="" />`;
     const initial = (p.author || "?").trim().charAt(0).toUpperCase() || "?";
     const col = avatarColor(p.author || "?");
-    const cap = p.caption ? `<p class="card-caption">${escapeHtml(p.caption)}</p>` : "";
+    const cap = p.caption ? `<p class="card-caption" tabindex="0" title="Tap to read it all">${escapeHtml(p.caption)}</p>` : "";
     const where = p.posterTz ? " \u00b7 " + shortTz(p.posterTz) : "";
+    const badge = p.fromMilestone ? `<span class="ms-badge">\u2728 Milestone</span>` : "";
+    // Milestone-derived cards share the milestone's own comment thread.
+    const cType = p.fromMilestone ? "milestone" : "post";
+    const cId = p.fromMilestone ? p.milestoneId : p.id;
     card.innerHTML = `
-      <div class="card-media">${media}</div>
+      <div class="card-media" role="button" tabindex="0" data-lightbox="${src}" data-type="${p.mediaType}" data-caption="${escapeHtml(p.caption || "")}" data-author="${escapeHtml(p.author || "Someone")}">${media}${badge}</div>
       <div class="card-body">
         <div class="card-head">
           <div class="avatar" style="background:${col}">${escapeHtml(initial)}</div>
@@ -283,7 +288,7 @@ function renderFeed() {
           </div>
         </div>
         ${cap}
-        <div class="comments-mount" data-type="post" data-id="${escapeHtml(p.id)}"></div>
+        <div class="comments-mount" data-type="${cType}" data-id="${escapeHtml(cId)}"></div>
       </div>`;
     list.appendChild(card);
     mountComments(card.querySelector(".comments-mount"));
@@ -410,10 +415,12 @@ async function loadMilestones() {
     const d = document.createElement("div");
     d.className = "ms";
     const by = m.author ? `<div class="ms-date" style="margin-top:6px">added by ${escapeHtml(m.author)}</div>` : "";
+    const msrc = `/media/${escapeHtml(m.mediaFile || "")}`;
+    const mcap = escapeHtml(m.title || "");
     const media = m.mediaFile
       ? (m.mediaType === "video"
-          ? `<div class="ms-media"><video src="/media/${escapeHtml(m.mediaFile)}" controls playsinline preload="metadata"></video></div>`
-          : `<div class="ms-media"><img src="/media/${escapeHtml(m.mediaFile)}" loading="lazy" alt="" /></div>`)
+          ? `<div class="ms-media" role="button" tabindex="0" data-lightbox="${msrc}" data-type="video" data-caption="${mcap}"><video src="${msrc}#t=0.1" playsinline preload="metadata" muted></video><span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span></div>`
+          : `<div class="ms-media" role="button" tabindex="0" data-lightbox="${msrc}" data-type="image" data-caption="${mcap}"><img src="${msrc}" alt="" /></div>`)
       : "";
     d.innerHTML = `
       <div class="ms-card">
@@ -638,6 +645,7 @@ function startApp() {
   setupSort();
   setupEmailSignup();
   setupInfoTips();
+  setupLightbox();
   loadFamily();
   loadFeed();
   renderWorldClocks(); tickAge();
@@ -1010,6 +1018,55 @@ function wireEmailCard(card) {
   }
   card.querySelector(".ec-go").addEventListener("click", () => submit(false));
   card.querySelector(".ec-off").addEventListener("click", () => submit(true));
+}
+
+// ---------- Lightbox (tap a photo/video to view it big, blurred backdrop) ----------
+function openLightbox({ src, type, caption, author }) {
+  const lb = $("lightbox");
+  const stage = $("lb-stage");
+  stage.innerHTML = type === "video"
+    ? `<video src="${src}" controls playsinline autoplay></video>`
+    : `<img src="${src}" alt="" />`;
+  $("lb-author").textContent = author || "";
+  $("lb-caption").textContent = caption || "";
+  $("lb-caption").style.display = caption ? "" : "none";
+  lb.classList.remove("hidden");
+  lb.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+}
+function closeLightbox() {
+  const lb = $("lightbox");
+  if (lb.classList.contains("hidden")) return;
+  const v = lb.querySelector("video");
+  if (v) { try { v.pause(); } catch (e) {} }
+  $("lb-stage").innerHTML = "";
+  lb.classList.add("hidden");
+  lb.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
+}
+function setupLightbox() {
+  if (document.body.dataset.lbWired) return;
+  document.body.dataset.lbWired = "1";
+  const lb = $("lightbox");
+  lb.querySelector(".lb-close").addEventListener("click", closeLightbox);
+  lb.addEventListener("click", (e) => { if (e.target === lb || e.target.classList.contains("lb-inner")) closeLightbox(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeLightbox(); });
+
+  // Delegated: open lightbox on any media tile; toggle caption on caption tap.
+  document.addEventListener("click", (e) => {
+    const tile = e.target.closest(".card-media[data-lightbox], .ms-media[data-lightbox]");
+    if (tile) {
+      openLightbox({
+        src: tile.dataset.lightbox,
+        type: tile.dataset.type || (tile.querySelector("video") ? "video" : "image"),
+        caption: tile.dataset.caption || "",
+        author: tile.dataset.author || "",
+      });
+      return;
+    }
+    const cap = e.target.closest(".card-caption");
+    if (cap) cap.classList.toggle("expanded");
+  });
 }
 
 function setupEmailSignup() {

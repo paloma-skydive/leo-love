@@ -367,8 +367,18 @@ a { color: inherit; text-decoration: none; }
 @media (max-width: 860px) { .feed-list { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 520px) { .feed-list { grid-template-columns: 1fr; } }
 .card { background: var(--white); border-radius: 18px; overflow: hidden; box-shadow: var(--shadow); display: flex; flex-direction: column; }
-.card-media { background: var(--cream); display: flex; align-items: center; justify-content: center; height: clamp(210px, 22vw, 260px); overflow: hidden; }
-.card-media img, .card-media video { max-width: 100%; max-height: 100%; width: auto; height: auto; display: block; object-fit: contain; }
+.card-media { position: relative; background: var(--ink); display: flex; align-items: center; justify-content: center; height: clamp(230px, 24vw, 300px); overflow: hidden; cursor: zoom-in; }
+.card-media img, .card-media video { width: 100%; height: 100%; display: block; object-fit: cover; }
+/* Play badge on video tiles */
+.play-badge {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  width: 54px; height: 54px; border-radius: 50%;
+  background: rgba(21,20,20,.62); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  padding-left: 3px; pointer-events: none; backdrop-filter: blur(2px);
+  transition: background .15s, transform .15s;
+}
+.card-media:hover .play-badge { background: var(--red); transform: translate(-50%,-50%) scale(1.06); }
 .card-body { padding: 16px 18px 18px; display: flex; flex-direction: column; flex: 1; }
 .card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
 .avatar {
@@ -378,7 +388,8 @@ a { color: inherit; text-decoration: none; }
 }
 .card-who { font-weight: 700; }
 .card-when { font-family: var(--mono); font-size: .72rem; color: var(--soft); text-transform: uppercase; letter-spacing: .02em; }
-.card-caption { margin: 4px 0 0; white-space: pre-wrap; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+.card-caption { margin: 4px 0 0; white-space: pre-wrap; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; cursor: pointer; }
+.card-caption.expanded { -webkit-line-clamp: unset; }
 .card .comments-mount { margin-top: auto; padding-top: 10px; }
 .feed-empty { text-align: center; color: var(--soft); padding: 30px; font-size: 1.05rem; }
 
@@ -624,7 +635,7 @@ a { color: inherit; text-decoration: none; }
   content: ""; position: absolute; left: 7px; top: 8px; bottom: 8px;
   width: 3px; background: var(--line); border-radius: 2px;
 }
-.ms { position: relative; margin-bottom: 26px; }
+.ms { position: relative; margin-bottom: 16px; }
 .ms::before {
   content: ""; position: absolute; left: -30px; top: 6px;
   width: 18px; height: 18px; border-radius: 50%;
@@ -632,13 +643,14 @@ a { color: inherit; text-decoration: none; }
 }
 .ms:nth-child(3n+2)::before { background: var(--yellow); }
 .ms:nth-child(3n)::before { background: var(--blue); }
-.ms-card { background: var(--white); border-radius: 18px; padding: 20px 22px; box-shadow: var(--shadow); }
-.ms-date { font-family: var(--mono); font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; color: var(--soft); }
-.ms-title { font-family: var(--display); font-weight: 700; font-size: 1.3rem; margin: 6px 0 6px; }
-.ms-body { color: var(--soft); margin: 0; }
-.ms-media { margin-top: 12px; border-radius: 12px; overflow: hidden; background: #000; }
-.ms-media img, .ms-media video { width: 100%; display: block; max-height: 60vh; object-fit: contain; }
-.ms-emoji { font-size: 1.35rem; }
+.ms-card { background: var(--white); border-radius: 16px; padding: 15px 18px; box-shadow: var(--shadow); }
+.ms-date { font-family: var(--mono); font-size: .7rem; text-transform: uppercase; letter-spacing: .04em; color: var(--soft); }
+.ms-title { font-family: var(--display); font-weight: 700; font-size: 1.15rem; margin: 4px 0 5px; line-height: 1.2; }
+.ms-body { color: var(--soft); margin: 0; font-size: .96rem; line-height: 1.5; }
+/* Media fills the module edge-to-edge with no black bars: full width, natural height */
+.ms-media { margin: 13px -18px -15px; border-radius: 0 0 16px 16px; overflow: hidden; background: var(--cream); cursor: zoom-in; }
+.ms-media img, .ms-media video { width: 100%; height: auto; display: block; }
+.ms-emoji { font-size: 1.25rem; }
 
 /* ============================================================
    FOOTER  (full-bleed ink band)
@@ -796,4 +808,56 @@ a { color: inherit; text-decoration: none; }
 /* Keep the bubble on-screen near the right edge on small viewports */
 @media (max-width: 560px) {
   .info-pop { max-width: 200px; }
+}
+
+/* ---------- Lightbox ---------- */
+.lightbox {
+  position: fixed; inset: 0; z-index: 200;
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+  background: rgba(21,20,20,.72);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  animation: lbfade .18s ease;
+}
+.lightbox.hidden { display: none; }
+@keyframes lbfade { from { opacity: 0; } to { opacity: 1; } }
+.lb-inner { display: flex; flex-direction: column; align-items: center; gap: 16px; max-width: min(1000px, 96vw); max-height: 92vh; }
+.lb-stage { display: flex; align-items: center; justify-content: center; max-height: 78vh; }
+.lb-stage img, .lb-stage video { max-width: 100%; max-height: 78vh; width: auto; height: auto; border-radius: 14px; box-shadow: 0 20px 60px rgba(0,0,0,.4); display: block; background: #000; }
+.lb-meta { text-align: center; max-width: 620px; color: var(--cream); }
+.lb-author { font-family: var(--mono); text-transform: uppercase; letter-spacing: .05em; font-size: .74rem; opacity: .8; margin: 0 0 6px; }
+.lb-caption { font-family: var(--body); font-size: 1.05rem; line-height: 1.6; margin: 0; }
+.lb-close {
+  position: absolute; top: 16px; right: 20px; z-index: 2;
+  width: 44px; height: 44px; border-radius: 50%; border: none; cursor: pointer;
+  background: rgba(255,254,245,.14); color: var(--cream); font-size: 1.8rem; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .15s;
+}
+.lb-close:hover { background: rgba(255,254,245,.28); }
+@media (max-width: 620px) {
+  .lb-caption { font-size: .98rem; }
+  .lightbox { padding: 14px; }
+}
+
+/* ---------- Email signup sitting inside the blue band ---------- */
+.email-on-band { margin-top: 22px; max-width: 460px; }
+.email-on-band .email-card {
+  background: rgba(255,254,245,.10);
+  border: 1.5px solid rgba(255,254,245,.28);
+  box-shadow: none; padding: 16px 16px 14px; margin: 0;
+}
+.email-on-band .ec-title { color: var(--cream); font-size: 1.02rem; }
+.email-on-band .ec-sub { color: rgba(255,254,245,.8); }
+.email-on-band .ec-row .field { background: rgba(255,254,245,.95); border-color: transparent; }
+.email-on-band .ec-done-title, .email-on-band .ec-done-sub { color: var(--cream); }
+.email-on-band .ec-off { color: rgba(255,254,245,.6); }
+.email-on-band .ec-off:hover { color: var(--cream); }
+
+/* Milestone badge on feed cards derived from a milestone */
+.ms-badge {
+  position: absolute; top: 10px; left: 10px; z-index: 2;
+  font-family: var(--mono); text-transform: uppercase; letter-spacing: .04em;
+  font-size: .6rem; padding: 4px 9px; border-radius: 999px;
+  background: rgba(21,20,20,.72); color: var(--cream); backdrop-filter: blur(3px);
 }

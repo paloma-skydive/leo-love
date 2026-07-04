@@ -626,7 +626,26 @@ async function readPosts() {
 }
 
 app.get("/api/feed", requireAuth, async (_req, res) => {
-  res.json({ posts: await readPosts() });
+  const posts = await readPosts();
+  // Milestones that carry a photo/video also appear in the feed (Amy's ask), so
+  // the big moments live in both places. Shaped like a post, flagged fromMilestone
+  // so the client can badge/link them. De-duped by id prefix; sorted together.
+  const msPosts = loadMilestones()
+    .filter((m) => m.mediaFile && (m.mediaType === "image" || m.mediaType === "video"))
+    .map((m) => ({
+      id: "ms_" + m.id,
+      author: m.author || "Leo\u2019s mum & dad",
+      caption: [m.title, m.body].filter(Boolean).join(" \u2014 "),
+      mediaFile: m.mediaFile,
+      mediaType: m.mediaType,
+      createdAt: m.sortISO || m.createdAt || new Date().toISOString(),
+      fromMilestone: true,
+      milestoneId: m.id,
+    }));
+  const all = [...posts, ...msPosts].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+  res.json({ posts: all });
 });
 
 app.get("/api/milestones", requireAuth, (_req, res) => {
