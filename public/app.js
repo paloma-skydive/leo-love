@@ -496,8 +496,8 @@ async function loadMilestones() {
       const tiles = items.map((it) => {
         const msrc = `/media/${escapeHtml(it.file)}`;
         return it.type === "video"
-          ? `<div class="ms-gtile" role="button" tabindex="0" data-lightbox="${msrc}" data-type="video" data-caption="${mcap}"><video src="${msrc}#t=0.1" playsinline preload="metadata" muted></video><span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span></div>`
-          : `<div class="ms-gtile" role="button" tabindex="0" data-lightbox="${msrc}" data-type="image" data-caption="${mcap}"><img src="${msrc}" alt="" /></div>`;
+          ? `<div class="ms-gtile"><video src="${msrc}#t=0.1" playsinline preload="metadata" muted></video></div>`
+          : `<div class="ms-gtile"><img src="${msrc}" alt="" /></div>`;
       }).join("");
       media = `<div class="ms-gallery" data-count="${items.length}">${tiles}</div>`;
     }
