@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Averia+Libre:ital,wght@0,300;0,400;0,700;1,400&family=Fragment+Mono:ital@0;1&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="/styles.css?v=49" />
+<link rel="stylesheet" href="/styles.css?v=50" />
 </head>
 <body>
 
@@ -94,21 +94,20 @@
         <div class="intro-left">
           <div class="intro-card" id="intro-card">
             <img class="intro-photo" src="/img/leo-eyes.jpg?v=3" alt="Baby Leo with his eyes open" />
-            <h2 class="section-kicker intro-kicker">Welcome to the world, Leo <span class="kicker-dot d-red"></span></h2>
+            <h3 class="composer-title intro-kicker">Welcome to the world, Leo <span class="kicker-dot d-red"></span></h3>
             <div class="intro-body">
-              <p class="intro-copy">This is a place where family &amp; friends can share love for Leo, Luke &amp; Dana&mdash;and enjoy baby Leo&rsquo;s milestones from afar.</p>
+              <p class="intro-lead">This is a place where family &amp; friends can share love for Leo, Luke &amp; Dana&mdash;and enjoy baby Leo&rsquo;s milestones from afar.</p>
               <ul class="intro-list">
                 <li>Drop a message, photo or video, and it will pop up on the feed.</li>
-                <li>Find yourself on the <a class="intro-link" data-view="family" href="#family">family tree</a>. If you&rsquo;re related to Leo and add a video or picture, you&rsquo;ll pop up here too.</li>
+                <li>If you&rsquo;re related to Leo and post to the feed, you&rsquo;ll pop up in the <a class="intro-link" data-view="family" href="#family">family tree</a>. If you&rsquo;re a friend or part of the extended family, choose &lsquo;a friend of Luke &amp; Dana&rsquo;&mdash;you&rsquo;ll show up on the feed just the same.</li>
                 <li>Follow along <a class="intro-link" data-view="timeline" href="#timeline">Leo&rsquo;s milestones</a> &amp; watch him grow.</li>
               </ul>
-              <p class="intro-copy intro-closer">Those first hellos are only the start.</p>
             </div>
           </div>
         </div>
         <div class="composer">
           <h3 class="composer-title">Drop an update for Leo <span class="kicker-dot d-blue"></span></h3>
-          <p class="prompt-lead">Click the refresh icon for an idea starter&mdash;or post anything of your own you want to share.</p>
+          <p class="prompt-lead">You can choose to write a quick message only, post a video or a photo, or post a combination of both. Share anything at all, or click the refresh icon for an idea starter.</p>
           <div class="prompt-card" id="prompt-card">
             <span id="prompt-text">&hellip;</span>
             <button type="button" id="prompt-shuffle" title="Tap for another idea" aria-label="Tap for another idea">
@@ -116,13 +115,13 @@
             </button>
           </div>
           <textarea id="caption" class="field" rows="3" placeholder="Write a little message&hellip;" maxlength="2000"></textarea>
-          <div class="composer-who">
-            <select id="who-picker" class="field">
-              <option value="" disabled selected>Who&rsquo;s posting? Choose your name&hellip;</option>
-              <option value="__friend__">A friend of Luke &amp; Dana</option>
-              <option value="__newfamily__">Family &mdash; not on the tree yet</option>
-            </select>
-            <input id="author" class="field who-name hidden" type="text" placeholder="Your name" maxlength="80" />
+          <div class="composer-who" id="composer-who">
+            <button type="button" class="field who-btn" id="who-btn" aria-haspopup="listbox" aria-expanded="false">
+              <span class="who-btn-label placeholder" id="who-btn-label">Who&rsquo;s posting? Choose your name&hellip;</span>
+              <span class="who-btn-chevron" aria-hidden="true"></span>
+            </button>
+            <div class="who-menu hidden" id="who-menu" role="listbox"></div>
+            <input id="author" class="field who-name hidden" type="text" placeholder="Name" maxlength="80" />
             <input id="who-relation" class="field who-relation hidden" type="text" placeholder="How are you related to Leo? (e.g. Leo&rsquo;s great-uncle)" maxlength="120" />
           </div>
           <div class="composer-row">
@@ -132,7 +131,7 @@
             </label>
           </div>
           <div id="preview" class="preview hidden"></div>
-          <button id="post-btn" class="btn btn-blue full" type="button">Share with the family</button>
+          <button id="post-btn" class="btn btn-blue full" type="button">Post to Leo&rsquo;s Feed</button>
           <div id="post-status" class="post-status"></div>
         </div>
       </div>
@@ -360,6 +359,6 @@
   </div>
 </div>
 
-<script src="/app.js?v=49"></script>
+<script src="/app.js?v=50"></script>
 </body>
 </html>

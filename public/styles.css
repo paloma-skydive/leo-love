@@ -293,34 +293,40 @@ a { color: inherit; text-decoration: none; }
   background: var(--white); border-radius: 18px; box-shadow: var(--shadow);
   padding: 28px 28px 30px;
 }
-/* Photo pops over the top-left corner of the module, like the other circles */
+/* Leo photo replaces the corner circle: bigger, no white border, matches the hero dot look */
 .intro-photo {
-  width: 108px; height: 108px;
+  width: 132px; height: 132px;
   object-fit: cover; object-position: 50% 38%;
   border-radius: 50%; box-shadow: var(--shadow); display: block;
-  position: absolute; top: -32px; left: -24px;
-  border: 4px solid var(--white); z-index: 2;
+  position: absolute; top: -40px; left: -30px;
+  z-index: 2;
 }
 .intro-left .eyebrow { margin-bottom: 10px; }
-/* Higher specificity so .section-kicker's margin:0 doesn't win and crowd the photo */
-.intro-card .intro-kicker { font-size: 1.9rem; margin: 60px 0 14px; }
+/* Welcome header matches the composer "Drop an update" title size */
+.intro-card .intro-kicker { margin: 66px 0 14px; }
 .intro-copy { color: var(--soft); margin: 0; font-size: 1.02rem; line-height: 1.6; max-width: 42ch; }
-.intro-list { color: var(--soft); margin: 12px 0 0; padding-left: 1.15em; font-size: 1.02rem; line-height: 1.55; max-width: 42ch; }
+/* Intro lead sits in its own soft-yellow module */
+.intro-lead { margin: 0 0 4px; font-size: 1.02rem; line-height: 1.55;
+  background: var(--yellow); color: var(--ink); border-radius: 12px; padding: 14px 16px; }
+.intro-list { color: var(--soft); margin: 14px 0 0; padding-left: 1.15em; font-size: 1.02rem; line-height: 1.55; max-width: 42ch; }
 .intro-list li { margin-bottom: 8px; }
 .intro-list li::marker { color: var(--red); }
-.intro-link { color: var(--blue); font-weight: 600; text-decoration: underline; text-underline-offset: 2px; text-decoration-thickness: 1.5px; }
+.intro-link { color: var(--blue); font-weight: 600; text-decoration: none; }
 .intro-link:hover { color: var(--red); }
 .intro-closer { margin-top: 12px; }
-/* Whole first section (welcome + composer) collapses together */
+/* Toggle is an icon chip so it's noticeable */
 .intro-bar { display: flex; justify-content: flex-end; margin-bottom: 14px; }
 .intro-toggle {
-  background: none; border: none; padding: 6px 2px; cursor: pointer;
+  background: var(--white); border: 1.5px solid #ece6d4; padding: 8px 16px; cursor: pointer;
+  border-radius: 999px; box-shadow: 0 2px 8px rgba(21,20,20,.08);
   font-family: var(--mono); text-transform: uppercase; letter-spacing: .04em;
-  font-size: .72rem; color: var(--red); display: inline-flex; align-items: center; gap: 7px;
+  font-size: .72rem; color: var(--ink); display: inline-flex; align-items: center; gap: 8px;
+  transition: transform .15s, box-shadow .15s;
 }
-.intro-toggle::after { content: "\25B4"; font-size: .8rem; line-height: 1; }
+.intro-toggle:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(21,20,20,.14); }
+.intro-toggle::before { content: "\1F441"; font-size: .95rem; }
+.intro-toggle::after { content: "\25B4"; font-size: .78rem; line-height: 1; }
 .intro-section.collapsed .intro-toggle::after { content: "\25BE"; }
-.intro-toggle:hover { filter: brightness(.9); }
 .intro-grid-wrap { overflow: hidden; transition: max-height .34s ease, opacity .28s ease; }
 .intro-section.collapsed .intro-grid { display: none; }
 @media (max-width: 760px) {
@@ -366,12 +372,12 @@ a { color: inherit; text-decoration: none; }
 .prompt-card span { flex: 1; }
 .prompt-hint { font-family: var(--mono); text-transform: uppercase; letter-spacing: .02em; font-size: .68rem; color: var(--soft); margin: 0 0 16px; text-align: center; }
 #prompt-shuffle {
-  border: none; background: var(--ink); color: var(--cream);
+  border: none; background: var(--red); color: var(--cream);
   width: 34px; height: 34px; border-radius: 50%; cursor: pointer; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
   transition: transform .4s cubic-bezier(.4,1.4,.5,1), background .12s;
 }
-#prompt-shuffle:hover { background: var(--red); transform: rotate(-180deg); }
+#prompt-shuffle:hover { background: var(--ink); transform: rotate(-180deg); }
 #prompt-shuffle:active { transform: rotate(-360deg); }
 .field {
   width: 100%; font-family: var(--body); font-size: 1rem;
@@ -383,12 +389,28 @@ a { color: inherit; text-decoration: none; }
 .composer-row { display: flex; gap: 10px; align-items: stretch; flex-wrap: wrap; }
 .composer-row #author { flex: 1 1 55%; min-width: 140px; margin-bottom: 12px; }
 .composer-row .filepick { flex: 1 1 100%; min-width: 130px; margin-bottom: 12px; }
-/* "Who's posting?" picker */
-.composer-who { margin-bottom: 2px; }
-.composer-who select.field { appearance: none; -webkit-appearance: none; cursor: pointer;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23151414' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat: no-repeat; background-position: right 15px center; padding-right: 40px; }
-.composer-who .who-name, .composer-who .who-relation { margin-top: 2px; }
+/* "Who's posting?" custom dropdown — styled to match the site, not the native OS list */
+.composer-who { position: relative; margin-bottom: 2px; }
+.who-btn { display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  width: 100%; text-align: left; cursor: pointer; background: var(--cream); }
+.who-btn-label { color: var(--ink); font-size: 1rem; }
+.who-btn-label.placeholder { color: #9a968a; }
+.who-btn-chevron { flex-shrink: 0; width: 0; height: 0; border-left: 5px solid transparent;
+  border-right: 5px solid transparent; border-top: 6px solid var(--ink); transition: transform .18s; }
+.who-btn[aria-expanded="true"] .who-btn-chevron { transform: rotate(180deg); }
+.who-menu { position: absolute; left: 0; right: 0; top: calc(100% + 6px); z-index: 30;
+  background: var(--white); border: 1.5px solid #ece6d4; border-radius: 14px;
+  box-shadow: 0 14px 40px rgba(21,20,20,.18); padding: 8px; max-height: 320px; overflow-y: auto; }
+.who-menu.hidden { display: none; }
+.who-group-label { font-family: var(--mono); text-transform: uppercase; letter-spacing: .05em;
+  font-size: .62rem; color: var(--soft); padding: 6px 10px 4px; }
+.who-opt { display: block; width: 100%; text-align: left; border: none; background: none;
+  cursor: pointer; font-family: var(--body); font-size: .98rem; color: var(--ink);
+  padding: 9px 10px; border-radius: 9px; }
+.who-opt:hover { background: var(--cream); }
+.who-opt-alt { color: var(--blue); font-weight: 600; }
+.who-sep { height: 1px; background: var(--line); margin: 6px 4px; }
+.composer-who .who-name, .composer-who .who-relation { margin-top: 8px; }
 .filepick {
   display: flex; align-items: center; justify-content: center; text-align: center; cursor: pointer;
   border: 2px dashed var(--line); border-radius: 12px;
@@ -440,16 +462,18 @@ a { color: inherit; text-decoration: none; }
 }
 .card-who { font-weight: 700; }
 .card-when { font-family: var(--mono); font-size: .72rem; color: var(--soft); text-transform: uppercase; letter-spacing: .02em; }
-.card-caption { margin: 4px 0 0; white-space: pre-wrap; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; cursor: pointer; }
-.card-caption.expanded { -webkit-line-clamp: unset; }
-/* Clear "read more" affordance when a caption is truncated */
-.card-caption.clamped { position: relative; padding-bottom: 20px; }
+.card-caption { margin: 4px 0 0; white-space: pre-wrap; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; cursor: pointer; font-size: .92rem; line-height: 1.5; }
+/* Reserve a consistent caption height so resting cards in a row line up (media cards) */
+.card:not(.card-text) .card-caption { min-height: 4.4em; }
+.card-caption.expanded { -webkit-line-clamp: unset; min-height: 0; }
+/* Clear "read more" affordance when a caption is truncated — cut a line earlier so text doesn't run under it */
+.card-caption.clamped { position: relative; padding-bottom: 22px; -webkit-line-clamp: 2; }
 .card-caption.clamped::after {
   content: "… more"; position: absolute; right: 0; bottom: 0;
   font-family: var(--mono); text-transform: uppercase; letter-spacing: .03em;
   font-size: .64rem; font-weight: 600; color: var(--blue);
-  padding: 2px 4px 2px 22px;
-  background: linear-gradient(90deg, transparent, var(--white) 34%);
+  padding: 2px 2px 2px 64px;
+  background: linear-gradient(90deg, transparent, var(--white) 58%);
 }
 .card-caption.expanded::after { content: none; }
 .card .comments-mount { margin-top: auto; padding-top: 10px; }
@@ -510,18 +534,19 @@ a { color: inherit; text-decoration: none; }
 .feed-controls { display: flex; flex-direction: column; gap: 14px; margin: 18px 0 6px; }
 /* Horizontal filter scroller with a fade + arrow on each side */
 .feed-filters-wrap { position: relative; display: flex; align-items: center; }
-.feed-filters { display: flex; gap: 18px; overflow-x: auto; padding: 6px 2px 10px; -webkit-overflow-scrolling: touch; scrollbar-width: none; scroll-behavior: smooth; flex: 1; min-width: 0; }
+.feed-filters { display: flex; gap: 26px; overflow-x: auto; padding: 10px 2px 12px; -webkit-overflow-scrolling: touch; scrollbar-width: none; scroll-behavior: smooth; flex: 1; min-width: 0; }
 .feed-filters::-webkit-scrollbar { display: none; }
+/* Floating scroll arrows — no circle, just the chevron */
 .ff-arrow {
-  flex: 0 0 auto; width: 30px; height: 30px; border-radius: 50%;
-  border: 1.5px solid #e7e2d0; background: var(--white); color: var(--ink);
-  font-size: 1.25rem; line-height: 1; cursor: pointer; z-index: 3;
+  flex: 0 0 auto; width: 22px; height: 40px; border-radius: 0;
+  border: none; background: none; color: var(--ink);
+  font-size: 1.7rem; line-height: 1; cursor: pointer; z-index: 3; opacity: .55;
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 2px 8px rgba(21,20,20,.10); transition: background .15s, transform .15s;
+  box-shadow: none; transition: opacity .15s, transform .15s;
 }
-.ff-arrow:hover { background: var(--yellow); transform: translateY(-1px); }
-.ff-prev { margin-right: 6px; }
-.ff-next { margin-left: 6px; }
+.ff-arrow:hover { opacity: 1; transform: scale(1.15); background: none; }
+.ff-prev { margin-right: 4px; }
+.ff-next { margin-left: 4px; }
 .ff-arrow[hidden] { display: none; }
 .fam-chip {
   display: flex; flex-direction: column; align-items: center; gap: 6px;
@@ -925,14 +950,14 @@ a { color: inherit; text-decoration: none; }
 
 /* ---------- Email signup sitting inside the blue band ---------- */
 .email-on-band { margin-top: 20px; max-width: 480px; }
-/* Subtle module behind the signup so the label + fields read clearly on the busy blue */
+/* Inline in the blue band — no bounding module. Only the heading gets a small colored chip. */
 .email-on-band .email-card {
-  background: rgba(21,20,20,.16); border: 1px solid rgba(255,254,245,.22);
-  box-shadow: none; padding: 16px 16px 16px; margin: 0; border-radius: 16px;
-  backdrop-filter: blur(1px);
+  background: none; border: none; box-shadow: none; padding: 0; margin: 0;
 }
-.email-on-band .ec-lead { margin-bottom: 10px; }
-.email-on-band .ec-title { color: var(--cream); font-size: .82rem; font-family: var(--mono); font-weight: 400; text-transform: uppercase; letter-spacing: .03em; opacity: .96; }
+.email-on-band .ec-lead { margin-bottom: 12px; }
+.email-on-band .ec-title { display: inline-block; background: rgba(21,20,20,.22);
+  color: var(--cream); font-size: .8rem; font-family: var(--mono); font-weight: 400;
+  text-transform: uppercase; letter-spacing: .03em; padding: 7px 13px; border-radius: 999px; }
 /* Name + email share the top row, button drops full-width beneath (module is narrow) */
 .email-on-band .ec-row { flex-wrap: wrap; }
 .email-on-band .ec-row .field, .email-on-band .ec-row .ec-go { height: 46px; box-sizing: border-box; }

@@ -486,8 +486,6 @@ let chosenFile = null;
 let posterKind = "";        // family | friend | newfamily
 function setupComposer() {
   const author = $("author");
-  author.value = localStorage.getItem("leo_author") || "";
-  author.addEventListener("input", () => localStorage.setItem("leo_author", author.value));
   setupWhoPicker();
 
   $("file").addEventListener("change", (e) => {
@@ -514,56 +512,69 @@ function setupComposer() {
   $("prompt-shuffle").addEventListener("click", () => { pIdx++; showPrompt(); });
 }
 
-// ---- "Who's posting?" picker ----
+// ---- "Who's posting?" picker (custom dropdown, styled to match the site) ----
 // Family self-select from the tree (exact tag), a friend (feed only, off tree),
 // or a new family member (self-identifies + we surface them to add to the tree).
 function whoPersonName(p) {
   const t = (p.title && p.title.trim()) ? p.title.trim() : "";
-  // e.g. "Jacki (Nana)" once she's picked a grandparent name
   return t && t.toLowerCase() !== p.name.toLowerCase() ? `${p.name} (${t})` : p.name;
 }
-async function populateWhoPicker() {
-  const sel = $("who-picker");
-  if (!sel) return;
-  if (!FAMILY.length) {
-    try { const r = await fetch("/api/family"); if (r.ok) FAMILY = (await r.json()).family || []; } catch {}
-  }
-  if (!FAMILY.length) return;
-  // Build family options grouped by side, excluding Leo & the dog.
+async function ensureFamilyLoaded() {
+  if (FAMILY.length) return;
+  try { const r = await fetch("/api/family"); if (r.ok) FAMILY = (await r.json()).family || []; } catch {}
+}
+function closeWhoMenu() {
+  const menu = $("who-menu"), btn = $("who-btn");
+  if (menu) menu.classList.add("hidden");
+  if (btn) btn.setAttribute("aria-expanded", "false");
+}
+async function buildWhoMenu() {
+  const menu = $("who-menu");
+  if (!menu) return;
+  await ensureFamilyLoaded();
   const people = FAMILY.filter((p) => p.id !== "leo" && p.role !== "pet");
-  const optFor = (p) => `<option value="fam:${p.id}">${escapeHtml(whoPersonName(p))}</option>`;
-  const fam = `<optgroup label="Family">${people.map(optFor).join("")}</optgroup>`;
-  sel.innerHTML =
-    `<option value="" disabled selected>Who\u2019s posting? Choose your name\u2026</option>` +
-    fam +
-    `<option value="__friend__">A friend of Luke & Dana</option>` +
-    `<option value="__newfamily__">Family \u2014 not on the tree yet</option>`;
+  const famItems = people.map((p) =>
+    `<button type="button" class="who-opt" role="option" data-kind="family" data-id="${p.id}">${escapeHtml(whoPersonName(p))}</button>`
+  ).join("");
+  menu.innerHTML =
+    `<div class="who-group-label">Family</div>${famItems}` +
+    `<div class="who-sep"></div>` +
+    `<button type="button" class="who-opt who-opt-alt" role="option" data-kind="friend">A friend of Luke &amp; Dana</button>` +
+    `<button type="button" class="who-opt who-opt-alt" role="option" data-kind="newfamily">Family \u2014 not on the tree yet</button>`;
+  menu.querySelectorAll(".who-opt").forEach((o) =>
+    o.addEventListener("click", () => chooseWho(o.dataset.kind, o.dataset.id, o.textContent.trim()))
+  );
+}
+function chooseWho(kind, id, label) {
+  const nameEl = $("author"), relEl = $("who-relation"), btnLabel = $("who-btn-label");
+  posterKind = kind;
+  btnLabel.textContent = label;
+  btnLabel.classList.remove("placeholder");
+  if (kind === "family") {
+    const p = FAMILY.find((x) => x.id === id);
+    nameEl.value = p ? ((p.title && p.title.trim()) || p.name) : "";
+    nameEl.classList.add("hidden"); relEl.classList.add("hidden");
+  } else if (kind === "friend") {
+    nameEl.value = ""; nameEl.classList.remove("hidden"); relEl.classList.add("hidden");
+    setTimeout(() => nameEl.focus(), 20);
+  } else if (kind === "newfamily") {
+    nameEl.value = ""; nameEl.classList.remove("hidden"); relEl.classList.remove("hidden");
+    setTimeout(() => nameEl.focus(), 20);
+  }
+  closeWhoMenu();
 }
 function setupWhoPicker() {
-  const sel = $("who-picker");
-  const nameEl = $("author");
-  const relEl = $("who-relation");
-  if (!sel) return;
-  populateWhoPicker();
-  sel.addEventListener("change", () => {
-    const v = sel.value;
-    if (v === "__friend__") {
-      posterKind = "friend";
-      nameEl.classList.remove("hidden"); relEl.classList.add("hidden");
-      nameEl.value = localStorage.getItem("leo_author") || ""; nameEl.placeholder = "Your name"; nameEl.focus();
-    } else if (v === "__newfamily__") {
-      posterKind = "newfamily";
-      nameEl.classList.remove("hidden"); relEl.classList.remove("hidden");
-      nameEl.value = localStorage.getItem("leo_author") || ""; nameEl.placeholder = "Your name"; nameEl.focus();
-    } else if (v.startsWith("fam:")) {
-      posterKind = "family";
-      const p = FAMILY.find((x) => x.id === v.slice(4));
-      // Tag under their tree name (title if they've set one) so posts group cleanly.
-      nameEl.value = p ? ((p.title && p.title.trim()) || p.name) : "";
-      nameEl.classList.add("hidden"); relEl.classList.add("hidden");
-    } else {
-      posterKind = ""; nameEl.classList.add("hidden"); relEl.classList.add("hidden");
-    }
+  const btn = $("who-btn"), menu = $("who-menu");
+  if (!btn || !menu) return;
+  buildWhoMenu();
+  btn.addEventListener("click", async (e) => {
+    e.stopPropagation();
+    const open = menu.classList.contains("hidden");
+    if (open) { await buildWhoMenu(); menu.classList.remove("hidden"); btn.setAttribute("aria-expanded", "true"); }
+    else closeWhoMenu();
+  });
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest("#composer-who")) closeWhoMenu();
   });
 }
 
@@ -606,8 +617,10 @@ function submitPost() {
       $("preview").innerHTML = ""; $("preview").classList.add("hidden");
       $("filepick-label").innerHTML = "\u{1F4F7}  Choose a photo or video";
       // Reset the who-picker back to its prompt.
-      posterKind = ""; if ($("who-picker")) $("who-picker").selectedIndex = 0;
-      $("author").classList.add("hidden"); if ($("who-relation")) { $("who-relation").value = ""; $("who-relation").classList.add("hidden"); }
+      posterKind = "";
+      if ($("who-btn-label")) { $("who-btn-label").textContent = "Who\u2019s posting? Choose your name\u2026"; $("who-btn-label").classList.add("placeholder"); }
+      $("author").value = ""; $("author").classList.add("hidden");
+      if ($("who-relation")) { $("who-relation").value = ""; $("who-relation").classList.add("hidden"); }
       loadFeed();
       setTimeout(() => { status.textContent = ""; status.className = "post-status"; }, 3500);
     } else {
