@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Averia+Libre:ital,wght@0,300;0,400;0,700;1,400&family=Fragment+Mono:ital@0;1&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="/styles.css?v=48" />
+<link rel="stylesheet" href="/styles.css?v=49" />
 </head>
 <body>
 
@@ -116,8 +116,16 @@
             </button>
           </div>
           <textarea id="caption" class="field" rows="3" placeholder="Write a little message&hellip;" maxlength="2000"></textarea>
+          <div class="composer-who">
+            <select id="who-picker" class="field">
+              <option value="" disabled selected>Who&rsquo;s posting? Choose your name&hellip;</option>
+              <option value="__friend__">A friend of Luke &amp; Dana</option>
+              <option value="__newfamily__">Family &mdash; not on the tree yet</option>
+            </select>
+            <input id="author" class="field who-name hidden" type="text" placeholder="Your name" maxlength="80" />
+            <input id="who-relation" class="field who-relation hidden" type="text" placeholder="How are you related to Leo? (e.g. Leo&rsquo;s great-uncle)" maxlength="120" />
+          </div>
           <div class="composer-row">
-            <input id="author" class="field" type="text" placeholder="Your name" maxlength="80" />
             <label class="filepick" id="filepick">
               <input id="file" type="file" accept="image/*,video/*" hidden />
               <span id="filepick-label">&#x1F4F7;  Photo or video</span>
@@ -177,7 +185,6 @@
       <div class="hero-inner">
         <p class="eyebrow light">Leo&rsquo;s story, one day at a time</p>
         <h1 class="hero-name">Milestones</h1>
-        <p class="hero-parents">Stronger by the minute</p>
       </div>
     </section>
 
@@ -186,7 +193,7 @@
         <details class="add-ms" id="timeline-add">
           <summary>
             <span class="add-ms-plus" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
-            <span>Add to Leo&rsquo;s timeline <em>&mdash;just for Mum &amp; Dad</em></span><span class="info-tip"><button type="button" class="info-btn" aria-label="About the timeline">i</button><span class="info-pop">Two ways to update: a <b>Quick update</b> in a few taps for how Leo&rsquo;s doing, or a full <b>Milestone</b> for a bigger moment. Add either any time, even days later.</span></span>
+            <span>Add to Leo&rsquo;s timeline<em>&mdash;just for Mum &amp; Dad</em></span><span class="info-tip"><button type="button" class="info-btn" aria-label="About the timeline">🦁</button><span class="info-pop">Two ways to update: a <b>Quick update</b> in a few taps for how Leo&rsquo;s doing, or a full <b>Milestone</b> for a bigger moment. Add either any time, even days later.</span></span>
           </summary>
           <div class="add-ms-body">
             <div class="tl-tabs">
@@ -353,6 +360,6 @@
   </div>
 </div>
 
-<script src="/app.js?v=48"></script>
+<script src="/app.js?v=49"></script>
 </body>
 </html>

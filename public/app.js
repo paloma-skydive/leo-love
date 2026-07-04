@@ -483,10 +483,12 @@ async function loadMilestones() {
 
 // ---------- Composer ----------
 let chosenFile = null;
+let posterKind = "";        // family | friend | newfamily
 function setupComposer() {
   const author = $("author");
   author.value = localStorage.getItem("leo_author") || "";
   author.addEventListener("input", () => localStorage.setItem("leo_author", author.value));
+  setupWhoPicker();
 
   $("file").addEventListener("change", (e) => {
     chosenFile = e.target.files[0] || null;
@@ -512,11 +514,66 @@ function setupComposer() {
   $("prompt-shuffle").addEventListener("click", () => { pIdx++; showPrompt(); });
 }
 
+// ---- "Who's posting?" picker ----
+// Family self-select from the tree (exact tag), a friend (feed only, off tree),
+// or a new family member (self-identifies + we surface them to add to the tree).
+function whoPersonName(p) {
+  const t = (p.title && p.title.trim()) ? p.title.trim() : "";
+  // e.g. "Jacki (Nana)" once she's picked a grandparent name
+  return t && t.toLowerCase() !== p.name.toLowerCase() ? `${p.name} (${t})` : p.name;
+}
+async function populateWhoPicker() {
+  const sel = $("who-picker");
+  if (!sel) return;
+  if (!FAMILY.length) {
+    try { const r = await fetch("/api/family"); if (r.ok) FAMILY = (await r.json()).family || []; } catch {}
+  }
+  if (!FAMILY.length) return;
+  // Build family options grouped by side, excluding Leo & the dog.
+  const people = FAMILY.filter((p) => p.id !== "leo" && p.role !== "pet");
+  const optFor = (p) => `<option value="fam:${p.id}">${escapeHtml(whoPersonName(p))}</option>`;
+  const fam = `<optgroup label="Family">${people.map(optFor).join("")}</optgroup>`;
+  sel.innerHTML =
+    `<option value="" disabled selected>Who\u2019s posting? Choose your name\u2026</option>` +
+    fam +
+    `<option value="__friend__">A friend of Luke & Dana</option>` +
+    `<option value="__newfamily__">Family \u2014 not on the tree yet</option>`;
+}
+function setupWhoPicker() {
+  const sel = $("who-picker");
+  const nameEl = $("author");
+  const relEl = $("who-relation");
+  if (!sel) return;
+  populateWhoPicker();
+  sel.addEventListener("change", () => {
+    const v = sel.value;
+    if (v === "__friend__") {
+      posterKind = "friend";
+      nameEl.classList.remove("hidden"); relEl.classList.add("hidden");
+      nameEl.value = localStorage.getItem("leo_author") || ""; nameEl.placeholder = "Your name"; nameEl.focus();
+    } else if (v === "__newfamily__") {
+      posterKind = "newfamily";
+      nameEl.classList.remove("hidden"); relEl.classList.remove("hidden");
+      nameEl.value = localStorage.getItem("leo_author") || ""; nameEl.placeholder = "Your name"; nameEl.focus();
+    } else if (v.startsWith("fam:")) {
+      posterKind = "family";
+      const p = FAMILY.find((x) => x.id === v.slice(4));
+      // Tag under their tree name (title if they've set one) so posts group cleanly.
+      nameEl.value = p ? ((p.title && p.title.trim()) || p.name) : "";
+      nameEl.classList.add("hidden"); relEl.classList.add("hidden");
+    } else {
+      posterKind = ""; nameEl.classList.add("hidden"); relEl.classList.add("hidden");
+    }
+  });
+}
+
 function submitPost() {
   const status = $("post-status");
   const author = $("author").value.trim();
   const caption = $("caption").value.trim();
+  const relation = ($("who-relation")?.value || "").trim();
   if (!chosenFile) { status.className = "post-status err"; status.textContent = "Pick a photo or video first \u{1F60A}"; return; }
+  if (!posterKind) { status.className = "post-status err"; status.textContent = "Let us know who's posting \u{1F642}"; return; }
   if (!author) { status.className = "post-status err"; status.textContent = "Add your name so Leo knows who it's from."; return; }
 
   const btn = $("post-btn");
@@ -531,6 +588,8 @@ function submitPost() {
   xhr.setRequestHeader("X-Author", author.replace(/[^\x20-\x7E]/g, ""));
   xhr.setRequestHeader("X-Caption", encodeURIComponent(caption));
   xhr.setRequestHeader("X-Tz", localTz);
+  if (posterKind) xhr.setRequestHeader("X-Kind", posterKind);
+  if (posterKind === "newfamily" && relation) xhr.setRequestHeader("X-Relation", encodeURIComponent(relation));
   xhr.upload.onprogress = (e) => {
     if (e.lengthComputable) { const b = $("pbar"); if (b) b.style.width = (e.loaded / e.total * 100) + "%"; }
   };
@@ -546,6 +605,9 @@ function submitPost() {
       $("caption").value = ""; $("file").value = ""; chosenFile = null;
       $("preview").innerHTML = ""; $("preview").classList.add("hidden");
       $("filepick-label").innerHTML = "\u{1F4F7}  Choose a photo or video";
+      // Reset the who-picker back to its prompt.
+      posterKind = ""; if ($("who-picker")) $("who-picker").selectedIndex = 0;
+      $("author").classList.add("hidden"); if ($("who-relation")) { $("who-relation").value = ""; $("who-relation").classList.add("hidden"); }
       loadFeed();
       setTimeout(() => { status.textContent = ""; status.className = "post-status"; }, 3500);
     } else {

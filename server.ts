@@ -762,6 +762,9 @@ app.post("/api/upload", requireAuth, (req, res) => {
   const author = String(req.headers["x-author"] || "Someone in the family");
   const caption = decodeURIComponent(String(req.headers["x-caption"] || ""));
   const tz = String(req.headers["x-tz"] || "");
+  // From the "who's posting?" picker: kind = family | friend | newfamily; relation = free text (newfamily only)
+  const posterKind = String(req.headers["x-kind"] || "").slice(0, 20);
+  const posterRelation = decodeURIComponent(String(req.headers["x-relation"] || "")).slice(0, 120);
   const origName = decodeURIComponent(String(req.headers["x-filename"] || "upload"));
   const mime = String(req.headers["content-type"] || "application/octet-stream");
 
@@ -802,7 +805,7 @@ app.post("/api/upload", requireAuth, (req, res) => {
       fs.unlink(dest, () => {});
       return res.status(422).json({ error: "Couldn't process that file\u2014try a JPG or MP4?" });
     }
-    const post = {
+    const post: any = {
       id,
       author: author.slice(0, 80),
       caption: caption.slice(0, 2000),
@@ -812,6 +815,10 @@ app.post("/api/upload", requireAuth, (req, res) => {
       posterTz: tz,
       createdAt: new Date().toISOString(),
     };
+    // Remember when a new family member self-identifies, so it can be surfaced
+    // (they asked to be added to the tree). Friends carry no such flag.
+    if (posterKind) post.posterKind = posterKind;
+    if (posterKind === "newfamily" && posterRelation) post.posterRelation = posterRelation;
     await fsp.writeFile(path.join(POSTS_DIR, id + ".json"), JSON.stringify(post, null, 2));
     res.json({ ok: true, post });
     notifyNewPost(post); // fire-and-forget

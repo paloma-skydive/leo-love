@@ -382,7 +382,13 @@ a { color: inherit; text-decoration: none; }
 /* compact composer: name + file picker share a row */
 .composer-row { display: flex; gap: 10px; align-items: stretch; flex-wrap: wrap; }
 .composer-row #author { flex: 1 1 55%; min-width: 140px; margin-bottom: 12px; }
-.composer-row .filepick { flex: 1 1 35%; min-width: 130px; margin-bottom: 12px; }
+.composer-row .filepick { flex: 1 1 100%; min-width: 130px; margin-bottom: 12px; }
+/* "Who's posting?" picker */
+.composer-who { margin-bottom: 2px; }
+.composer-who select.field { appearance: none; -webkit-appearance: none; cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23151414' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 15px center; padding-right: 40px; }
+.composer-who .who-name, .composer-who .who-relation { margin-top: 2px; }
 .filepick {
   display: flex; align-items: center; justify-content: center; text-align: center; cursor: pointer;
   border: 2px dashed var(--line); border-radius: 12px;
@@ -723,8 +729,8 @@ a { color: inherit; text-decoration: none; }
 .ms-date { font-family: var(--mono); font-size: .7rem; text-transform: uppercase; letter-spacing: .04em; color: var(--soft); }
 .ms-title { font-family: var(--display); font-weight: 700; font-size: 1.15rem; margin: 4px 0 5px; line-height: 1.2; }
 .ms-body { color: var(--soft); margin: 0; font-size: .96rem; line-height: 1.5; }
-/* Media capped in height so the milestone page isn't one long scroll (tap for full size) */
-.ms-media { margin: 13px -18px -15px; border-radius: 0 0 16px 16px; overflow: hidden; background: var(--ink); cursor: pointer; max-height: 300px; }
+/* Media capped in height; positive bottom margin so the comment toggle sits clear below it (no overlap) */
+.ms-media { margin: 13px -18px 15px; border-radius: 0; overflow: hidden; background: var(--ink); cursor: pointer; max-height: 300px; }
 .ms-media img, .ms-media video { width: 100%; height: 300px; object-fit: cover; display: block; }
 .ms-emoji { font-size: 1.25rem; }
 
@@ -852,14 +858,14 @@ a { color: inherit; text-decoration: none; }
 /* ---------- Section info popups (ⓘ) ---------- */
 .info-tip { position: relative; display: inline-flex; vertical-align: middle; margin-left: 8px; }
 .info-btn {
-  width: 22px; height: 22px; border-radius: 50%;
-  border: 1.5px solid var(--ink); background: transparent; color: var(--ink);
-  font-family: var(--display); font-style: italic; font-weight: 700;
-  font-size: .82rem; line-height: 1; cursor: pointer; padding: 0;
+  width: 26px; height: 26px; border-radius: 50%;
+  border: 1.5px solid #ece6d4; background: var(--white); color: var(--ink);
+  font-size: .92rem; line-height: 1; cursor: pointer; padding: 0;
   display: inline-flex; align-items: center; justify-content: center;
-  transition: background .15s, color .15s, transform .15s;
+  box-shadow: 0 2px 6px rgba(21,20,20,.12);
+  transition: transform .15s, box-shadow .15s;
 }
-.info-btn:hover { background: var(--red); border-color: var(--red); color: var(--cream); transform: scale(1.08); }
+.info-btn:hover { transform: scale(1.12); box-shadow: 0 4px 12px rgba(21,20,20,.2); }
 .info-pop {
   position: absolute; left: 50%; top: calc(100% + 12px); transform: translateX(-50%) translateY(-4px);
   width: max-content; max-width: 260px; z-index: 40;
