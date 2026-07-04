@@ -1044,21 +1044,18 @@ app.get("/media/:file", requireAuth, (req, res) => {
   res.sendFile(full); // express handles Range requests
 });
 
-// ---- Parent-only guide page (Luke & Dana). Gated by the parent code so it is
-// genuinely private; anyone not recognised as a parent is funnelled to the home
-// screen with a flag that opens the parent-code step. ----
+// ---- Guide page (Luke & Dana). Reached via leo-love.com/guide.html with just the
+// family/secret code — no separate parent code needed. It's unlisted (not linked
+// anywhere public), so only people L&D send the /guide.html link to will find it.
+// The parent code (146) is now ONLY the manual "Unlock Parent Mode" button. ----
 app.get(["/guide", "/guide.html"], (req, res) => {
-  const _cfg = loadConfig();
-  // Approval mode: any family-password visitor may see the guide (no parent code
-  // needed) — the whole point is Luke & Dana reviewing it first.
-  if (_cfg.approvalMode && isAuthed(req)) {
-    return res.sendFile(path.join(import.meta.dirname, "public", "guide.html"));
-  }
   res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-  if (isAuthed(req) && isParent(req)) {
+  if (isAuthed(req)) {
     return res.sendFile(path.join(import.meta.dirname, "public", "guide.html"));
   }
-  return res.redirect("/?for=parents");
+  // Not logged in yet → send to the password page, and come back to the guide
+  // once they've entered the secret code.
+  return res.redirect("/?next=guide");
 });
 
 // Internal Skydive cluster site (kept in public/skydive) is not served here —

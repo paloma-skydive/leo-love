@@ -944,33 +944,31 @@ async function boot() {
   IS_PARENT = !!data.parent;
   APPROVAL_MODE = !!data.approvalMode;
 
-  // "?for=parents" funnel: Luke & Dana arriving via their guide link.
-  const forParents = new URLSearchParams(location.search).get("for") === "parents";
-  if (forParents) {
+  // Guide link: Luke & Dana arriving at /guide.html (redirected to /?next=guide when
+  // not logged in). They just need the secret code — no separate parent code.
+  // (?for=parents kept as a back-compat alias for any old links.)
+  const q = new URLSearchParams(location.search);
+  const wantsGuide = q.get("next") === "guide" || q.get("for") === "parents";
+  if (wantsGuide) {
     const sub = $("login-sub");
-    if (sub) sub.textContent = "Welcome, Mum & Dad. Pop in the secret code first, then your parent code, and we\u2019ll open your private guide.";
+    if (sub) sub.textContent = "Welcome, Mum & Dad. Pop in the secret code to open your private guide.";
   }
 
   if (!data.authed) {
-    PENDING_PARENT = forParents;
+    PENDING_GUIDE = wantsGuide;
     $("login").classList.remove("hidden");
     $("app").classList.add("hidden");
     return;
   }
-  // Approval mode: every family-password visitor lands on the guide first, until
-  // they choose “Enter Leo’s page” (which sets leoGuideSeen on the guide page).
+  // Came in via the guide link → open the guide.
+  if (wantsGuide) {
+    location.href = "/guide.html";
+    return;
+  }
+  // Approval mode (if ever re-enabled): family-password visitors land on the guide
+  // first, until they choose “Enter Leo’s page” (which sets leoGuideSeen).
   if (APPROVAL_MODE && !localStorage.getItem("leoGuideSeen")) {
     location.href = "/guide.html";
-    return;
-  }
-  // Already a recognised parent: send them to their guide first (once).
-  if (IS_PARENT && !localStorage.getItem("leoGuideSeen")) {
-    location.href = "/guide.html";
-    return;
-  }
-  // Authed but not yet identified as a parent, and they came via the parent link.
-  if (forParents && !IS_PARENT) {
-    showParentGate();
     return;
   }
   startApp();
@@ -1283,16 +1281,18 @@ $("login-form").addEventListener("submit", async (e) => {
   });
   if (r.ok) {
     $("login").classList.add("hidden");
-    // Approval mode: first thing L&D see after the password is their guide.
+    // Came in via the guide link → open the guide (just the secret code needed).
+    if (PENDING_GUIDE) { location.href = "/guide.html"; return; }
+    // Approval mode (if ever re-enabled): first thing after the code is the guide.
     if (APPROVAL_MODE) { try { localStorage.removeItem("leoGuideSeen"); } catch (e) {} location.href = "/guide.html"; return; }
-    if (PENDING_PARENT) { showParentGate(); }
-    else { startApp(); }
+    startApp();
   }
   else { const d = await r.json().catch(() => ({})); err.textContent = d.error || "That didn't work."; $("pw").select(); }
 });
 
-// ---------- Parent-code gate (funnels Luke & Dana to their private guide) ----------
-let PENDING_PARENT = false;
+// ---------- Parent-code gate (legacy; parent code 146 is now only the footer
+// "Unlock Parent Mode" button — this overlay is no longer part of the guide flow) ----------
+let PENDING_GUIDE = false;
 function showParentGate() {
   $("login").classList.add("hidden");
   $("app").classList.add("hidden");
@@ -1313,7 +1313,7 @@ async function parentGateGo() {
 }
 $("pg-go")?.addEventListener("click", parentGateGo);
 $("pg-code")?.addEventListener("keydown", (e) => { if (e.key === "Enter") parentGateGo(); });
-$("pg-skip")?.addEventListener("click", (e) => { e.preventDefault(); $("parent-gate").classList.add("hidden"); PENDING_PARENT = false; startApp(); });
+$("pg-skip")?.addEventListener("click", (e) => { e.preventDefault(); $("parent-gate").classList.add("hidden"); PENDING_GUIDE = false; startApp(); });
 
 // ---------- Email signup (get news about Leo by email) ----------
 function emailCardHTML(compact) {
