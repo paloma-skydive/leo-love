@@ -538,6 +538,18 @@ app.post("/api/parent-login", requireAuth, (req, res) => {
   res.status(401).json({ error: "That parent code didn't match." });
 });
 
+// ---- Toggle approval mode (parent-only) ----
+// approvalMode ON  = every family-password visitor lands on the guide first
+//                    (Luke & Dana review before the site opens).
+// approvalMode OFF = family-password visitors go straight to the feed; the guide
+//                    becomes parent-code-gated (only L&D reach it).
+app.post("/api/config", requireParent, (req, res) => {
+  const cfg = loadConfig();
+  if (typeof req.body?.approvalMode === "boolean") cfg.approvalMode = req.body.approvalMode;
+  fs.writeFileSync(CONFIG_FILE, JSON.stringify(cfg, null, 2));
+  res.json({ ok: true, approvalMode: cfg.approvalMode });
+});
+
 // ---- Family tree ----
 app.get("/api/family", requireAuth, (_req, res) => {
   res.json({ family: loadFamily() });
