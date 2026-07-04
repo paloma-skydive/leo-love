@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Averia+Libre:ital,wght@0,300;0,400;0,700;1,400&family=Fragment+Mono:ital@0;1&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="/styles.css?v=40" />
+<link rel="stylesheet" href="/styles.css?v=42" />
 </head>
 <body>
 
@@ -63,17 +63,10 @@
       <a data-view="timeline" href="#timeline">Milestones</a>
       <a data-view="family" href="#family">Family</a>
     </nav>
-    <div class="clocks" id="clocks">
-      <div class="clock">
-        <span class="clock-label">Leo &middot; Cayman</span>
-        <span class="clock-time" id="clk-leo">--:--</span>
-      </div>
-      <div class="clock">
-        <span class="clock-label" id="clk-you-label">You</span>
-        <span class="clock-time" id="clk-you">--:--</span>
-      </div>
-    </div>
   </header>
+  <div class="worldclocks" aria-label="The time right now, across Leo&rsquo;s family">
+    <div class="wc-track" id="worldclocks"></div>
+  </div>
 
   <!-- FEED VIEW -->
   <main id="view-feed" class="view">
@@ -103,6 +96,8 @@
           <p class="intro-copy">Think of this as a pinboard for Leo, Luke &amp; Dana&mdash;a place to drop a message, a photo or a video, just to show you&rsquo;re thinking of them. Those first hellos are only the start. The more we fill it up, the lovelier it gets.</p>
         </div>
         <div class="composer">
+          <h3 class="composer-title">Say hello to Leo <span class="kicker-dot d-blue"></span></h3>
+          <p class="prompt-lead">Need a nudge? Here&rsquo;s an idea &mdash; or just write your own.</p>
           <div class="prompt-card" id="prompt-card">
             <span id="prompt-text">&hellip;</span>
             <button type="button" id="prompt-shuffle" title="Tap for another idea" aria-label="Tap for another idea">
@@ -132,6 +127,7 @@
           <div class="feed-sort">
             <button type="button" class="sort-btn active" data-sort="newest">Newest</button>
             <button type="button" class="sort-btn" data-sort="oldest">Oldest</button>
+            <button type="button" class="sort-btn sort-shuffle" data-sort="shuffle">&#x1F500; Shuffle</button>
           </div>
         </div>
         <div id="feed-list" class="feed-list"></div>
@@ -331,6 +327,6 @@
   </footer>
 </div>
 
-<script src="/app.js?v=40"></script>
+<script src="/app.js?v=42"></script>
 </body>
 </html>

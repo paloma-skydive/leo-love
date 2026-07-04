@@ -154,17 +154,32 @@ a { color: inherit; text-decoration: none; }
 .nav a + a { margin-left: 26px; position: relative; }
 .nav a + a::before { content: "\2022"; color: var(--red); position: absolute; left: -16px; }
 
-/* clocks = the "location tag" slot, top-right */
-.clocks { margin-left: auto; display: flex; align-items: center; gap: 10px; }
-.clock {
-  display: flex; align-items: baseline; gap: 8px;
-  padding: 9px 16px; border-radius: 999px; background: var(--white);
-  border: 1px solid var(--line);
+/* World clocks = a strip of family-location times, just under the header */
+.worldclocks {
+  background: var(--ink);
+  border-bottom: 1px solid rgba(255,254,245,.1);
+  position: sticky; top: 0; z-index: 30;
 }
-.clock:first-child { background: var(--yellow); border-color: transparent; }
-.clock-label { font-family: var(--mono); font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; color: var(--soft); white-space: nowrap; }
-.clock:first-child .clock-label { color: rgba(21,20,20,.78); }
-.clock-time { font-family: var(--mono); font-weight: 400; font-size: .8rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.wc-track {
+  max-width: 1180px; margin: 0 auto;
+  display: flex; align-items: stretch; gap: 8px;
+  padding: 9px clamp(14px,4vw,28px);
+  overflow-x: auto; -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.wc-track::-webkit-scrollbar { display: none; }
+.wc-pill {
+  display: inline-flex; align-items: center; gap: 7px; flex: 0 0 auto;
+  padding: 6px 13px; border-radius: 999px;
+  background: rgba(255,254,245,.08); border: 1px solid rgba(255,254,245,.14);
+}
+.wc-pill.wc-home { background: var(--yellow); border-color: transparent; }
+.wc-pill.wc-you { background: transparent; border-style: dashed; border-color: rgba(255,254,245,.35); }
+.wc-flag { font-size: .95rem; line-height: 1; }
+.wc-label { font-family: var(--mono); font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; color: rgba(255,254,245,.72); white-space: nowrap; }
+.wc-time { font-family: var(--mono); font-size: .74rem; font-variant-numeric: tabular-nums; color: var(--cream); white-space: nowrap; }
+.wc-pill.wc-home .wc-label { color: rgba(21,20,20,.7); }
+.wc-pill.wc-home .wc-time { color: var(--ink); }
 
 /* ============================================================
    FULL-BLEED HERO  (tall colour block, inset frame, scattered dots)
@@ -179,7 +194,7 @@ a { color: inherit; text-decoration: none; }
   text-align: center;
   overflow: visible;
 }
-.hero-timeline { background: var(--blue); }
+.hero-timeline { background: var(--blue); min-height: 42vh; padding-top: 52px; padding-bottom: 56px; }
 .hero-letterbox { background: var(--ink); }
 .hero-family { background: var(--yellow); color: var(--ink); }
 .hero-family .eyebrow.light, .hero-family .hero-parents { color: rgba(21,20,20,.72); }
@@ -283,7 +298,7 @@ a { color: inherit; text-decoration: none; }
 .intro-photo {
   width: 132px; height: 132px;
   object-fit: cover; object-position: 50% 38%;
-  border-radius: 16px; box-shadow: var(--shadow); margin-bottom: 18px; display: block;
+  border-radius: 50%; box-shadow: var(--shadow); margin-bottom: 18px; display: block;
 }
 .intro-left .eyebrow { margin-bottom: 10px; }
 .intro-kicker { font-size: 1.9rem; margin-bottom: 14px; }
@@ -307,6 +322,9 @@ a { color: inherit; text-decoration: none; }
   padding: 24px 24px; box-shadow: var(--shadow);
 }
 .composer-help { color: var(--soft); margin: 0 0 16px; font-size: 1rem; }
+.composer-title { font-family: var(--display); font-weight: 700; font-size: 1.5rem; margin: 0 0 4px; display: flex; align-items: center; gap: 9px; }
+.composer-title .kicker-dot { width: 11px; height: 11px; }
+.prompt-lead { font-family: var(--body); color: var(--soft); font-size: .92rem; margin: 0 0 12px; }
 .prompt-card {
   background: var(--yellow); border-radius: 12px; padding: 11px 14px;
   display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
@@ -350,9 +368,9 @@ a { color: inherit; text-decoration: none; }
 
 /* ---------- FEED ---------- */
 .wrap-feed { max-width: 1140px; }
-.feed-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-top: 18px; align-items: start; }
-@media (max-width: 920px) { .feed-list { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 620px) { .feed-list { grid-template-columns: 1fr; } }
+.feed-list { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-top: 18px; align-items: start; }
+@media (max-width: 860px) { .feed-list { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px) { .feed-list { grid-template-columns: 1fr; } }
 .card { background: var(--white); border-radius: 18px; overflow: hidden; box-shadow: var(--shadow); }
 .card-media { background: var(--cream); text-align: center; line-height: 0; }
 .card-media img, .card-media video { max-width: 100%; max-height: 76vh; width: auto; height: auto; display: inline-block; vertical-align: middle; }
@@ -380,14 +398,20 @@ a { color: inherit; text-decoration: none; }
 .comment-who { font-weight: 700; font-size: .92rem; }
 .comment-when { font-family: var(--mono); font-size: .68rem; color: var(--soft); margin-left: 7px; text-transform: uppercase; }
 .comment-text { margin: 1px 0 0; font-size: .96rem; white-space: pre-wrap; }
-.comment-form { display: flex; gap: 8px; margin-top: 12px; align-items: flex-start; }
+.comment-form { display: flex; gap: 8px; margin-top: 12px; align-items: stretch; }
 .comment-form input {
-  flex: 1; min-width: 0; font-family: var(--body); font-size: .92rem;
-  padding: 10px 14px; border: 2px solid var(--line); border-radius: 999px;
+  flex: 1; min-width: 0; font-family: var(--mono); font-size: .78rem;
+  padding: 10px 16px; border: 2px solid var(--line); border-radius: 999px;
   background: var(--cream); outline: none;
 }
+.comment-form input::placeholder { font-family: var(--mono); text-transform: uppercase; letter-spacing: .02em; font-size: .72rem; color: var(--soft); }
 .comment-form input:focus { border-color: var(--blue); }
-.comment-form .cf-name { flex: 0 0 32%; }
+.comment-form .cf-name { flex: 0 0 30%; }
+/* In the narrow 4-up feed cards, stack the comment fields so they stay full,
+   tappable pills (same height as the CTA) instead of collapsing to circles. */
+.card .comment-form { flex-direction: column; align-items: stretch; }
+.card .comment-form .cf-name { flex: none; }
+.card .comment-send { width: 100%; }
 .comment-send {
   flex-shrink: 0; border: none; background: var(--blue); color: var(--white);
   font-family: var(--mono); text-transform: uppercase; letter-spacing: .02em;
@@ -633,9 +657,6 @@ a { color: inherit; text-decoration: none; }
   .nav { display: none; }
   .mobnav { display: flex; }
   .footer { padding-bottom: 92px; }
-  .clocks { gap: 8px; margin-left: auto; }
-  .clock { min-width: 78px; padding: 6px 12px; }
-  .clock-time { font-size: .8rem; }
   .topbar { gap: 10px; padding: 11px 16px; }
   .hero { min-height: 74vh; }
   .hero .dot-c { right: -22px; width: 84px; height: 84px; }
@@ -652,6 +673,21 @@ a { color: inherit; text-decoration: none; }
   box-shadow: var(--shadow);
   max-width: 620px;
   margin: 0 auto;
+}
+/* Slim variant for the feed — about half the footprint: lead + one inline row */
+.email-card-slim { max-width: 640px; padding: 16px 18px; }
+.email-card-slim .ec-lead { display: flex; flex-direction: column; margin-bottom: 12px; }
+.email-card-slim .ec-title { font-family: var(--display); font-weight: 700; font-size: 1.08rem; }
+.email-card-slim .ec-sub { font-family: var(--body); color: var(--soft); font-size: .86rem; margin-top: 2px; }
+.email-card-slim .ec-row { display: flex; gap: 8px; align-items: stretch; }
+.email-card-slim .ec-row .field { margin-bottom: 0; flex: 1 1 30%; min-width: 0; }
+.email-card-slim .ec-row .ec-go { flex: 0 0 auto; white-space: nowrap; margin-top: 0; padding-left: 18px; padding-right: 18px; }
+.email-card-slim .ec-status { min-height: 0; }
+.email-card-slim .ec-status:empty { margin-top: 0; }
+@media (max-width: 620px) {
+  .email-card-slim .ec-row { flex-wrap: wrap; }
+  .email-card-slim .ec-row .field { flex: 1 1 100%; }
+  .email-card-slim .ec-row .ec-go { flex: 1 1 100%; }
 }
 .gd-step .email-card { box-shadow: none; border-color: #eee7d4; margin-top: 4px; }
 .ec-title {

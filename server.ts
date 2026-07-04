@@ -794,6 +794,20 @@ app.post("/api/posts/:id/edit", requireParent, async (req, res) => {
   res.json({ ok: true, post });
 });
 
+// ---- Edit a milestone's title / story / emoji (parent-only) ----
+app.post("/api/milestones/:id/edit", requireParent, (req, res) => {
+  const id = String(req.params.id || "");
+  const list = loadMilestones();
+  const m = list.find((x) => x.id === id);
+  if (!m) return res.status(404).json({ error: "Couldn't find that milestone." });
+  const b = req.body || {};
+  if (typeof b.title === "string" && b.title.trim()) m.title = b.title.trim().slice(0, 140);
+  if (typeof b.body === "string") m.body = b.body.slice(0, 4000);
+  if (typeof b.emoji === "string") m.emoji = b.emoji.trim().slice(0, 8);
+  saveMilestones(list);
+  res.json({ ok: true, milestone: m });
+});
+
 // ---- Serve media with range support ----
 app.get("/media/:file", requireAuth, (req, res) => {
   const file = path.basename(req.params.file);

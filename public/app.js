@@ -8,6 +8,7 @@ let ALL_POSTS = [];
 let FAMILY = [];
 let feedFilter = null;
 let feedSort = "newest";
+let shuffleOrder = [];
 let renderedFeedSig = null;   // signature of the posts currently drawn in the DOM
 let pendingFeedRefresh = false; // a refresh is waiting for a playing video to stop
 
@@ -40,10 +41,51 @@ function shortTz(tz) {
   return city;
 }
 let localTz = "";
+
+// The places Leo's family are scattered across. Cayman is home (Leo & parents).
+const FAMILY_ZONES = [
+  { flag: "\u{1F1F0}\u{1F1FE}", label: "Cayman", tz: "America/Cayman", home: true },
+  { flag: "\u{1F1F3}\u{1F1FF}", label: "NZ", tz: "Pacific/Auckland" },
+  { flag: "\u{1F1E6}\u{1F1FA}", label: "Sydney", tz: "Australia/Sydney" },
+  { flag: "\u{1F1EF}\u{1F1F5}", label: "Japan", tz: "Asia/Tokyo" },
+];
+
+function worldZones() {
+  const zones = FAMILY_ZONES.slice();
+  // Add the visitor's own zone as a "You" pill, unless they're already in a
+  // family zone (same current UTC offset as one we already show).
+  if (localTz) {
+    const off = (tz) => { try { return new Intl.DateTimeFormat("en", { timeZone: tz, timeZoneName: "shortOffset" }).formatToParts(new Date()).find((p) => p.type === "timeZoneName")?.value; } catch { return tz; } };
+    const mine = off(localTz);
+    const already = zones.some((z) => off(z.tz) === mine);
+    if (!already) zones.push({ flag: "\u{1F4CD}", label: "You", tz: localTz, you: true });
+  }
+  return zones;
+}
+
+function renderWorldClocks() {
+  const track = $("worldclocks");
+  if (!track) return;
+  const zones = worldZones();
+  track.innerHTML = zones
+    .map(
+      (z, i) =>
+        `<div class="wc-pill${z.home ? " wc-home" : ""}${z.you ? " wc-you" : ""}">` +
+        `<span class="wc-flag">${z.flag}</span>` +
+        `<span class="wc-label">${escapeHtml(z.label)}</span>` +
+        `<span class="wc-time" data-tz="${escapeHtml(z.tz)}">--:--</span>` +
+        `</div>`
+    )
+    .join("");
+  tickClocks();
+}
+
 function tickClocks() {
-  if (!BABY) return;
-  $("clk-leo").textContent = fmtTime(BABY.timezone);
-  $("clk-you").textContent = fmtTime(localTz);
+  const track = $("worldclocks");
+  if (!track) return;
+  track.querySelectorAll(".wc-time").forEach((el) => {
+    el.textContent = fmtTime(el.dataset.tz);
+  });
 }
 function tickAge() {
   if (!BABY) return;
@@ -207,10 +249,17 @@ function renderFeed() {
   const list = $("feed-list");
   let posts = ALL_POSTS.slice();
   if (feedFilter && feedFilter.tokens) posts = posts.filter((p) => matchesTokens(p.author, feedFilter.tokens));
-  posts.sort((a, b) => {
-    const d = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-    return feedSort === "oldest" ? d : -d;
-  });
+  if (feedSort === "shuffle") {
+    // Order by a fixed shuffle rolled when Shuffle was tapped, so auto-refresh
+    // doesn't reshuffle under them. New posts (not in the order) fall to the end.
+    const idx = (id) => { const i = shuffleOrder.indexOf(id); return i === -1 ? 1e9 : i; };
+    posts.sort((a, b) => idx(a.id) - idx(b.id));
+  } else {
+    posts.sort((a, b) => {
+      const d = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      return feedSort === "oldest" ? d : -d;
+    });
+  }
   list.innerHTML = "";
   $("feed-empty").classList.toggle("hidden", posts.length > 0);
   for (const p of posts) {
@@ -311,7 +360,7 @@ function renderComments(mount, comments) {
       <div class="comment-form">
         <input class="cf-name" type="text" placeholder="Name" value="${escapeHtml(name)}" maxlength="80" />
         <input class="cf-text" type="text" placeholder="Add a comment…" maxlength="1500" />
-        <button class="comment-send" type="button">Send</button>
+        <button class="comment-send" type="button">Post</button>
       </div>
     </div>`;
 
@@ -447,7 +496,7 @@ function submitPost() {
 // ---------- Boot ----------
 async function boot() {
   try { localTz = Intl.DateTimeFormat().resolvedOptions().timeZone; } catch { localTz = ""; }
-  $("clk-you-label").textContent = shortTz(localTz);
+  renderWorldClocks();
 
   const r = await fetch("/api/session");
   const data = await r.json();
@@ -578,7 +627,7 @@ function startApp() {
   setupInfoTips();
   loadFamily();
   loadFeed();
-  tickClocks(); tickAge();
+  renderWorldClocks(); tickAge();
   setInterval(tickClocks, 1000 * 10);
   setInterval(tickAge, 1000 * 30);
   setInterval(loadFeed, 1000 * 45);
@@ -589,6 +638,14 @@ function startApp() {
 function setupSort() {
   document.querySelectorAll(".sort-btn").forEach((b) => b.addEventListener("click", () => {
     feedSort = b.dataset.sort;
+    // (Re)roll the shuffle each time Shuffle is tapped.
+    if (feedSort === "shuffle") {
+      shuffleOrder = ALL_POSTS.map((p) => p.id);
+      for (let i = shuffleOrder.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffleOrder[i], shuffleOrder[j]] = [shuffleOrder[j], shuffleOrder[i]];
+      }
+    }
     document.querySelectorAll(".sort-btn").forEach((x) => x.classList.toggle("active", x === b));
     renderFeed();
   }));
@@ -808,19 +865,18 @@ $("pg-skip")?.addEventListener("click", (e) => { e.preventDefault(); $("parent-g
 function emailCardHTML(compact) {
   const name = escapeHtml(localStorage.getItem("leo_author") || localStorage.getItem("leo_email_name") || "");
   const email = escapeHtml(localStorage.getItem("leo_email") || "");
-  const lead = compact
-    ? `<h3 class="ec-title">Want an email when there&rsquo;s news? \u{1F4EC}</h3>
-       <p class="ec-sub">We&rsquo;ll email you whenever there&rsquo;s a new photo, video or milestone of Leo &mdash; no app, no fuss.</p>`
-    : "";
   return `
-    <div class="email-card">
+    <div class="email-card email-card-slim">
       <div class="ec-form">
-        ${lead}
-        <div class="ec-fields">
+        <div class="ec-lead">
+          <span class="ec-title">\u{1F4EC} Get an email when there&rsquo;s news of Leo</span>
+          <span class="ec-sub">New photo, video or milestone &mdash; no app, no fuss.</span>
+        </div>
+        <div class="ec-row">
           <input class="field ec-name" type="text" placeholder="Your name" maxlength="80" value="${name}" />
           <input class="field ec-email" type="email" placeholder="you@email.com" maxlength="160" value="${email}" />
+          <button type="button" class="btn btn-red ec-go">Keep me posted \u{1F49B}</button>
         </div>
-        <button type="button" class="btn btn-red full ec-go">Keep me posted \u{1F49B}</button>
         <div class="ec-status post-status"></div>
       </div>
       <div class="ec-done hidden">
