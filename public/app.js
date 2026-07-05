@@ -124,7 +124,12 @@ function setView(v, opts) {
   window.scrollTo({ top: 0, behavior: "smooth" });
   if (v === "timeline") loadMilestones();
   if (v === "family") loadFamily();
-  if (v === "feed") requestAnimationFrame(() => setTimeout(() => { updateFilterArrows(); flagClampedCaptions(); }, 40));
+  if (v === "feed") {
+    // If the feed never loaded (e.g. deep-linked straight to another view first),
+    // pull it now so it isn't blank.
+    if (!ALL_POSTS.length) loadFeed();
+    requestAnimationFrame(() => setTimeout(() => { updateFilterArrows(); flagClampedCaptions(); }, 40));
+  }
 }
 const KNOWN_VIEWS = ["feed", "timeline", "family"];
 document.addEventListener("click", (e) => {
@@ -1229,7 +1234,13 @@ function onFamilyCard(id) {
   // otherwise: filter the feed to their posts (matches their name, title & nicknames)
   feedFilter = { key: "p:" + p.id, personId: p.id, label: p.name.split(" ")[0], tokens: personTokens(p) };
   setView("feed");
-  setTimeout(() => { renderFeedFilters(); renderFeed(); }, 60);
+  // If the feed data isn't in yet (deep-link into the tree first), load it, then
+  // apply the filter once it's here.
+  if (!ALL_POSTS.length) {
+    loadFeed().then(() => { renderFeedFilters(); renderFeed(); });
+  } else {
+    setTimeout(() => { renderFeedFilters(); renderFeed(); }, 60);
+  }
 }
 
 function openTitleEditor(p) {
