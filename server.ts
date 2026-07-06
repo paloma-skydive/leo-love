@@ -1044,18 +1044,14 @@ app.get("/media/:file", requireAuth, (req, res) => {
   res.sendFile(full); // express handles Range requests
 });
 
-// ---- Guide page (Luke & Dana). Reached via leo-love.com/guide.html with just the
-// family/secret code — no separate parent code needed. It's unlisted (not linked
-// anywhere public), so only people L&D send the /guide.html link to will find it.
-// The parent code (146) is now ONLY the manual "Unlock Parent Mode" button. ----
-app.get(["/guide", "/guide.html"], (req, res) => {
+// ---- Guide page (Luke & Dana) — ARCHIVED 6 Jul 2026. This was L&D's private
+// preview/review gate before the site opened up. They've approved the site to be
+// shared with the wider family, so the guide has served its purpose and is retired.
+// The page itself is preserved at public/guide.archived.html (and in git history).
+// The old /guide + /guide.html links now just send visitors to the feed. ----
+app.get(["/guide", "/guide.html"], (_req, res) => {
   res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-  if (isAuthed(req)) {
-    return res.sendFile(path.join(import.meta.dirname, "public", "guide.html"));
-  }
-  // Not logged in yet → send to the password page, and come back to the guide
-  // once they've entered the secret code.
-  return res.redirect("/?next=guide");
+  return res.redirect("/");
 });
 
 // Internal Skydive cluster site (kept in public/skydive) is not served here —
