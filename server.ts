@@ -703,16 +703,21 @@ app.get("/api/feed", requireAuth, async (_req, res) => {
       };
     });
   const all = [...posts, ...msPosts];
-  // Amy's hand-curated feed order. Key a family post by its post id, a milestone
-  // by "ms:<milestoneId>". Listed items appear in exactly this order at the top;
-  // anything not listed (new posts, Ra/Marlow) falls after, newest-first.
-  // To re-order: just rearrange this list. Max's slot is held until his post lands.
+  // Amy's hand-curated launch baseline (FEED_ORDER) is FROZEN in exactly its
+  // listed order. Anything NOT listed is a post/milestone added since launch:
+  // those float ABOVE the baseline, newest-first (date-ordered), so fresh updates
+  // show first without disturbing the curated launch flow below.
+  // To pin a new post into the baseline, add its key to FEED_ORDER.
   const ord = new Map(FEED_ORDER.map((k, i) => [k, i]));
   const keyOf = (p: any) => (p.fromMilestone ? "ms:" + p.milestoneId : p.id);
   all.sort((a, b) => {
-    const ia = ord.has(keyOf(a)) ? ord.get(keyOf(a))! : Infinity;
-    const ib = ord.has(keyOf(b)) ? ord.get(keyOf(b))! : Infinity;
-    if (ia !== ib) return ia - ib;
+    const la = ord.has(keyOf(a));
+    const lb = ord.has(keyOf(b));
+    // New (unlisted) items come before baseline (listed) items.
+    if (la !== lb) return la ? 1 : -1;
+    // Both baseline: keep the fixed curated order.
+    if (la && lb) return ord.get(keyOf(a))! - ord.get(keyOf(b))!;
+    // Both new: newest-first by date.
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
   res.json({ posts: all });
